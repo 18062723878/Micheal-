@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动物萌宠 · 创作灵感 · Micheal 的拼豆网</title>
+  <link rel="stylesheet" href="../assets/css/theme.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+  <main>
+    <section class="section">
+      <p><a class="btn" href="../inspiration.html">← 返回灵感</a></p>
+      <h2 id="category-title" class="section-title">动物萌宠</h2>
+      <p id="category-desc" class="section-sub"></p>
+      <div id="example-grid" class="example-grid">
+        <p class="empty">加载中…</p>
+      </div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script type="module">
+    import { injectChrome } from '../assets/js/chrome.js';
+    import { initInspirationCategory } from '../assets/js/inspiration.js';
+    injectChrome('inspiration', '../');
+    initInspirationCategory('animals');
+  </script>
+</body>
+</html>

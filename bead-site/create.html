@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>创作 · Micheal 的拼豆网</title>
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <!-- AI 生图板块 -->
+    <section class="ai-panel">
+      <h2>✨ AI 生图</h2>
+      <div class="ai-row">
+        <input id="ai-prompt" class="ai-prompt" type="text" placeholder="描述你想生成的画面，例如：一只戴帽子的卡通猫，扁平插画风" />
+        <button id="ai-generate" class="btn btn-accent" type="button">生成</button>
+      </div>
+      <div id="ai-preview" class="ai-preview"></div>
+      <p id="ai-status" class="ai-status"></p>
+      <p id="ai-tutorial" class="ai-tutorial">未配置 API Key，<a href="docs/api-integration.md" target="_blank" rel="noopener">点此查看接入教程</a></p>
+      <button id="ai-to-bead" class="btn btn-primary" type="button">把这张图送进拼豆 →</button>
+    </section>
+
+    <!-- 主上传 / 转换流程 -->
+    <section id="upload-section" class="upload-section">
+      <h2>上传图片，开始拼豆</h2>
+      <div class="control-row">
+        <label class="upload-btn">
+          上传图片 / 开始创作
+          <input id="upload-input" type="file" accept="image/*,.gif" hidden />
+        </label>
+        <label class="wb-check">
+          <input id="bg-toggle" type="checkbox" /> 自动抠背景
+        </label>
+        <div class="control">
+          <label>板宽（横向拼豆数）：<span id="board-width-val">29</span></label>
+          <input id="board-width" type="range" min="8" max="80" step="1" value="29" />
+        </div>
+        <label class="wb-check">
+          <input id="labels-toggle" type="checkbox" /> 标注色号
+        </label>
+        <label class="wb-check">
+          选色板：
+          <select id="palette-select"><option value="artkal55">Artkal 55</option></select>
+        </label>
+        <button id="convert-btn" class="btn btn-primary" type="button">开始拼豆</button>
+      </div>
+
+      <p id="convert-status" class="ai-status"></p>
+
+      <div class="canvas-row">
+        <div class="canvas-box">
+          <span class="canvas-label">拼豆网格</span>
+          <canvas id="board-canvas" class="board-canvas"></canvas>
+        </div>
+        <div class="canvas-box">
+          <span class="canvas-label">像素预览</span>
+          <canvas id="preview-canvas" class="preview-canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="export-row">
+        <button id="export-png" class="btn" type="button">导出 PNG</button>
+        <button id="export-pdf" class="btn" type="button">导出 PDF</button>
+        <button id="export-csv" class="btn" type="button">导出 CSV</button>
+      </div>
+    </section>
+
+    <!-- 两个入口 -->
+    <section class="tool-section">
+      <h2>更多玩法</h2>
+      <div class="entry-cards">
+        <div class="entry-card">
+          <h3>从相似图开始</h3>
+          <p>上传一张风格参考图，对齐网格后即可导出带色号的图纸。</p>
+          <div class="control-row">
+            <label class="upload-btn">
+              上传风格图
+              <input id="similar-input" type="file" accept="image/*,.gif" hidden />
+            </label>
+            <div class="control">
+              <label>板宽：<span id="similar-width-val">29</span></label>
+              <input id="similar-width" type="range" min="8" max="80" step="1" value="29" />
+            </div>
+            <button id="similar-convert" class="btn btn-primary" type="button">转换</button>
+          </div>
+          <p id="similar-status" class="ai-status"></p>
+          <div class="canvas-row">
+            <div class="canvas-box">
+              <span class="canvas-label">网格</span>
+              <canvas id="similar-canvas" class="similar-canvas"></canvas>
+            </div>
+          </div>
+          <div class="stats" id="similar-stats"></div>
+          <div class="export-row">
+            <button id="similar-export-png" class="btn" type="button">PNG</button>
+            <button id="similar-export-csv" class="btn" type="button">CSV</button>
+            <button id="similar-export-pdf" class="btn" type="button">PDF</button>
+          </div>
+        </div>
+
+        <div class="entry-card">
+          <h3>从白板开始</h3>
+          <p>打开像素画板，自由绘制并实时统计用色，支持画笔 / 橡皮 / 油漆桶 / 镜像 / 撤销。</p>
+          <button id="whiteboard-btn" class="btn btn-primary" type="button">打开白板编辑器</button>
+          <div id="whiteboard-root"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
+    import './assets/js/create.js';
+    injectChrome('create');
+  </script>
+</body>
+</html>

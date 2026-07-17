@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Micheal 的拼豆网 · 把图片变成可拼的图纸</title>
+  <meta name="description" content="拼豆网：上传图片，自动转换为 Artkal 55 色拼豆图纸，支持 PNG/PDF/CSV 导出，还有 AI 生图与灵感社区。" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <style>
+    .fixed-sign {
+      position: fixed; right: 16px; bottom: 14px; z-index: 5;
+      font-weight: 800; color: var(--brand-800); opacity: .85;
+      letter-spacing: 1px; text-shadow: 0 1px 0 #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <header class="hero">
+    <h1>把每一张图片，变成可拼的拼豆图纸</h1>
+    <p>上传照片、用 AI 生图，或照着灵感临摹——拼豆网帮你自动匹配 Artkal 55 色，一键导出 PNG / PDF / CSV。</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="create.html">开始创作 →</a>
+      <a class="btn" href="inspiration.html">逛逛灵感</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2 class="section-title">图片转拼豆 · 精选图纸</h2>
+      <p class="section-sub">每张都由算法从图片映射到 55 色拼豆，点击「去创作」即可复刻。</p>
+      <div id="featured-grid" class="feature-grid">
+        <p class="empty">加载中…</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">分步骤教程</h2>
+      <p class="section-sub">六步从零做出你的第一幅拼豆作品。</p>
+      <div id="tutorial-steps" class="tutorial-steps">
+        <p class="empty">加载中…</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <div class="fixed-sign">Michael</div>
+
+  <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
+    import { initHome } from './assets/js/home.js';
+    injectChrome('home');
+    initHome();
+  </script>
+</body>
+</html>

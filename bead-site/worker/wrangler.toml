@@ -1,0 +1,19 @@
+# wrangler.toml — Cloudflare Worker config for 拼豆网 edge enhancement.
+# Deploy with:  wrangler deploy
+# Then point the site's BEAD_WORKER_BASE to your worker URL (see README.md).
+
+name = "bead-studio-worker"
+main = "index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Upstream image-generation endpoint (OpenAI-compatible).
+# Override via: wrangler secret put API_BASE  (or leave the default below)
+[vars]
+API_BASE = "https://api.openai.com/v1/images/generations"
+MODEL = "dall-e-2"
+
+# The API key is a SECRET — never commit it. Set it with:
+#   wrangler secret put API_KEY
+# (It is then injected as env.API_KEY at runtime; the worker returns
+#  { "error": "NO_KEY" } when it is missing so the UI shows the tutorial.)

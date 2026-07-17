@@ -1,0 +1,44 @@
+{
+  "total": 40,
+  "passed": 40,
+  "failed": 0,
+  "groups": {
+    "G1-color": {
+      "total": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    "G2-palette": {
+      "total": 6,
+      "pass": 6,
+      "fail": 0
+    },
+    "G3-decode": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    "G4-modules": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    "G5-dom": {
+      "total": 10,
+      "pass": 10,
+      "fail": 0
+    },
+    "G6-worker": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0
+    },
+    "G7-export": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0
+    }
+  },
+  "routing": "NoOne",
+  "failedCases": []
+}
