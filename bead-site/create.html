@@ -6,6 +6,74 @@
   <title>创作 · Micheal 的拼豆网</title>
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
+  <style>
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .canvas-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .canvas-box {
+      flex: 1 1 450px;
+      background: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      overflow: auto;
+      max-height: 650px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .canvas-label {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #374151;
+      align-self: flex-start;
+    }
+    .board-canvas, .preview-canvas {
+      max-width: 100%;
+      height: auto;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-radius: 4px;
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+    .stats-table th, .stats-table td {
+      border: 1px solid #e5e7eb;
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .stats-table th {
+      background: #f3f4f6;
+    }
+    .color-chip {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: 6px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .export-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <div id="site-header"></div>
@@ -15,32 +83,34 @@
     <section id="upload-section" class="upload-section">
       <h2>上传图片，开始拼豆</h2>
       <div class="control-row">
-        <label class="upload-btn">
-          上传图片 / 开始创作
+        <label class="upload-btn btn btn-primary" style="cursor: pointer;">
+          📁 上传图片 / 开始创作
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
-        <label class="wb-check">
+        <label class="wb-check" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
           <input id="bg-toggle" type="checkbox" /> 自动抠背景
         </label>
-        <div class="control">
+        <div class="control" style="display: flex; align-items: center; gap: 8px;">
           <label>板宽（横向拼豆数）：<span id="board-width-val">29</span></label>
-          <input id="board-width" type="range" min="8" max="80" step="1" value="29" />
+          <input id="board-width" type="range" min="10" max="80" step="1" value="29" />
         </div>
-        <label class="wb-check">
-          <input id="labels-toggle" type="checkbox" /> 标注色号
+        <label class="wb-check" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <input id="labels-toggle" type="checkbox" checked /> 标注色号
         </label>
-        <label class="wb-check">
+        <label class="wb-check" style="display: flex; align-items: center; gap: 6px;">
           选色板：
-          <select id="palette-select"><option value="artkal55">Artkal 55</option></select>
+          <select id="palette-select">
+            <option value="artkal55">Artkal 标准 55 色</option>
+          </select>
         </label>
         <button id="convert-btn" class="btn btn-primary" type="button">开始拼豆</button>
       </div>
 
-      <p id="convert-status" class="ai-status"></p>
+      <p id="convert-status" class="ai-status" style="color: #4b5563; font-weight: 500;"></p>
 
       <div class="canvas-row">
         <div class="canvas-box">
-          <span class="canvas-label">拼豆网格</span>
+          <span class="canvas-label">拼豆网格（带色号图纸）</span>
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
@@ -49,48 +119,20 @@
         </div>
       </div>
 
+      <!-- 用色统计 -->
       <div class="stats" id="stats"></div>
 
+      <!-- 导出选项 -->
       <div class="export-row">
-        <button id="export-png" class="btn" type="button">导出 PNG</button>
-        <button id="export-pdf" class="btn" type="button">导出 PDF</button>
-        <button id="export-csv" class="btn" type="button">导出 CSV</button>
+        <button id="export-png" class="btn" type="button">📥 导出高清图纸 (PNG)</button>
+        <button id="export-csv" class="btn" type="button">📊 导出用色清单 (CSV)</button>
       </div>
     </section>
 
-    <!-- 两个入口 -->
+    <!-- 更多玩法 -->
     <section class="tool-section">
       <h2>更多玩法</h2>
       <div class="entry-cards">
-        <div class="entry-card">
-          <h3>从相似图开始</h3>
-          <p>上传一张风格参考图，对齐网格后即可导出带色号的图纸。</p>
-          <div class="control-row">
-            <label class="upload-btn">
-              上传风格图
-              <input id="similar-input" type="file" accept="image/*,.gif" hidden />
-            </label>
-            <div class="control">
-              <label>板宽：<span id="similar-width-val">29</span></label>
-              <input id="similar-width" type="range" min="8" max="80" step="1" value="29" />
-            </div>
-            <button id="similar-convert" class="btn btn-primary" type="button">转换</button>
-          </div>
-          <p id="similar-status" class="ai-status"></p>
-          <div class="canvas-row">
-            <div class="canvas-box">
-              <span class="canvas-label">网格</span>
-              <canvas id="similar-canvas" class="similar-canvas"></canvas>
-            </div>
-          </div>
-          <div class="stats" id="similar-stats"></div>
-          <div class="export-row">
-            <button id="similar-export-png" class="btn" type="button">PNG</button>
-            <button id="similar-export-csv" class="btn" type="button">CSV</button>
-            <button id="similar-export-pdf" class="btn" type="button">PDF</button>
-          </div>
-        </div>
-
         <div class="entry-card">
           <h3>从白板开始</h3>
           <p>打开像素画板，自由绘制并实时统计用色，支持画笔 / 橡皮 / 油漆桶 / 镜像 / 撤销。</p>
@@ -104,8 +146,299 @@
 
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
-    import './assets/js/create.js';
-    injectChrome('create');
+    try { injectChrome('create'); } catch (e) { console.warn(e); }
+
+    // Artkal 常用标准色板
+    const PALETTE = [
+      { code: 'S01', name: '纯白', r: 255, g: 255, b: 255 },
+      { code: 'S02', name: '纯黑', r: 20, g: 20, b: 20 },
+      { code: 'S03', name: '正红', r: 229, g: 57, b: 53 },
+      { code: 'S04', name: '深红', r: 183, g: 28, b: 28 },
+      { code: 'S05', name: '粉红', r: 240, g: 98, b: 146 },
+      { code: 'S06', name: '浅粉', r: 248, g: 187, b: 208 },
+      { code: 'S07', name: '天蓝', r: 66, g: 165, b: 245 },
+      { code: 'S08', name: '海蓝', r: 30, g: 136, b: 229 },
+      { code: 'S09', name: '藏青', r: 13, g: 71, b: 161 },
+      { code: 'S10', name: '草绿', r: 102, g: 187, b: 106 },
+      { code: 'S11', name: '深绿', r: 46, g: 125, b: 50 },
+      { code: 'S12', name: '嫩绿', r: 165, g: 214, b: 167 },
+      { code: 'S13', name: '柠檬黄', r: 255, g: 238, b: 88 },
+      { code: 'S14', name: '金黄', r: 251, g: 192, b: 45 },
+      { code: 'S15', name: '橙色', r: 251, g: 140, b: 0 },
+      { code: 'S16', name: '深橙', r: 230, g: 81, b: 0 },
+      { code: 'S17', name: '浅紫', r: 186, g: 104, b: 200 },
+      { code: 'S18', name: '深紫', r: 123, g: 31, b: 162 },
+      { code: 'S19', name: '肤色', r: 255, g: 224, b: 178 },
+      { code: 'S20', name: '浅咖', r: 215, g: 204, b: 200 },
+      { code: 'S21', name: '棕色', r: 141, g: 110, b: 99 },
+      { code: 'S22', name: '深褐', r: 78, g: 52, b: 46 },
+      { code: 'S23', name: '浅灰', r: 224, g: 224, b: 224 },
+      { code: 'S24', name: '中灰', r: 158, g: 158, b: 158 },
+      { code: 'S25', name: '深灰', r: 97, g: 97, b: 97 },
+      { code: 'S26', name: '薄荷绿', r: 128, g: 222, b: 234 },
+      { code: 'S27', name: '绿松石', r: 0, g: 172, b: 193 },
+      { code: 'S28', name: '珊瑚红', r: 255, g: 112, b: 67 },
+      { code: 'S29', name: '奶黄', r: 255, g: 249, b: 196 }
+    ];
+
+    let currentImg = null;
+    let gridData = [];
+
+    const uploadInput = document.getElementById('upload-input');
+    const bgToggle = document.getElementById('bg-toggle');
+    const boardWidthInput = document.getElementById('board-width');
+    const boardWidthVal = document.getElementById('board-width-val');
+    const labelsToggle = document.getElementById('labels-toggle');
+    const convertBtn = document.getElementById('convert-btn');
+    const statusText = document.getElementById('convert-status');
+    const boardCanvas = document.getElementById('board-canvas');
+    const previewCanvas = document.getElementById('preview-canvas');
+    const statsContainer = document.getElementById('stats');
+    const exportPngBtn = document.getElementById('export-png');
+    const exportCsvBtn = document.getElementById('export-csv');
+
+    // 监听板宽滑动
+    boardWidthInput.addEventListener('input', (e) => {
+      boardWidthVal.textContent = e.target.value;
+      if (currentImg) processImage();
+    });
+
+    // 监听标注色号切换
+    labelsToggle.addEventListener('change', () => {
+      if (gridData.length > 0) renderCanvases();
+    });
+
+    // 监听抠背景切换
+    bgToggle.addEventListener('change', () => {
+      if (currentImg) processImage();
+    });
+
+    // 监听上传
+    uploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          currentImg = img;
+          processImage();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 监听“开始拼豆”按钮
+    convertBtn.addEventListener('click', () => {
+      if (!currentImg) {
+        statusText.textContent = '请先上传图片再点击拼豆哦！';
+        statusText.style.color = '#ef4444';
+        return;
+      }
+      processImage();
+    });
+
+    // 颜色匹配算法
+    function findNearestColor(r, g, b) {
+      let minDist = Infinity;
+      let matched = PALETTE[0];
+      for (const item of PALETTE) {
+        const dist = 2 * (r - item.r) ** 2 + 4 * (g - item.g) ** 2 + 3 * (b - item.b) ** 2;
+        if (dist < minDist) {
+          minDist = dist;
+          matched = item;
+        }
+      }
+      return matched;
+    }
+
+    // 核心转换
+    function processImage() {
+      if (!currentImg) return;
+      statusText.style.color = '#4b5563';
+      statusText.textContent = '正在生成拼豆图纸...';
+
+      const targetWidth = parseInt(boardWidthInput.value, 10);
+      const aspectRatio = currentImg.height / currentImg.width;
+      const targetHeight = Math.max(1, Math.round(targetWidth * aspectRatio));
+
+      // 缩放读取像素
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = targetWidth;
+      offCanvas.height = targetHeight;
+      const offCtx = offCanvas.getContext('2d');
+      offCtx.drawImage(currentImg, 0, 0, targetWidth, targetHeight);
+
+      const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
+      const autoBg = bgToggle.checked;
+
+      gridData = [];
+      const statsMap = {};
+
+      for (let y = 0; y < targetHeight; y++) {
+        const row = [];
+        for (let x = 0; x < targetWidth; x++) {
+          const idx = (y * targetWidth + x) * 4;
+          const r = imgData[idx];
+          const g = imgData[idx + 1];
+          const b = imgData[idx + 2];
+          const a = imgData[idx + 3];
+
+          // 抠背景判断（透明度或近似纯白背景）
+          if (a < 50 || (autoBg && r > 240 && g > 240 && b > 240)) {
+            row.push(null);
+          } else {
+            const bead = findNearestColor(r, g, b);
+            row.push(bead);
+            statsMap[bead.code] = statsMap[bead.code] || { ...bead, count: 0 };
+            statsMap[bead.code].count += 1;
+          }
+        }
+        gridData.push(row);
+      }
+
+      renderCanvases();
+      renderStats(statsMap);
+      statusText.textContent = `完成：${targetWidth} × ${targetHeight} 网格`;
+    }
+
+    // 渲染网格与色号
+    function renderCanvases() {
+      if (gridData.length === 0) return;
+      const height = gridData.length;
+      const width = gridData[0].length;
+
+      // 1. 预览 Canvas
+      const pixelSize = 8;
+      previewCanvas.width = width * pixelSize;
+      previewCanvas.height = height * pixelSize;
+      const pCtx = previewCanvas.getContext('2d');
+      pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const bead = gridData[y][x];
+          if (bead) {
+            pCtx.fillStyle = `rgb(${bead.r},${bead.g},${bead.b})`;
+            pCtx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+          }
+        }
+      }
+
+      // 2. 拼豆板 Canvas（带豆豆质感 + 色号标注）
+      const cellSize = 30; // 单元格尺寸，保证色号清晰可读
+      boardCanvas.width = width * cellSize;
+      boardCanvas.height = height * cellSize;
+      const bCtx = boardCanvas.getContext('2d');
+      bCtx.fillStyle = '#f9fafb';
+      bCtx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
+
+      const showLabels = labelsToggle.checked;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const cx = x * cellSize;
+          const cy = y * cellSize;
+
+          // 绘制网格辅助线
+          bCtx.strokeStyle = '#e5e7eb';
+          bCtx.lineWidth = 1;
+          bCtx.strokeRect(cx, cy, cellSize, cellSize);
+
+          const bead = gridData[y][x];
+          if (bead) {
+            const centerX = cx + cellSize / 2;
+            const centerY = cy + cellSize / 2;
+            const radius = cellSize * 0.44;
+
+            // 绘制外圈拼豆
+            bCtx.beginPath();
+            bCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            bCtx.fillStyle = `rgb(${bead.r},${bead.g},${bead.b})`;
+            bCtx.fill();
+            bCtx.lineWidth = 1.5;
+            bCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+            bCtx.stroke();
+
+            // 绘制拼豆中间小孔
+            bCtx.beginPath();
+            bCtx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
+            bCtx.fillStyle = 'rgba(255,255,255,0.75)';
+            bCtx.fill();
+
+            // 标注色号代码
+            if (showLabels) {
+              const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
+              bCtx.fillStyle = lum > 140 ? '#111827' : '#ffffff';
+              bCtx.font = 'bold 9px monospace, sans-serif';
+              bCtx.textAlign = 'center';
+              bCtx.textBaseline = 'middle';
+              bCtx.fillText(bead.code, centerX, centerY);
+            }
+          }
+        }
+      }
+    }
+
+    // 渲染统计明细
+    function renderStats(statsMap) {
+      const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
+      if (items.length === 0) {
+        statsContainer.innerHTML = '';
+        return;
+      }
+
+      let total = items.reduce((sum, item) => sum + item.count, 0);
+      let html = `
+        <h3>🎨 用色清单 (共使用 ${items.length} 种颜色，${total} 颗拼豆)</h3>
+        <table class="stats-table">
+          <thead>
+            <tr><th>色号</th><th>颜色</th><th>名称</th><th>所需数量</th></tr>
+          </thead>
+          <tbody>
+      `;
+      for (const item of items) {
+        html += `
+          <tr>
+            <td><strong>${item.code}</strong></td>
+            <td><span class="color-chip" style="background: rgb(${item.r},${item.g},${item.b});"></span></td>
+            <td>${item.name}</td>
+            <td>${item.count} 颗</td>
+          </tr>
+        `;
+      }
+      html += '</tbody></table>';
+      statsContainer.innerHTML = html;
+    }
+
+    // 导出 PNG
+    exportPngBtn.addEventListener('click', () => {
+      if (gridData.length === 0) return alert('请先生成拼豆图纸！');
+      const link = document.createElement('a');
+      link.download = 'micheal-beads-pattern.png';
+      link.href = boardCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // 导出 CSV
+    exportCsvBtn.addEventListener('click', () => {
+      if (gridData.length === 0) return alert('请先生成拼豆图纸！');
+      let csv = '\uFEFF色号,颜色名称,所需颗粒数\n';
+      const statsMap = {};
+      gridData.flat().filter(Boolean).forEach(b => {
+        statsMap[b.code] = statsMap[b.code] || { name: b.name, count: 0 };
+        statsMap[b.code].count++;
+      });
+      for (const code in statsMap) {
+        csv += `"${code}","${statsMap[code].name}",${statsMap[code].count}\n`;
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'bead-shopping-list.csv';
+      link.click();
+    });
   </script>
 </body>
 </html>
