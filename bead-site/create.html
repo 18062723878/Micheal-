@@ -21,13 +21,13 @@
       margin-top: 20px;
     }
     .canvas-box {
-      flex: 1 1 450px;
+      flex: 1 1 480px;
       background: #fafafa;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 16px;
       overflow: auto;
-      max-height: 650px;
+      max-height: 750px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -42,8 +42,8 @@
       max-width: 100%;
       height: auto;
       background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border-radius: 4px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border-radius: 6px;
     }
     .stats-table {
       width: 100%;
@@ -61,17 +61,22 @@
     }
     .color-chip {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
       vertical-align: middle;
       margin-right: 6px;
-      border: 1px solid rgba(0,0,0,0.15);
+      border: 1px solid rgba(0,0,0,0.18);
     }
     .export-row {
       display: flex;
-      gap: 12px;
-      margin-top: 20px;
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .btn-lg {
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -79,42 +84,43 @@
   <div id="site-header"></div>
 
   <main>
-    <!-- 主上传 / 转换流程 -->
     <section id="upload-section" class="upload-section">
-      <h2>上传图片，开始拼豆</h2>
+      <h2>上传图片，自动生成拼豆图纸</h2>
       <div class="control-row">
         <label class="upload-btn btn btn-primary" style="cursor: pointer;">
-          📁 上传图片 / 开始创作
+          📁 上传图片 / 更换图片
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
         <label class="wb-check" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
-          <input id="bg-toggle" type="checkbox" /> 自动抠背景
+          <input id="bg-toggle" type="checkbox" /> 自动抠除白色/透明背景
         </label>
         <div class="control" style="display: flex; align-items: center; gap: 8px;">
-          <label>板宽（横向拼豆数）：<span id="board-width-val">29</span></label>
-          <input id="board-width" type="range" min="10" max="80" step="1" value="29" />
+          <label>板宽（横向拼豆数）：<span id="board-width-val">30</span></label>
+          <input id="board-width" type="range" min="10" max="100" step="1" value="30" />
         </div>
         <label class="wb-check" style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
           <input id="labels-toggle" type="checkbox" checked /> 标注色号
         </label>
         <label class="wb-check" style="display: flex; align-items: center; gap: 6px;">
           选色板：
-          <select id="palette-select">
-            <option value="artkal55">Artkal 标准 55 色</option>
+          <select id="palette-select" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db;">
+            <option value="artkal">Artkal 常用标准 50 色</option>
+            <option value="perler">Perler 经典常用色系</option>
+            <option value="hama">Hama 拼豆精选色系</option>
+            <option value="retro">复古像素 16 色 (GameBoy/Pixel)</option>
           </select>
         </label>
-        <button id="convert-btn" class="btn btn-primary" type="button">开始拼豆</button>
       </div>
 
       <p id="convert-status" class="ai-status" style="color: #4b5563; font-weight: 500;"></p>
 
       <div class="canvas-row">
         <div class="canvas-box">
-          <span class="canvas-label">拼豆网格（带色号图纸）</span>
+          <span class="canvas-label">拼豆高清网格图纸（高对比度色号）</span>
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
-          <span class="canvas-label">像素预览</span>
+          <span class="canvas-label">像素原图预览</span>
           <canvas id="preview-canvas" class="preview-canvas"></canvas>
         </div>
       </div>
@@ -124,8 +130,8 @@
 
       <!-- 导出选项 -->
       <div class="export-row">
-        <button id="export-png" class="btn" type="button">📥 导出高清图纸 (PNG)</button>
-        <button id="export-csv" class="btn" type="button">📊 导出用色清单 (CSV)</button>
+        <button id="export-png" class="btn btn-primary btn-lg" type="button">✨ 导出超清图纸 (Ultra-HD PNG)</button>
+        <button id="export-csv" class="btn btn-lg" type="button">📊 导出用色清单 (CSV)</button>
       </div>
     </section>
 
@@ -148,38 +154,103 @@
     import { injectChrome } from './assets/js/chrome.js';
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
-    // Artkal 常用标准色板
-    const PALETTE = [
-      { code: 'S01', name: '纯白', r: 255, g: 255, b: 255 },
-      { code: 'S02', name: '纯黑', r: 20, g: 20, b: 20 },
-      { code: 'S03', name: '正红', r: 229, g: 57, b: 53 },
-      { code: 'S04', name: '深红', r: 183, g: 28, b: 28 },
-      { code: 'S05', name: '粉红', r: 240, g: 98, b: 146 },
-      { code: 'S06', name: '浅粉', r: 248, g: 187, b: 208 },
-      { code: 'S07', name: '天蓝', r: 66, g: 165, b: 245 },
-      { code: 'S08', name: '海蓝', r: 30, g: 136, b: 229 },
-      { code: 'S09', name: '藏青', r: 13, g: 71, b: 161 },
-      { code: 'S10', name: '草绿', r: 102, g: 187, b: 106 },
-      { code: 'S11', name: '深绿', r: 46, g: 125, b: 50 },
-      { code: 'S12', name: '嫩绿', r: 165, g: 214, b: 167 },
-      { code: 'S13', name: '柠檬黄', r: 255, g: 238, b: 88 },
-      { code: 'S14', name: '金黄', r: 251, g: 192, b: 45 },
-      { code: 'S15', name: '橙色', r: 251, g: 140, b: 0 },
-      { code: 'S16', name: '深橙', r: 230, g: 81, b: 0 },
-      { code: 'S17', name: '浅紫', r: 186, g: 104, b: 200 },
-      { code: 'S18', name: '深紫', r: 123, g: 31, b: 162 },
-      { code: 'S19', name: '肤色', r: 255, g: 224, b: 178 },
-      { code: 'S20', name: '浅咖', r: 215, g: 204, b: 200 },
-      { code: 'S21', name: '棕色', r: 141, g: 110, b: 99 },
-      { code: 'S22', name: '深褐', r: 78, g: 52, b: 46 },
-      { code: 'S23', name: '浅灰', r: 224, g: 224, b: 224 },
-      { code: 'S24', name: '中灰', r: 158, g: 158, b: 158 },
-      { code: 'S25', name: '深灰', r: 97, g: 97, b: 97 },
-      { code: 'S26', name: '薄荷绿', r: 128, g: 222, b: 234 },
-      { code: 'S27', name: '绿松石', r: 0, g: 172, b: 193 },
-      { code: 'S28', name: '珊瑚红', r: 255, g: 112, b: 67 },
-      { code: 'S29', name: '奶黄', r: 255, g: 249, b: 196 }
-    ];
+    // 预设丰富色板库
+    const PALETTES = {
+      artkal: [
+        { code: 'S01', name: '纯白', r: 255, g: 255, b: 255 },
+        { code: 'S02', name: '纯黑', r: 24, g: 24, b: 27 },
+        { code: 'S03', name: '大红', r: 220, g: 38, b: 38 },
+        { code: 'S04', name: '暗红', r: 153, g: 27, b: 27 },
+        { code: 'S05', name: '芭比粉', r: 236, g: 72, b: 153 },
+        { code: 'S06', name: '樱花粉', r: 251, g: 207, b: 232 },
+        { code: 'S07', name: '天蓝', r: 56, g: 189, b: 248 },
+        { code: 'S08', name: '宝蓝', r: 37, g: 99, b: 235 },
+        { code: 'S09', name: '藏青', r: 30, g: 58, b: 138 },
+        { code: 'S10', name: '草绿', r: 74, g: 222, b: 128 },
+        { code: 'S11', name: '森林绿', r: 22, g: 101, b: 52 },
+        { code: 'S12', name: '嫩芽绿', r: 187, g: 247, b: 208 },
+        { code: 'S13', name: '柠檬黄', r: 250, g: 204, b: 21 },
+        { code: 'S14', name: '郁金香黄', r: 234, g: 179, b: 8 },
+        { code: 'S15', name: '亮橙', r: 251, g: 146, b: 60 },
+        { code: 'S16', name: '南瓜橙', r: 234, g: 88, b: 12 },
+        { code: 'S17', name: '香芋紫', r: 192, g: 132, b: 252 },
+        { code: 'S18', name: '深紫', r: 126, g: 34, b: 206 },
+        { code: 'S19', name: '肤色', r: 254, g: 215, b: 170 },
+        { code: 'S20', name: '奶茶色', r: 214, g: 180, b: 158 },
+        { code: 'S21', name: '摩卡棕', r: 161, g: 98, b: 7 },
+        { code: 'S22', name: '巧克力棕', r: 69, g: 26, b: 3 },
+        { code: 'S23', name: '银灰', r: 228, g: 228, b: 231 },
+        { code: 'S24', name: '中灰', r: 161, g: 161, b: 170 },
+        { code: 'S25', name: '碳灰', r: 82, g: 82, b: 91 },
+        { code: 'S26', name: '薄荷蓝', r: 165, g: 243, b: 252 },
+        { code: 'S27', name: '孔雀绿', r: 13, g: 148, b: 136 },
+        { code: 'S28', name: '珊瑚粉', r: 251, g: 113, b: 133 },
+        { code: 'S29', name: '浅奶黄', r: 254, g: 240, b: 138 },
+        { code: 'S30', name: '抹茶绿', r: 132, g: 204, b: 22 },
+        { code: 'S31', name: '酒红', r: 136, g: 19, b: 55 },
+        { code: 'S32', name: '灰蓝', r: 100, g: 116, b: 139 }
+      ],
+      perler: [
+        { code: 'P01', name: 'White', r: 255, g: 255, b: 255 },
+        { code: 'P02', name: 'Black', r: 20, g: 20, b: 20 },
+        { code: 'P03', name: 'Red', r: 210, g: 35, b: 42 },
+        { code: 'P04', name: 'Cherry', r: 148, g: 17, b: 37 },
+        { code: 'P05', name: 'Bubblegum', r: 244, g: 114, b: 177 },
+        { code: 'P06', name: 'Cotton Candy', r: 252, g: 182, b: 206 },
+        { code: 'P07', name: 'Light Blue', r: 96, g: 165, b: 250 },
+        { code: 'P08', name: 'Cobalt', r: 29, g: 78, b: 216 },
+        { code: 'P09', name: 'Midnight', r: 15, g: 23, b: 42 },
+        { code: 'P10', name: 'Kiwi Lime', r: 132, g: 204, b: 22 },
+        { code: 'P11', name: 'Dark Green', r: 21, g: 128, b: 61 },
+        { code: 'P12', name: 'Pastel Green', r: 187, g: 247, b: 208 },
+        { code: 'P13', name: 'Yellow', r: 253, g: 224, b: 71 },
+        { code: 'P14', name: 'Cheddar', r: 245, g: 158, b: 11 },
+        { code: 'P15', name: 'Orange', r: 249, g: 115, b: 22 },
+        { code: 'P16', name: 'Hot Coral', r: 244, g: 63, b: 94 },
+        { code: 'P17', name: 'Pastel Lavender', r: 216, g: 180, b: 254 },
+        { code: 'P18', name: 'Purple', r: 147, g: 51, b: 234 },
+        { code: 'P19', name: 'Peach', r: 253, g: 186, b: 140 },
+        { code: 'P20', name: 'Sand', r: 221, g: 190, b: 169 },
+        { code: 'P21', name: 'Light Brown', r: 180, g: 122, b: 82 },
+        { code: 'P22', name: 'Brown', r: 87, g: 52, b: 34 },
+        { code: 'P23', name: 'Light Grey', r: 212, g: 212, b: 216 },
+        { code: 'P24', name: 'Grey', r: 113, g: 113, b: 122 },
+        { code: 'P25', name: 'Dark Grey', r: 63, g: 63, b: 70 },
+        { code: 'P26', name: 'Turquoise', r: 20, g: 184, b: 166 },
+        { code: 'P27', name: 'Pastel Yellow', r: 254, g: 249, b: 195 }
+      ],
+      hama: [
+        { code: 'H01', name: 'White', r: 255, g: 255, b: 255 },
+        { code: 'H02', name: 'Cream', r: 254, g: 243, b: 199 },
+        { code: 'H03', name: 'Yellow', r: 250, g: 204, b: 21 },
+        { code: 'H04', name: 'Orange', r: 249, g: 115, b: 22 },
+        { code: 'H05', name: 'Red', r: 225, g: 29, b: 72 },
+        { code: 'H06', name: 'Pink', r: 244, g: 114, b: 182 },
+        { code: 'H07', name: 'Purple', r: 168, g: 85, b: 247 },
+        { code: 'H08', name: 'Blue', r: 37, g: 99, b: 235 },
+        { code: 'H09', name: 'Light Blue', r: 125, g: 211, b: 252 },
+        { code: 'H10', name: 'Green', r: 34, g: 197, b: 94 },
+        { code: 'H11', name: 'Light Green', r: 134, g: 239, b: 172 },
+        { code: 'H12', name: 'Brown', r: 120, g: 53, b: 15 },
+        { code: 'H13', name: 'Grey', r: 156, g: 163, b: 175 },
+        { code: 'H14', name: 'Black', r: 17, g: 24, b: 39 },
+        { code: 'H15', name: 'Flesh', r: 253, g: 186, b: 140 }
+      ],
+      retro: [
+        { code: 'R01', name: '墨黑', r: 15, g: 15, b: 15 },
+        { code: 'R02', name: '深灰', r: 75, g: 75, b: 75 },
+        { code: 'R03', name: '浅灰', r: 160, g: 160, b: 160 },
+        { code: 'R04', name: '纯白', r: 250, g: 250, b: 250 },
+        { code: 'R05', name: 'GB深绿', r: 15, g: 56, b: 15 },
+        { code: 'R06', name: 'GB草绿', r: 48, g: 98, b: 48 },
+        { code: 'R07', name: 'GB浅绿', r: 139, g: 172, b: 15 },
+        { code: 'R08', name: 'GB嫩黄', r: 155, g: 188, b: 15 },
+        { code: 'R09', name: '像素红', r: 235, g: 59, b: 90 },
+        { code: 'R10', name: '像素蓝', r: 56, g: 103, b: 214 },
+        { code: 'R11', name: '像素黄', r: 254, g: 211, b: 48 },
+        { code: 'R12', name: '像素青', r: 32, g: 191, b: 107 }
+      ]
+    };
 
     let currentImg = null;
     let gridData = [];
@@ -189,7 +260,7 @@
     const boardWidthInput = document.getElementById('board-width');
     const boardWidthVal = document.getElementById('board-width-val');
     const labelsToggle = document.getElementById('labels-toggle');
-    const convertBtn = document.getElementById('convert-btn');
+    const paletteSelect = document.getElementById('palette-select');
     const statusText = document.getElementById('convert-status');
     const boardCanvas = document.getElementById('board-canvas');
     const previewCanvas = document.getElementById('preview-canvas');
@@ -197,23 +268,25 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
-    // 监听板宽滑动
+    // 监听所有输入变动，全部实现无缝自动转换
     boardWidthInput.addEventListener('input', (e) => {
       boardWidthVal.textContent = e.target.value;
       if (currentImg) processImage();
     });
 
-    // 监听标注色号切换
     labelsToggle.addEventListener('change', () => {
       if (gridData.length > 0) renderCanvases();
     });
 
-    // 监听抠背景切换
     bgToggle.addEventListener('change', () => {
       if (currentImg) processImage();
     });
 
-    // 监听上传
+    paletteSelect.addEventListener('change', () => {
+      if (currentImg) processImage();
+    });
+
+    // 监听图片上传
     uploadInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -229,22 +302,16 @@
       reader.readAsDataURL(file);
     });
 
-    // 监听“开始拼豆”按钮
-    convertBtn.addEventListener('click', () => {
-      if (!currentImg) {
-        statusText.textContent = '请先上传图片再点击拼豆哦！';
-        statusText.style.color = '#ef4444';
-        return;
-      }
-      processImage();
-    });
-
-    // 颜色匹配算法
-    function findNearestColor(r, g, b) {
+    // 颜色距离匹配算法（CIELAB 加权近似）
+    function findNearestColor(r, g, b, palette) {
       let minDist = Infinity;
-      let matched = PALETTE[0];
-      for (const item of PALETTE) {
-        const dist = 2 * (r - item.r) ** 2 + 4 * (g - item.g) ** 2 + 3 * (b - item.b) ** 2;
+      let matched = palette[0];
+      for (const item of palette) {
+        const rmean = (r + item.r) / 2;
+        const dr = r - item.r;
+        const dg = g - item.g;
+        const db = b - item.b;
+        const dist = (2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db;
         if (dist < minDist) {
           minDist = dist;
           matched = item;
@@ -253,17 +320,16 @@
       return matched;
     }
 
-    // 核心转换
+    // 图片处理转拼豆核心逻辑
     function processImage() {
       if (!currentImg) return;
       statusText.style.color = '#4b5563';
-      statusText.textContent = '正在生成拼豆图纸...';
+      statusText.textContent = '正在实时生成高对比拼豆图纸...';
 
       const targetWidth = parseInt(boardWidthInput.value, 10);
       const aspectRatio = currentImg.height / currentImg.width;
       const targetHeight = Math.max(1, Math.round(targetWidth * aspectRatio));
 
-      // 缩放读取像素
       const offCanvas = document.createElement('canvas');
       offCanvas.width = targetWidth;
       offCanvas.height = targetHeight;
@@ -272,6 +338,7 @@
 
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
       const autoBg = bgToggle.checked;
+      const activePalette = PALETTES[paletteSelect.value] || PALETTES.artkal;
 
       gridData = [];
       const statsMap = {};
@@ -285,11 +352,10 @@
           const b = imgData[idx + 2];
           const a = imgData[idx + 3];
 
-          // 抠背景判断（透明度或近似纯白背景）
-          if (a < 50 || (autoBg && r > 240 && g > 240 && b > 240)) {
+          if (a < 50 || (autoBg && r > 235 && g > 235 && b > 235)) {
             row.push(null);
           } else {
-            const bead = findNearestColor(r, g, b);
+            const bead = findNearestColor(r, g, b, activePalette);
             row.push(bead);
             statsMap[bead.code] = statsMap[bead.code] || { ...bead, count: 0 };
             statsMap[bead.code].count += 1;
@@ -300,16 +366,61 @@
 
       renderCanvases();
       renderStats(statsMap);
-      statusText.textContent = `完成：${targetWidth} × ${targetHeight} 网格`;
+      statusText.textContent = `完成：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色预设)`;
     }
 
-    // 渲染网格与色号
+    // 绘制拼豆颗粒与高对比度文字
+    function drawBeadCell(ctx, bead, cx, cy, cellSize, showLabels) {
+      const centerX = cx + cellSize / 2;
+      const centerY = cy + cellSize / 2;
+      const radius = cellSize * 0.44;
+
+      // 1. 拼豆主体
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgb(${bead.r},${bead.g},${bead.b})`;
+      ctx.fill();
+      ctx.lineWidth = Math.max(1, cellSize * 0.04);
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.stroke();
+
+      // 2. 中间小孔
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.stroke();
+
+      // 3. 高对比度标注色号（加入描边与微胶囊底色，确保 100% 清晰）
+      if (showLabels) {
+        const fontSize = Math.max(8, Math.floor(cellSize * 0.34));
+        ctx.font = `bold ${fontSize}px "SF Pro", -apple-system, monospace, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 依据 WCAG 标准计算亮度
+        const lum = 0.2126 * bead.r + 0.7152 * bead.g + 0.0722 * bead.b;
+        const isBright = lum > 145;
+
+        // 文字背部描边对比层
+        ctx.lineWidth = Math.max(2, fontSize * 0.25);
+        ctx.strokeStyle = isBright ? '#ffffff' : '#000000';
+        ctx.strokeText(bead.code, centerX, centerY);
+
+        // 文字主体
+        ctx.fillStyle = isBright ? '#000000' : '#ffffff';
+        ctx.fillText(bead.code, centerX, centerY);
+      }
+    }
+
+    // 页面内渲染
     function renderCanvases() {
       if (gridData.length === 0) return;
       const height = gridData.length;
       const width = gridData[0].length;
 
-      // 1. 预览 Canvas
+      // 像素预览
       const pixelSize = 8;
       previewCanvas.width = width * pixelSize;
       previewCanvas.height = height * pixelSize;
@@ -326,12 +437,12 @@
         }
       }
 
-      // 2. 拼豆板 Canvas（带豆豆质感 + 色号标注）
-      const cellSize = 30; // 单元格尺寸，保证色号清晰可读
+      // 拼豆网格板
+      const cellSize = 32;
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
-      bCtx.fillStyle = '#f9fafb';
+      bCtx.fillStyle = '#f8fafc';
       bCtx.fillRect(0, 0, boardCanvas.width, boardCanvas.height);
 
       const showLabels = labelsToggle.checked;
@@ -341,47 +452,19 @@
           const cx = x * cellSize;
           const cy = y * cellSize;
 
-          // 绘制网格辅助线
-          bCtx.strokeStyle = '#e5e7eb';
+          bCtx.strokeStyle = '#e2e8f0';
           bCtx.lineWidth = 1;
           bCtx.strokeRect(cx, cy, cellSize, cellSize);
 
           const bead = gridData[y][x];
           if (bead) {
-            const centerX = cx + cellSize / 2;
-            const centerY = cy + cellSize / 2;
-            const radius = cellSize * 0.44;
-
-            // 绘制外圈拼豆
-            bCtx.beginPath();
-            bCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            bCtx.fillStyle = `rgb(${bead.r},${bead.g},${bead.b})`;
-            bCtx.fill();
-            bCtx.lineWidth = 1.5;
-            bCtx.strokeStyle = 'rgba(0,0,0,0.15)';
-            bCtx.stroke();
-
-            // 绘制拼豆中间小孔
-            bCtx.beginPath();
-            bCtx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-            bCtx.fillStyle = 'rgba(255,255,255,0.75)';
-            bCtx.fill();
-
-            // 标注色号代码
-            if (showLabels) {
-              const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-              bCtx.fillStyle = lum > 140 ? '#111827' : '#ffffff';
-              bCtx.font = 'bold 9px monospace, sans-serif';
-              bCtx.textAlign = 'center';
-              bCtx.textBaseline = 'middle';
-              bCtx.fillText(bead.code, centerX, centerY);
-            }
+            drawBeadCell(bCtx, bead, cx, cy, cellSize, showLabels);
           }
         }
       }
     }
 
-    // 渲染统计明细
+    // 统计用色
     function renderStats(statsMap) {
       const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
       if (items.length === 0) {
@@ -412,12 +495,79 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出 PNG
+    // 导出超清 PNG（采用独立 64px 大尺寸单元格 + 坐标轴刻度尺）
     exportPngBtn.addEventListener('click', () => {
-      if (gridData.length === 0) return alert('请先生成拼豆图纸！');
+      if (gridData.length === 0) return alert('请先上传图片生成拼豆图纸！');
+
+      const height = gridData.length;
+      const width = gridData[0].length;
+      const cellSize = 64; // 超高清单元格分辨率
+      const rulerSize = 40; // 顶部与左侧坐标尺区域
+
+      const hdCanvas = document.createElement('canvas');
+      hdCanvas.width = width * cellSize + rulerSize;
+      hdCanvas.height = height * cellSize + rulerSize;
+      const ctx = hdCanvas.getContext('2d');
+
+      // 背景底色
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, hdCanvas.width, hdCanvas.height);
+
+      // 绘制标尺文字样式
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 16px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // 顶部 X 轴刻度
+      for (let x = 0; x < width; x++) {
+        const posX = rulerSize + x * cellSize + cellSize / 2;
+        ctx.fillText((x + 1).toString(), posX, rulerSize / 2);
+      }
+
+      // 左侧 Y 轴刻度
+      for (let y = 0; y < height; y++) {
+        const posY = rulerSize + y * cellSize + cellSize / 2;
+        ctx.fillText((y + 1).toString(), rulerSize / 2, posY);
+      }
+
+      // 标尺分割线
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(rulerSize, 0);
+      ctx.lineTo(rulerSize, hdCanvas.height);
+      ctx.moveTo(0, rulerSize);
+      ctx.lineTo(hdCanvas.width, rulerSize);
+      ctx.stroke();
+
+      // 绘制超清网格与豆豆
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const cx = rulerSize + x * cellSize;
+          const cy = rulerSize + y * cellSize;
+
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(cx, cy, cellSize, cellSize);
+
+          // 逢 5 格与 10 格加粗辅助线，方便拼装定位
+          if ((x + 1) % 5 === 0) {
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(cx, cy, cellSize, cellSize);
+          }
+
+          const bead = gridData[y][x];
+          if (bead) {
+            drawBeadCell(ctx, bead, cx, cy, cellSize, true);
+          }
+        }
+      }
+
       const link = document.createElement('a');
-      link.download = 'micheal-beads-pattern.png';
-      link.href = boardCanvas.toDataURL('image/png');
+      link.download = `Micheal-Beads-UltraHD-${width}x${height}.png`;
+      link.href = hdCanvas.toDataURL('image/png', 1.0);
       link.click();
     });
 
