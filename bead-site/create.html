@@ -7,7 +7,11 @@
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
   <style>
-    .create-container { max-width: 1380px; margin: 24px auto; padding: 0 20px; }
+    .create-container {
+      max-width: 1380px;
+      margin: 24px auto;
+      padding: 0 20px;
+    }
     .panel-card {
       background: var(--bg-card);
       border-radius: 16px;
@@ -54,7 +58,8 @@
       max-width: 100%;
       height: auto;
       border-radius: 6px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      background: var(--canvas-bg);
     }
     .stats-table {
       width: 100%;
@@ -67,7 +72,10 @@
       padding: 8px 12px;
       text-align: center;
     }
-    .stats-table th { background: var(--table-head); color: var(--text-main); }
+    .stats-table th {
+      background: var(--table-head);
+      color: var(--text-main);
+    }
     .color-chip {
       display: inline-block;
       width: 18px;
@@ -75,7 +83,7 @@
       border-radius: 4px;
       vertical-align: middle;
       margin-right: 6px;
-      border: 1px solid rgba(0,0,0,0.2);
+      border: 1px solid rgba(0, 0, 0, 0.2);
     }
     .form-select {
       background: var(--bg-card);
@@ -122,7 +130,7 @@
       <!-- 双画板：左侧纯色实体拼豆，右侧带标尺编号图纸 -->
       <div class="canvas-row">
         <div class="canvas-box">
-          <span class="canvas-label">✨ 纯色实体拼豆效果（纯净无孔点）</span>
+          <span class="canvas-label">✨ 纯色实体拼豆效果（暗色模式纯净自适应）</span>
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
@@ -131,13 +139,13 @@
         </div>
       </div>
 
-      <!-- 用色明细 -->
+      <!-- 页面下方用色明细展示 -->
       <div id="stats"></div>
 
-      <!-- 导出 -->
+      <!-- 导出选项 -->
       <div style="display: flex; gap: 14px; margin-top: 24px;">
         <button id="export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (PNG)</button>
-        <button id="export-csv" class="btn" type="button">📊 导出用色清单 (CSV)</button>
+        <button id="export-csv" class="btn" type="button">🗺️ 导出图纸网格矩阵 (CSV 色号对应位置)</button>
       </div>
     </section>
 
@@ -250,6 +258,7 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
+    // 载入 URL 传入图纸
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
     if (patternId) {
@@ -366,13 +375,14 @@
       const height = gridData.length;
       const width = gridData[0].length;
 
+      // 动态获取当前暗黑/明亮主题色
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
       const cellSize = 30;
 
-      // 1. 左侧：纯色实体拼豆（无任何白点穿孔）
+      // 1. 左侧纯色实体拼豆（暗色模式纯黑底，纯色实体无孔洞）
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -394,7 +404,6 @@
             const centerY = cy + cellSize / 2;
             const radius = cellSize * 0.44;
 
-            // 纯色实体圆豆豆
             bCtx.beginPath();
             bCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             bCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
@@ -406,7 +415,7 @@
         }
       }
 
-      // 2. 右侧：色号对照图纸（带坐标标尺与高对比色号）
+      // 2. 右侧色号对照图纸（标尺坐标与编号）
       const ruler = 28;
       schematicCanvas.width = width * cellSize + ruler;
       schematicCanvas.height = height * cellSize + ruler;
@@ -445,7 +454,7 @@
             sCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             sCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
             sCtx.fill();
-            sCtx.strokeStyle = 'rgba(0,0,0,0.15)';
+            sCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
             sCtx.stroke();
 
             const lum = 0.299 * (bead.r || 100) + 0.587 * (bead.g || 100) + 0.114 * (bead.b || 100);
@@ -458,6 +467,11 @@
         }
       }
     }
+
+    // 监听暗黑主题切换并即时重绘画布底色
+    window.addEventListener('storage', renderCanvases);
+    const observer = new MutationObserver(() => renderCanvases());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     function buildStatsFromGrid() {
       const statsMap = {};
@@ -497,6 +511,7 @@
       statsContainer.innerHTML = html;
     }
 
+    // 导出超清 PNG
     exportPngBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const link = document.createElement('a');
@@ -505,21 +520,26 @@
       link.click();
     });
 
+    // 导出图纸网格色号矩阵 (CSV 格式对应色号矩阵位置)
     exportCsvBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
-      let csv = '\uFEFF色号,颜色名称,所需颗粒数\n';
-      const statsMap = {};
-      gridData.flat().filter(Boolean).forEach(b => {
-        statsMap[b.code] = statsMap[b.code] || { name: b.name || b.code, count: 0 };
-        statsMap[b.code].count++;
-      });
-      for (const code in statsMap) {
-        csv += `"${code}","${statsMap[code].name}",${statsMap[code].count}\n`;
+      const height = gridData.length;
+      const width = gridData[0].length;
+
+      let csv = '\uFEFF行号\\列号,' + Array.from({ length: width }, (_, i) => `第${i + 1}列`).join(',') + '\n';
+      for (let y = 0; y < height; y++) {
+        const rowData = [`第${y + 1}行`];
+        for (let x = 0; x < width; x++) {
+          const bead = gridData[y][x];
+          rowData.push(bead ? `"${bead.code}"` : '""');
+        }
+        csv += rowData.join(',') + '\n';
       }
+
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'bead-shopping-list.csv';
+      link.download = `Micheal-Beads-GridMatrix-${width}x${height}.csv`;
       link.click();
     });
   </script>
