@@ -8,56 +8,25 @@
   <link rel="stylesheet" href="assets/css/layout.css" />
   <style>
     .wb-container {
-      max-width: 1380px;
-      margin: 24px auto;
-      padding: 0 20px;
+      max-width: 1440px;
+      margin: 20px auto;
+      padding: 0 16px;
     }
     .wb-card {
       background: var(--bg-card);
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .wb-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 16px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--border-color);
-      margin-bottom: 20px;
-    }
-    .wb-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-    .tool-group {
-      display: flex;
-      gap: 6px;
-      background: var(--bg-secondary);
-      padding: 4px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    .tool-btn {
-      padding: 6px 12px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-main);
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tool-btn.active {
-      background: var(--primary);
-      color: #ffffff !important;
-      font-weight: 700;
+      margin-bottom: 16px;
     }
     .wb-select {
       background: var(--bg-card);
@@ -67,77 +36,162 @@
       border-radius: 8px;
       font-size: 13px;
     }
-
-    /* 调色板容器 */
-    .palette-box {
-      margin-bottom: 20px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px;
-    }
-    .color-swatches {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      max-height: 140px;
-      overflow-y: auto;
-    }
-    .swatch {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 2px solid transparent;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-      transition: transform 0.15s;
-    }
-    .swatch:hover { transform: scale(1.15); }
-    .swatch.selected {
-      outline: 2px solid var(--primary);
-      transform: scale(1.1);
-      z-index: 2;
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
     }
 
-    /* 双工作台排版 */
+    /* 双工作台容器排版 */
     .workbench-row {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
     }
     .board-workbench {
-      flex: 1 1 480px;
+      flex: 1 1 580px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 20px;
-      overflow: auto;
-      max-height: 720px;
+      border-radius: 14px;
+      padding: 16px;
+      box-sizing: border-box;
       position: relative;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
     .workbench-header {
-      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .workbench-label {
       font-weight: 700;
       color: var(--text-main);
-      margin: 0;
-    }
-    #wb-canvas, #wb-schematic {
-      border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-      cursor: crosshair;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    /* 全屏专属模式 (跟随深色/浅色主题) */
+    /* 工作台内部主体布局 */
+    .workbench-body {
+      display: flex;
+      gap: 14px;
+      flex: 1;
+      min-height: 480px;
+    }
+    .viewport-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      position: relative;
+    }
+    #wb-canvas, #wb-schematic {
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      cursor: crosshair;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* 画板侧边独立工具与调色栏 */
+    .draw-sidebar {
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    .sidebar-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .tool-btn {
+      padding: 7px 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .tool-btn:hover {
+      background: var(--bg-page);
+      border-color: var(--primary);
+    }
+    .tool-btn.active {
+      background: var(--primary);
+      color: #ffffff !important;
+      border-color: var(--primary);
+    }
+
+    /* 侧边栏色块矩阵 */
+    .color-swatches-scroll {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 240px;
+      padding: 4px 2px;
+    }
+    .swatch {
+      aspect-ratio: 1 / 1;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      transition: transform 0.1s;
+    }
+    .swatch:hover { transform: scale(1.18); }
+    .swatch.selected {
+      outline: 2px solid var(--primary);
+      border-color: #ffffff;
+      transform: scale(1.1);
+      z-index: 2;
+    }
+    .current-color-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* 全屏模式 (完美自适应系统深色/浅色) */
     .board-workbench.is-fullscreen {
       position: fixed !important;
       inset: 0 !important;
@@ -148,16 +202,20 @@
       background: var(--bg-page) !important;
       border-radius: 0 !important;
       border: none !important;
-      padding: 24px !important;
-      box-sizing: border-box !important;
+      padding: 18px 24px !important;
+      margin: 0 !important;
     }
-    .board-workbench.is-fullscreen .workbench-header {
-      max-width: 1200px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 20px;
+    .board-workbench.is-fullscreen .workbench-body {
+      height: calc(100vh - 90px);
+    }
+    .board-workbench.is-fullscreen .draw-sidebar {
+      width: 250px;
+    }
+    .board-workbench.is-fullscreen .color-swatches-scroll {
+      max-height: calc(100vh - 360px);
     }
 
+    /* 表格清单 */
     .stats-table {
       width: 100%;
       border-collapse: collapse;
@@ -186,87 +244,116 @@
   <main class="wb-container">
     <section class="wb-card">
       <div class="wb-header">
-        <h1 style="margin: 0; font-size: 22px; color: var(--text-main);">🎨 白板像素画板</h1>
+        <h1 style="margin: 0; font-size: 20px; color: var(--text-main);">🎨 白板像素画板与图纸系统</h1>
         <a href="create.html" class="btn" style="text-decoration: none;">← 返回设计工坊</a>
       </div>
 
-      <!-- 工具栏 -->
-      <div class="wb-toolbar">
-        <div class="tool-group">
-          <button id="tool-pen" class="tool-btn active" type="button">✏️ 画笔</button>
-          <button id="tool-eraser" class="tool-btn" type="button">🧹 橡皮</button>
-          <button id="tool-picker" class="tool-btn" type="button">💉 吸管</button>
-          <button id="tool-bucket" class="tool-btn" type="button">🪣 油漆桶</button>
-        </div>
-
-        <div class="tool-group">
-          <button id="btn-undo" class="tool-btn" type="button">↩️ 撤销</button>
-          <button id="btn-hflip" class="tool-btn" type="button">⇄ 水平镜像</button>
-          <button id="btn-vflip" class="tool-btn" type="button">⇅ 垂直镜像</button>
-          <button id="btn-clear" class="tool-btn" type="button">🗑️ 清空画板</button>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="color: var(--text-main); font-size: 13px; font-weight: 500;">板型尺寸：</label>
-          <select id="board-size-select" class="wb-select">
-            <option value="16">16 × 16 (迷你板)</option>
-            <option value="20">20 × 20 (小板)</option>
-            <option value="29" selected>29 × 29 (标准拼豆方板)</option>
-            <option value="32">32 × 32 (经典像素板)</option>
-            <option value="40">40 × 40 (大方板)</option>
-          </select>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="color: var(--text-main); font-size: 13px; font-weight: 500;">调色板：</label>
-          <select id="palette-select" class="wb-select">
-            <option value="artkal">Artkal 旗舰 72 色板</option>
-            <option value="perler">Perler 经典 48 色板</option>
-            <option value="pastel">马卡龙少女甜系 32 色</option>
-            <option value="morandi">莫兰迪高级灰 24 色</option>
-            <option value="retro">复古像素 16 色</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 调色板色块区域 -->
-      <div class="palette-box">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: var(--text-muted);">
-          <span>当前画笔颜色：<strong id="active-color-name" style="color: var(--text-main);">S03 正红 (#DC2626)</strong></span>
-          <span id="palette-count-info">共 72 色可选</span>
-        </div>
-        <div class="color-swatches" id="swatches-container"></div>
-      </div>
-
-      <!-- 双工作台：左侧自由画板 + 右侧色号对照图 (均带全屏切换) -->
+      <!-- 双工作台主体 -->
       <div class="workbench-row">
-        <!-- 左侧画板 -->
+        <!-- 1. 左侧自由画板 -->
         <div class="board-workbench" id="workbench-left">
           <div class="workbench-header">
-            <span class="workbench-label">🖌️ 自由画板（纯色实体豆豆）</span>
-            <button id="btn-fullscreen-left" class="btn" type="button">⛶ 全屏编辑</button>
+            <div class="workbench-label">
+              <span>🖌️ 自由画板（纯色实体豆豆）</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <select id="board-size-select" class="wb-select" title="切换板型尺寸">
+                <option value="16">16×16</option>
+                <option value="20">20×20</option>
+                <option value="29" selected>29×29 (标准方板)</option>
+                <option value="32">32×32</option>
+                <option value="40">40×40</option>
+              </select>
+              <button id="btn-fullscreen-left" class="btn btn-sm" type="button">⛶ 全屏编辑</button>
+            </div>
           </div>
-          <canvas id="wb-canvas"></canvas>
+
+          <div class="workbench-body">
+            <!-- 旁边常驻工具栏与取色调色盘（全屏与平时均可直接涂色） -->
+            <aside class="draw-sidebar">
+              <div>
+                <div class="sidebar-section-title">绘画工具</div>
+                <div class="tools-grid">
+                  <button id="tool-pen" class="tool-btn active" type="button">✏️ 画笔</button>
+                  <button id="tool-bucket" class="tool-btn" type="button">🪣 填充</button>
+                  <button id="tool-eraser" class="tool-btn" type="button">🧹 橡皮</button>
+                  <button id="tool-picker" class="tool-btn" type="button">💉 吸管</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="sidebar-section-title">画板操作</div>
+                <div class="tools-grid">
+                  <button id="btn-undo" class="tool-btn" type="button">↩️ 撤销</button>
+                  <button id="btn-clear" class="tool-btn" type="button">🗑️ 清空</button>
+                  <button id="btn-hflip" class="tool-btn" type="button">⇄ 水平</button>
+                  <button id="btn-vflip" class="tool-btn" type="button">⇅ 垂直</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="sidebar-section-title">
+                  <span>当前画笔色</span>
+                </div>
+                <div class="current-color-tag">
+                  <span id="active-color-dot" style="width:14px; height:14px; border-radius:3px; background:#DC2626;"></span>
+                  <span id="active-color-name">S03 正红</span>
+                </div>
+              </div>
+
+              <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                <div class="sidebar-section-title">
+                  <span>选择色板库</span>
+                  <select id="palette-select" class="wb-select" style="padding: 2px 6px; font-size: 11px;">
+                    <option value="artkal">Artkal 72色</option>
+                    <option value="perler">Perler 48色</option>
+                    <option value="pastel">马卡龙 32色</option>
+                    <option value="morandi">莫兰迪 24色</option>
+                    <option value="retro">复古 16色</option>
+                  </select>
+                </div>
+                <div class="color-swatches-scroll" id="swatches-container"></div>
+              </div>
+            </aside>
+
+            <!-- 绘制视口 -->
+            <div class="viewport-box">
+              <canvas id="wb-canvas"></canvas>
+            </div>
+          </div>
         </div>
 
-        <!-- 右侧色号图纸 -->
+        <!-- 2. 右侧色号对照图纸（支持放大/缩小/下载对应PNG与矩阵CSV） -->
         <div class="board-workbench" id="workbench-right">
           <div class="workbench-header">
-            <span class="workbench-label">🔢 色号对照图（实时同步标尺）</span>
-            <button id="btn-fullscreen-right" class="btn" type="button">⛶ 全屏查看</button>
+            <div class="workbench-label">
+              <span>🔢 色号对照图（实时同步标尺）</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <!-- 放大/缩小/还原 -->
+              <button id="btn-zoom-out" class="btn btn-sm" type="button" title="缩小图纸">🔍 -</button>
+              <span id="zoom-level-text" style="font-size: 12px; font-weight: 600; color: var(--text-muted);">100%</span>
+              <button id="btn-zoom-in" class="btn btn-sm" type="button" title="放大图纸">🔍 +</button>
+              <button id="btn-zoom-reset" class="btn btn-sm" type="button" title="还原比例">1:1</button>
+              
+              <!-- 下载按钮组 -->
+              <button id="btn-export-png" class="btn btn-sm btn-primary" type="button">📥 下载图纸(PNG)</button>
+              <button id="btn-export-csv" class="btn btn-sm" type="button">🗺️ 下载色号位置(CSV)</button>
+              
+              <button id="btn-fullscreen-right" class="btn btn-sm" type="button">⛶ 全屏查看</button>
+            </div>
           </div>
-          <canvas id="wb-schematic"></canvas>
-        </div>
-      </div>
 
-      <!-- 导出选项 -->
-      <div style="display: flex; gap: 12px; margin-top: 20px;">
-        <button id="btn-export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (PNG)</button>
-        <button id="btn-export-csv" class="btn" type="button">🗺️ 导出图纸网格矩阵 (CSV 色号位置)</button>
+          <div class="workbench-body">
+            <div class="viewport-box" id="schematic-viewport">
+              <canvas id="wb-schematic"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 材料清单表格展示 -->
+    <!-- 材料用量清单 -->
     <section class="wb-card">
       <h3 style="margin-top: 0; color: var(--text-main);">📋 所需材料用量清单 (实时统计)</h3>
       <div id="stats-container">
@@ -282,7 +369,7 @@
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
-    // 多色板预设库
+    // 多品牌全量调色板库
     const PALETTES = {
       artkal: [
         { code: 'S01', name: '纯白', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
@@ -362,19 +449,21 @@
     };
 
     let activePaletteList = PALETTES.artkal;
-    let activeColor = activePaletteList[2];
+    let activeColor = activePaletteList[2]; // S03 正红
     let currentTool = 'pen';
     let boardSize = 29;
     let grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
     let historyStack = [];
+    let schematicZoom = 1.0;
 
     const canvas = document.getElementById('wb-canvas');
     const ctx = canvas.getContext('2d');
     const schematicCanvas = document.getElementById('wb-schematic');
     const sCtx = schematicCanvas.getContext('2d');
+
     const swatchesContainer = document.getElementById('swatches-container');
+    const activeColorDot = document.getElementById('active-color-dot');
     const activeColorName = document.getElementById('active-color-name');
-    const paletteCountInfo = document.getElementById('palette-count-info');
     const boardSizeSelect = document.getElementById('board-size-select');
     const paletteSelect = document.getElementById('palette-select');
     const statsContainer = document.getElementById('stats-container');
@@ -384,11 +473,11 @@
     const btnFsLeft = document.getElementById('btn-fullscreen-left');
     const btnFsRight = document.getElementById('btn-fullscreen-right');
 
+    const zoomLevelText = document.getElementById('zoom-level-text');
+
     // 初始化调色板
     function initPalette() {
       swatchesContainer.innerHTML = '';
-      paletteCountInfo.textContent = `共 ${activePaletteList.length} 色可选`;
-
       activePaletteList.forEach(item => {
         const swatch = document.createElement('div');
         swatch.className = 'swatch';
@@ -400,18 +489,20 @@
           activeColor = item;
           document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
           swatch.classList.add('selected');
-          activeColorName.textContent = `${item.code} ${item.name} (${item.hex})`;
+          activeColorDot.style.backgroundColor = item.hex;
+          activeColorName.textContent = `${item.code} ${item.name}`;
           if (currentTool === 'eraser' || currentTool === 'picker') setTool('pen');
         });
         swatchesContainer.appendChild(swatch);
       });
     }
 
-    // 切换色板
+    // 切换色板预设
     paletteSelect.addEventListener('change', (e) => {
       activePaletteList = PALETTES[e.target.value] || PALETTES.artkal;
       activeColor = activePaletteList[0];
-      activeColorName.textContent = `${activeColor.code} ${activeColor.name} (${activeColor.hex})`;
+      activeColorDot.style.backgroundColor = activeColor.hex;
+      activeColorName.textContent = `${activeColor.code} ${activeColor.name}`;
       initPalette();
     });
 
@@ -428,9 +519,9 @@
     }
 
     document.getElementById('tool-pen').addEventListener('click', () => setTool('pen'));
+    document.getElementById('tool-bucket').addEventListener('click', () => setTool('bucket'));
     document.getElementById('tool-eraser').addEventListener('click', () => setTool('eraser'));
     document.getElementById('tool-picker').addEventListener('click', () => setTool('picker'));
-    document.getElementById('tool-bucket').addEventListener('click', () => setTool('bucket'));
 
     const CELL_SIZE = 26;
 
@@ -440,7 +531,7 @@
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
-      // 1. 左侧自由实体画板（无白点孔洞）
+      // 1. 左侧自由实体画板（纯色、无多余白孔）
       canvas.width = boardSize * CELL_SIZE;
       canvas.height = boardSize * CELL_SIZE;
       ctx.fillStyle = canvasBg;
@@ -472,7 +563,7 @@
         }
       }
 
-      // 2. 右侧色号对照图（带坐标标尺与编号）
+      // 2. 右侧色号对照图（标尺坐标与编号）
       const ruler = 28;
       schematicCanvas.width = boardSize * CELL_SIZE + ruler;
       schematicCanvas.height = boardSize * CELL_SIZE + ruler;
@@ -522,7 +613,32 @@
       updateStats();
     }
 
-    // 全屏模式控制
+    // 缩放色号图纸
+    function updateSchematicZoom() {
+      schematicCanvas.style.transform = `scale(${schematicZoom})`;
+      zoomLevelText.textContent = `${Math.round(schematicZoom * 100)}%`;
+    }
+
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      if (schematicZoom < 2.5) {
+        schematicZoom = parseFloat((schematicZoom + 0.15).toFixed(2));
+        updateSchematicZoom();
+      }
+    });
+
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      if (schematicZoom > 0.5) {
+        schematicZoom = parseFloat((schematicZoom - 0.15).toFixed(2));
+        updateSchematicZoom();
+      }
+    });
+
+    document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+      schematicZoom = 1.0;
+      updateSchematicZoom();
+    });
+
+    // 全屏切换
     function toggleFullscreen(targetEl, btnEl, labelText) {
       const isFs = targetEl.classList.toggle('is-fullscreen');
       if (isFs) {
@@ -545,7 +661,7 @@
       }
     });
 
-    // 画板交互事件
+    // 涂色交互
     let isDrawing = false;
     function handleDrawAt(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
@@ -563,7 +679,8 @@
           document.querySelectorAll('.swatch').forEach(s => {
             s.classList.toggle('selected', s.title.startsWith(picked.code));
           });
-          activeColorName.textContent = `${picked.code} ${picked.name} (${picked.hex})`;
+          activeColorDot.style.backgroundColor = picked.hex;
+          activeColorName.textContent = `${picked.code} ${picked.name}`;
           setTool('pen');
         }
         return;
@@ -651,7 +768,7 @@
       }
     });
 
-    // 统计清单更新
+    // 统计用量清单
     function updateStats() {
       const statsMap = {};
       let total = 0;
@@ -688,15 +805,15 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出超清 PNG
+    // 导出高清图纸 (PNG)
     document.getElementById('btn-export-png').addEventListener('click', () => {
       const link = document.createElement('a');
-      link.download = `Micheal-Whiteboard-${boardSize}x${boardSize}.png`;
+      link.download = `Micheal-Beads-Pattern-${boardSize}x${boardSize}.png`;
       link.href = schematicCanvas.toDataURL('image/png');
       link.click();
     });
 
-    // 导出图纸网格色号矩阵 CSV
+    // 导出图纸网格矩阵 (CSV 格式对应色号矩阵位置)
     document.getElementById('btn-export-csv').addEventListener('click', () => {
       let csv = '\uFEFF行号\\列号,' + Array.from({ length: boardSize }, (_, i) => `第${i + 1}列`).join(',') + '\n';
       for (let y = 0; y < boardSize; y++) {
