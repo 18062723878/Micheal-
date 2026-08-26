@@ -7,259 +7,86 @@
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
   <style>
-    .inspiration-container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 32px 20px;
-    }
-    .inspiration-header {
-      margin-bottom: 28px;
-    }
-    .inspiration-header h1 {
-      font-size: 28px;
-      color: #1e293b;
-      margin-bottom: 8px;
-    }
-    .inspiration-header p {
-      color: #64748b;
-      font-size: 15px;
-    }
-
-    /* 分类标签栏 */
-    .filter-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 28px;
-    }
+    .inspiration-container { max-width: 1300px; margin: 0 auto; padding: 32px 20px; }
+    .filter-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
     .filter-tab {
-      padding: 8px 18px;
-      border-radius: 9999px;
-      border: 1px solid #e2e8f0;
-      background: #ffffff;
-      color: #475569;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .filter-tab:hover {
-      border-color: #3b82f6;
-      color: #3b82f6;
+      padding: 8px 18px; border-radius: 9999px; border: 1px solid #e2e8f0;
+      background: #ffffff; color: #475569; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
     }
     .filter-tab.active {
-      background: #2563eb;
-      color: #ffffff;
-      border-color: #2563eb;
+      background: #2563eb; color: #ffffff; border-color: #2563eb;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
-
-    /* 图纸卡片网格 */
     .patterns-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-      gap: 22px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;
     }
     .pattern-card {
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #f1f5f9;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      padding: 16px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      background: #ffffff; border-radius: 16px; border: 1px solid #f1f5f9;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); padding: 14px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; transition: all 0.2s ease;
     }
-    .pattern-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
-      border-color: #cbd5e1;
-    }
+    .pattern-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08); }
     .pattern-preview-box {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: #f8fafc;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 14px;
-      overflow: hidden;
-      border: 1px solid #edf2f7;
+      width: 100%; aspect-ratio: 1 / 1; background: #f8fafc; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
     }
-    .pattern-canvas-thumb {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      image-rendering: pixelated;
-    }
-    .pattern-info {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .pattern-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .pattern-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1e293b;
-    }
-    .pattern-tag {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 6px;
-      background: #eff6ff;
-      color: #2563eb;
-      font-weight: 600;
-    }
-    .pattern-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: #94a3b8;
-    }
+    .pattern-canvas-thumb { max-width: 90%; max-height: 90%; object-fit: contain; }
+    .pattern-info { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+    .pattern-title-row { display: flex; justify-content: space-between; align-items: center; }
+    .pattern-title { font-size: 15px; font-weight: 700; color: #1e293b; }
+    .pattern-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #eff6ff; color: #2563eb; font-weight: 600; }
+    .pattern-meta { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; }
 
-    /* 弹窗查看详情 Modal */
+    /* 弹窗 Modal */
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-      padding: 16px;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 16px;
     }
-    .modal-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
     .modal-dialog {
-      background: #ffffff;
-      border-radius: 20px;
-      max-width: 860px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      position: relative;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      background: #ffffff; border-radius: 20px; max-width: 860px; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: 24px; position: relative;
     }
     .modal-close-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      border: none;
-      background: #f1f5f9;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      color: #64748b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 18px; right: 18px; border: none; background: #f1f5f9;
+      width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer;
     }
-    .modal-close-btn:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-    }
-    .modal-layout {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      margin-top: 16px;
-    }
+    .modal-layout { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 16px; }
     .modal-canvas-wrap {
-      flex: 1 1 380px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-height: 520px;
-      overflow: auto;
+      flex: 1 1 360px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 16px; display: flex; align-items: center; justify-content: center; max-height: 480px; overflow: auto;
     }
-    .modal-canvas-wrap canvas {
-      max-width: 100%;
-      height: auto;
-      background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-    .modal-details {
-      flex: 1 1 320px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .color-list {
-      max-height: 240px;
-      overflow-y: auto;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 8px 12px;
-    }
-    .color-list-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
-    }
-    .color-list-item:last-child {
-      border-bottom: none;
-    }
-    .color-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      margin-right: 8px;
-      border: 1px solid rgba(0,0,0,0.15);
-      display: inline-block;
-      vertical-align: middle;
-    }
+    .modal-details { flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px; }
+    .color-list { max-height: 220px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; }
+    .color-list-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+    .color-dot { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
   </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main class="inspiration-container">
-    <div class="inspiration-header">
-      <h1>✨ 精选拼豆创作图纸</h1>
-      <p>精选全网流行、复杂高精度的拼豆像素图纸。点击任意图纸可查看色号明细并直接导出超清图纸。</p>
+    <div>
+      <h1 style="font-size: 26px; color: #1e293b; margin-bottom: 6px;">✨ 精选拼豆创作图纸库 (50+款)</h1>
+      <p style="color: #64748b; font-size: 14px;">涵盖网络顶流、动漫 IP、人文建筑、治愈萌宠与节日美食。点击即可带入创作页进行编辑。</p>
     </div>
 
-    <!-- 分类筛选器 -->
+    <!-- 筛选 -->
     <div class="filter-tabs">
-      <button class="filter-tab active" data-category="all">全部精选</button>
-      <button class="filter-tab" data-category="anime">🔥 热门动漫 & 角色</button>
-      <button class="filter-tab" data-category="architecture">🏯 名胜古建 & 风景</button>
+      <button class="filter-tab active" data-category="all">全部 (50+)</button>
+      <button class="filter-tab" data-category="anime">🔥 热门动漫</button>
+      <button class="filter-tab" data-category="architecture">🏯 名胜古建</button>
       <button class="filter-tab" data-category="pets">🐾 治愈萌宠</button>
       <button class="filter-tab" data-category="food">🍔 美食甜品</button>
       <button class="filter-tab" data-category="festival">🏮 节日庆典</button>
     </div>
 
-    <!-- 图纸卡片列表 -->
     <div class="patterns-grid" id="patterns-grid"></div>
   </main>
 
-  <!-- 详情弹窗 Modal -->
+  <!-- 弹窗 -->
   <div class="modal-backdrop" id="pattern-modal">
     <div class="modal-dialog">
       <button class="modal-close-btn" id="modal-close-btn">&times;</button>
@@ -276,12 +103,12 @@
           <div class="color-list" id="modal-color-list"></div>
 
           <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
-            <button id="modal-export-btn" class="btn btn-primary" style="padding: 10px; font-weight: 600;">
-              📥 导出超清图纸 (带坐标轴 PNG)
+            <button id="modal-transfer-btn" class="btn btn-primary" style="padding: 10px; font-weight: bold;">
+              🖌️ 用这张图开始创作 →
             </button>
-            <a href="create.html" class="btn" style="text-align: center; text-decoration: none; padding: 10px;">
-              🖌️ 前往自定义创作页
-            </a>
+            <button id="modal-export-btn" class="btn" style="padding: 10px;">
+              📥 导出高清图纸 (PNG)
+            </button>
           </div>
         </div>
       </div>
@@ -292,331 +119,63 @@
 
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
+    import { ALL_PATTERNS } from './assets/js/patterns-data.js';
+
     try { injectChrome('inspiration'); } catch (e) { console.warn(e); }
 
-    // 标准 Artkal 颜色字典映射
-    const C = {
-      _: null, // 透明
-      W: { code: 'S01', name: '纯白', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
-      K: { code: 'S02', name: '纯黑', hex: '#18181B', r: 24, g: 24, b: 27 },
-      R: { code: 'S03', name: '正红', hex: '#DC2626', r: 220, g: 38, b: 38 },
-      DR: { code: 'S04', name: '暗红/枣红', hex: '#991B1B', r: 153, g: 27, b: 27 },
-      P: { code: 'S05', name: '芭比粉', hex: '#EC4899', r: 236, g: 72, b: 153 },
-      LP: { code: 'S06', name: '樱花浅粉', hex: '#FBCFE8', r: 251, g: 207, b: 232 },
-      LB: { code: 'S07', name: '天蓝', hex: '#38BDF8', r: 56, g: 189, b: 248 },
-      B: { code: 'S08', name: '宝蓝', hex: '#2563EB', r: 37, g: 99, b: 235 },
-      DB: { code: 'S09', name: '藏青/深蓝', hex: '#1E3A8A', r: 30, g: 58, b: 138 },
-      G: { code: 'S10', name: '草绿', hex: '#4ADE80', r: 74, g: 222, b: 128 },
-      DG: { code: 'S11', name: '墨绿', hex: '#166534', r: 22, g: 101, b: 52 },
-      LG: { code: 'S12', name: '嫩绿', hex: '#BBF7D0', r: 187, g: 247, b: 208 },
-      Y: { code: 'S13', name: '明黄', hex: '#FACC15', r: 250, g: 204, b: 21 },
-      DY: { code: 'S14', name: '金黄/琉璃黄', hex: '#D97706', r: 217, g: 119, b: 6 },
-      O: { code: 'S15', name: '活力橙', hex: '#FB923C', r: 251, g: 146, b: 60 },
-      DO: { code: 'S16', name: '深橙', hex: '#EA580C', r: 234, g: 88, b: 12 },
-      PU: { code: 'S17', name: '香芋紫', hex: '#C084FC', r: 192, g: 132, b: 252 },
-      SK: { code: 'S19', name: '肤色', hex: '#FED7AA', r: 254, g: 215, b: 170 },
-      BR: { code: 'S21', name: '棕褐', hex: '#A16207', r: 161, g: 98, b: 7 },
-      DBR: { code: 'S22', name: '深巧克力', hex: '#451A03', r: 69, g: 26, b: 3 },
-      GR: { code: 'S24', name: '质感中灰', hex: '#94A3B8', r: 148, g: 163, b: 184 },
-      CR: { code: 'S29', name: '奶酪淡黄', hex: '#FEF08A', r: 254, g: 240, b: 138 }
-    };
-
-    // 精选复杂高精度图纸数据库 (矩阵点阵)
-    const PATTERNS = [
-      {
-        id: 'spongebob',
-        title: '经典海绵宝宝 (SpongeBob)',
-        category: 'anime',
-        tag: '热门动漫',
-        difficulty: '★★★★☆',
-        desc: '大眼睛与经典红领带，拼豆界的经典顶流 IP。',
-        matrix: [
-          [C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._],
-          [C._, C.K, C.Y, C.Y, C.DY, C.Y, C.Y, C.Y, C.Y, C.DY, C.Y, C.Y, C.Y, C.Y, C.K, C._],
-          [C.K, C.Y, C.Y, C.K, C.K, C.K, C.Y, C.Y, C.K, C.K, C.K, C.Y, C.DY, C.Y, C.Y, C.K],
-          [C.K, C.Y, C.K, C.W, C.LB, C.K, C.K, C.K, C.W, C.LB, C.K, C.K, C.Y, C.Y, C.Y, C.K],
-          [C.K, C.DY, C.K, C.LB, C.B, C.K, C.Y, C.K, C.LB, C.B, C.K, C.Y, C.Y, C.DY, C.Y, C.K],
-          [C.K, C.Y, C.K, C.W, C.W, C.K, C.Y, C.K, C.W, C.W, C.K, C.Y, C.Y, C.Y, C.Y, C.K],
-          [C.K, C.Y, C.Y, C.K, C.K, C.Y, C.Y, C.Y, C.K, C.K, C.Y, C.Y, C.P, C.P, C.Y, C.K],
-          [C.K, C.Y, C.P, C.P, C.Y, C.Y, C.DY, C.DY, C.Y, C.Y, C.Y, C.P, C.P, C.P, C.Y, C.K],
-          [C.K, C.Y, C.Y, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.Y, C.Y, C.Y, C.K],
-          [C.K, C.DY, C.Y, C.K, C.W, C.K, C.Y, C.Y, C.K, C.W, C.K, C.Y, C.Y, C.DY, C.Y, C.K],
-          [C.K, C.Y, C.Y, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.Y, C.Y, C.Y, C.Y, C.K],
-          [C._, C.K, C.W, C.W, C.W, C.R, C.R, C.W, C.W, C.R, C.R, C.W, C.W, C.W, C.K, C._],
-          [C._, C.K, C.W, C.W, C.W, C.R, C.R, C.R, C.R, C.R, C.R, C.W, C.W, C.W, C.K, C._],
-          [C._, C.K, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.K, C._],
-          [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-          [C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._]
-        ]
-      },
-      {
-        id: 'meituan-mouse',
-        title: '网络顶流 · 奶酪小鼠 (Meme Mouse)',
-        category: 'anime',
-        tag: '全网爆款',
-        difficulty: '★★★☆☆',
-        desc: '圆滚滚的耳朵与偷吃奶酪的无辜眼神，超人气表情包。',
-        matrix: [
-          [C._, C.P, C.P, C.P, C._, C._, C._, C._, C._, C._, C._, C._, C.P, C.P, C.P, C._],
-          [C.P, C.LP, C.LP, C.P, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.P, C.LP, C.LP, C.P],
-          [C.P, C.LP, C.P, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.P, C.LP, C.P],
-          [C._, C.P, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.P, C._],
-          [C._, C.K, C.GR, C.K, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.K, C.GR, C.GR, C.K, C._],
-          [C._, C.K, C.GR, C.K, C.W, C.K, C.GR, C.GR, C.GR, C.K, C.W, C.K, C.GR, C.GR, C.K, C._],
-          [C._, C.K, C.GR, C.GR, C.K, C.GR, C.LP, C.LP, C.GR, C.GR, C.K, C.GR, C.GR, C.GR, C.K, C._],
-          [C._, C.K, C.GR, C.GR, C.GR, C.P, C.P, C.P, C.P, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C._],
-          [C._, C.K, C.GR, C.GR, C.GR, C.GR, C.K, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C._],
-          [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.Y, C.K, C._, C._],
-          [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.Y, C.DY, C.Y, C.K, C._, C._],
-          [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.DY, C.Y, C.Y, C.Y, C.K, C._, C._],
-          [C._, C._, C.K, C.LP, C.LP, C.GR, C.GR, C.GR, C.Y, C.Y, C.DY, C.Y, C.K, C._, C._, C._],
-          [C._, C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._, C._, C._]
-        ]
-      },
-      {
-        id: 'yellow-crane-tower',
-        title: '江南名楼 · 黄鹤楼 (Pagoda)',
-        category: 'architecture',
-        tag: '人文建筑',
-        difficulty: '★★★★★',
-        desc: '金黄琉璃飞檐、红柱朱门与雄伟多层重檐叠落的古典建筑。',
-        matrix: [
-          [C._, C._, C._, C._, C._, C._, C._, C.DY, C.DY, C._, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._, C._, C._, C._],
-          [C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._],
-          [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-          [C._, C._, C.DR, C.R, C.W, C.R, C.DR, C.R, C.R, C.DR, C.R, C.W, C.R, C.DR, C._, C._],
-          [C._, C._, C.DR, C.R, C.K, C.R, C.DR, C.R, C.R, C.DR, C.R, C.K, C.R, C.DR, C._, C._],
-          [C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._],
-          [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-          [C._, C.DR, C.R, C.W, C.R, C.DR, C.R, C.K, C.K, C.R, C.DR, C.R, C.W, C.R, C.DR, C._],
-          [C._, C.DR, C.R, C.K, C.R, C.DR, C.R, C.K, C.K, C.R, C.DR, C.R, C.K, C.R, C.DR, C._],
-          [C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY],
-          [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-          [C.DR, C.R, C.W, C.R, C.DR, C.R, C.K, C.K, C.K, C.K, C.R, C.DR, C.R, C.W, C.R, C.DR],
-          [C.DR, C.R, C.R, C.R, C.DR, C.R, C.K, C.K, C.K, C.K, C.R, C.DR, C.R, C.R, C.R, C.DR],
-          [C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR]
-        ]
-      },
-      {
-        id: 'fuji-sakura',
-        title: '富士山与樱花 (Mt. Fuji & Sakura)',
-        category: 'architecture',
-        tag: '自然风景',
-        difficulty: '★★★★☆',
-        desc: '雪顶富士山、落日红阳与盛放的粉嫩樱花树枝。',
-        matrix: [
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.LB, C.LB, C.P, C.LP, C._],
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.R, C.R, C.P, C.LP, C.P, C.BR],
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.R, C.R, C.LP, C.P, C.BR, C.BR],
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.LB, C.P, C.BR, C.LP, C.P],
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.W, C.W, C.LB, C.LB, C.BR, C.P, C.P, C._],
-          [C.LB, C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.W, C.W, C.W, C.W, C.BR, C.P, C.LP, C._, C._],
-          [C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.LB, C.W, C.W, C.LB, C.W, C.W, C.BR, C.P, C._, C._],
-          [C.LB, C.LB, C.LB, C.W, C.W, C.B, C.B, C.W, C.W, C.B, C.B, C.W, C.W, C._, C._, C._],
-          [C.LB, C.LB, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.LB, C.LB],
-          [C.LB, C.B, C.B, C.DB, C.B, C.B, C.B, C.DB, C.B, C.B, C.B, C.DB, C.B, C.B, C.B, C.LB],
-          [C.B, C.B, C.DB, C.DB, C.DB, C.B, C.DB, C.DB, C.DB, C.B, C.DB, C.DB, C.DB, C.B, C.B, C.B],
-          [C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G],
-          [C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG]
-        ]
-      },
-      {
-        id: 'capybara',
-        title: '豚门永存 · 顶橘卡皮巴拉 (Capybara)',
-        category: 'pets',
-        tag: '治愈萌宠',
-        difficulty: '★★★☆☆',
-        desc: '情绪稳定的水豚君，头顶小蜜橘，呆萌可爱。',
-        matrix: [
-          [C._, C._, C._, C._, C._, C._, C._, C.LG, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C._, C.O, C.O, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C.DO, C.O, C.O, C.DO, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C._, C._, C._],
-          [C._, C._, C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K, C._, C._],
-          [C._, C.K, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.K, C._],
-          [C._, C.K, C.BR, C.K, C.W, C.BR, C.BR, C.BR, C.BR, C.K, C.W, C.BR, C.K, C._],
-          [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.DBR, C.DBR, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-          [C._, C.K, C.BR, C.BR, C.BR, C.DBR, C.DBR, C.DBR, C.DBR, C.BR, C.BR, C.BR, C.K, C._],
-          [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-          [C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K],
-          [C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K],
-          [C.K, C.DBR, C.DBR, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.DBR, C.DBR, C.K],
-          [C._, C.K, C.K, C._, C._, C._, C._, C._, C._, C._, C._, C.K, C.K, C._]
-        ]
-      },
-      {
-        id: 'cheeseburger',
-        title: '双层芝士牛肉堡 (Gourmet Burger)',
-        category: 'food',
-        tag: '美食甜品',
-        difficulty: '★★★★☆',
-        desc: '芝麻面包、熔岩芝士片、多汁牛肉与爽脆生菜番茄。',
-        matrix: [
-          [C._, C._, C._, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C._, C._, C._],
-          [C._, C.SK, C.BR, C.BR, C.W, C.BR, C.BR, C.W, C.BR, C.BR, C.BR, C.SK, C._, C._],
-          [C.SK, C.BR, C.BR, C.BR, C.BR, C.BR, C.W, C.BR, C.BR, C.BR, C.BR, C.BR, C.SK, C._],
-          [C.K, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.K, C._],
-          [C.K, C.R, C.R, C.R, C.DR, C.R, C.R, C.R, C.DR, C.R, C.R, C.R, C.K, C._],
-          [C.K, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.K, C._],
-          [C.K, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.K, C._],
-          [C._, C.K, C.Y, C.DY, C.Y, C.K, C.K, C.Y, C.DY, C.Y, C.K, C.K, C._, C._],
-          [C.K, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.K, C._],
-          [C.K, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.DBR, C.K, C._],
-          [C.K, C.SK, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.SK, C.K, C._],
-          [C._, C.K, C.K, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.K, C.K, C._, C._]
-        ]
-      },
-      {
-        id: 'strawberry-cake',
-        title: '草莓千层奶油蛋糕 (Strawberry Cake)',
-        category: 'food',
-        tag: '美食甜品',
-        difficulty: '★★★☆☆',
-        desc: '新鲜红草莓薄荷叶点缀，层次分明的香浓奶油蛋糕。',
-        matrix: [
-          [C._, C._, C._, C._, C.LG, C.G, C._, C._, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C.R, C.R, C.DR, C.R, C._, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C.R, C.W, C.R, C.R, C.DR, C.R, C._, C._, C._, C._, C._, C._],
-          [C._, C.K, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.K, C._],
-          [C.K, C.W, C.LP, C.LP, C.W, C.LP, C.LP, C.W, C.LP, C.LP, C.W, C.W, C.W, C.K],
-          [C.K, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.K],
-          [C.K, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.K],
-          [C.K, C.R, C.R, C.DR, C.R, C.R, C.DR, C.R, C.R, C.DR, C.R, C.R, C.DR, C.K],
-          [C.K, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.CR, C.K],
-          [C.K, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.K],
-          [C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._]
-        ]
-      },
-      {
-        id: 'cny-lion',
-        title: '新春醒狮吉祥头 (Lion Dance)',
-        category: 'festival',
-        tag: '节日庆典',
-        difficulty: '★★★★★',
-        desc: '金红相间祥瑞醒狮，寓意吉祥如意、生龙活虎。',
-        matrix: [
-          [C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._],
-          [C._, C.DY, C.R, C.R, C.R, C.R, C.DY, C.DY, C.R, C.R, C.R, C.R, C.DY, C._],
-          [C.DY, C.R, C.W, C.W, C.W, C.W, C.R, C.R, C.W, C.W, C.W, C.W, C.R, C.DY],
-          [C.DY, C.R, C.W, C.K, C.K, C.W, C.Y, C.Y, C.W, C.K, C.K, C.W, C.R, C.DY],
-          [C.DY, C.R, C.W, C.K, C.LB, C.W, C.DY, C.DY, C.W, C.K, C.LB, C.W, C.R, C.DY],
-          [C._, C.DY, C.R, C.W, C.W, C.R, C.R, C.R, C.R, C.W, C.W, C.R, C.DY, C._],
-          [C._, C.DY, C.DY, C.Y, C.Y, C.DY, C.W, C.W, C.DY, C.Y, C.Y, C.DY, C.DY, C._],
-          [C.W, C.W, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.W, C.W],
-          [C.W, C.LP, C.W, C.W, C.K, C.K, C.K, C.K, C.K, C.K, C.W, C.W, C.LP, C.W],
-          [C.W, C.W, C.R, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.R, C.W, C.W],
-          [C._, C._, C.DY, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.DY, C._, C._],
-          [C._, C._, C._, C.DY, C.DY, C.Y, C.Y, C.Y, C.Y, C.DY, C.DY, C._, C._, C._]
-        ]
-      },
-      {
-        id: 'xmas-tree',
-        title: '华丽发光圣诞树 (Xmas Tree)',
-        category: 'festival',
-        tag: '节日庆典',
-        difficulty: '★★★★☆',
-        desc: '金星顶饰、缤纷彩球装饰与礼盒的多层茂盛圣诞树。',
-        matrix: [
-          [C._, C._, C._, C._, C._, C._, C.Y, C.Y, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C.Y, C.DY, C.DY, C.Y, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C._, C.LG, C.LG, C._, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C._, C.LG, C.G, C.G, C.LG, C._, C._, C._, C._, C._],
-          [C._, C._, C._, C._, C.LG, C.G, C.R, C.G, C.G, C.LG, C._, C._, C._, C._],
-          [C._, C._, C._, C.LG, C.G, C.G, C.G, C.Y, C.G, C.G, C.LG, C._, C._, C._],
-          [C._, C._, C._, C._, C.LG, C.G, C.G, C.G, C.G, C.LG, C._, C._, C._, C._],
-          [C._, C._, C.LG, C.G, C.LB, C.G, C.G, C.G, C.R, C.G, C.G, C.LG, C._, C._],
-          [C._, C.LG, C.G, C.G, C.G, C.G, C.PU, C.G, C.G, C.G, C.Y, C.G, C.LG, C._],
-          [C.LG, C.G, C.R, C.G, C.G, C.G, C.G, C.G, C.G, C.LB, C.G, C.G, C.G, C.LG],
-          [C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG],
-          [C._, C._, C._, C._, C._, C.BR, C.DBR, C.DBR, C.BR, C._, C._, C._, C._, C._],
-          [C._, C._, C.R, C.Y, C.R, C.BR, C.DBR, C.DBR, C.BR, C.LB, C.W, C.LB, C._, C._],
-          [C._, C._, C.R, C.R, C.R, C.K, C.K, C.K, C.K, C.LB, C.LB, C.LB, C._, C._]
-        ]
-      }
-    ];
-
-    // 绘制拼豆颗粒通用函数
-    function renderBeadMatrixToCanvas(canvas, matrix, cellSize = 24, showLabels = false) {
-      const height = matrix.length;
-      const width = matrix[0].length;
-
-      canvas.width = width * cellSize;
-      canvas.height = height * cellSize;
+    function drawPattern(canvas, matrix, cellSize = 22, showLabels = false) {
+      const h = matrix.length;
+      const w = matrix[0].length;
+      canvas.width = w * cellSize;
+      canvas.height = h * cellSize;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
           const bead = matrix[y][x];
           if (!bead) continue;
-
-          const cx = x * cellSize;
-          const cy = y * cellSize;
-          const centerX = cx + cellSize / 2;
-          const centerY = cy + cellSize / 2;
+          const cx = x * cellSize + cellSize / 2;
+          const cy = y * cellSize + cellSize / 2;
           const radius = cellSize * 0.44;
 
-          // 网格线
-          if (cellSize > 16) {
-            ctx.strokeStyle = '#f1f5f9';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(cx, cy, cellSize, cellSize);
-          }
-
-          // 拼豆主体
           ctx.beginPath();
-          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fillStyle = bead.hex;
           ctx.fill();
-          ctx.lineWidth = Math.max(1, cellSize * 0.05);
+          ctx.lineWidth = 1;
           ctx.strokeStyle = 'rgba(0,0,0,0.2)';
           ctx.stroke();
 
-          // 拼豆小孔
           ctx.beginPath();
-          ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
+          ctx.arc(cx, cy, radius * 0.35, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(255,255,255,0.7)';
           ctx.fill();
 
-          // 标注色号
-          if (showLabels && cellSize >= 28) {
+          if (showLabels && cellSize >= 26) {
             const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-            const isLight = lum > 140;
-            ctx.font = `bold ${Math.floor(cellSize * 0.32)}px monospace, sans-serif`;
+            ctx.font = `bold ${Math.floor(cellSize * 0.32)}px monospace`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-
-            // 文字轮廓与填充
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = isLight ? '#ffffff' : '#000000';
-            ctx.strokeText(bead.code, centerX, centerY);
-            ctx.fillStyle = isLight ? '#000000' : '#ffffff';
-            ctx.fillText(bead.code, centerX, centerY);
+            ctx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
+            ctx.fillText(bead.code, cx, cy);
           }
         }
       }
     }
 
-    // 渲染卡片列表
     const gridContainer = document.getElementById('patterns-grid');
 
     function renderCards(filter = 'all') {
       gridContainer.innerHTML = '';
-      const list = filter === 'all' ? PATTERNS : PATTERNS.filter(p => p.category === filter);
+      const list = filter === 'all' ? ALL_PATTERNS : ALL_PATTERNS.filter(p => p.category === filter);
 
       list.forEach(p => {
-        const height = p.matrix.length;
-        const width = p.matrix[0].length;
-        let beadCount = 0;
-        p.matrix.forEach(row => row.forEach(b => { if (b) beadCount++; }));
-
         const card = document.createElement('div');
         card.className = 'pattern-card';
         card.innerHTML = `
           <div class="pattern-preview-box">
-            <canvas id="canvas-${p.id}" class="pattern-canvas-thumb"></canvas>
+            <canvas id="cv-${p.id}" class="pattern-canvas-thumb"></canvas>
           </div>
           <div class="pattern-info">
             <div class="pattern-title-row">
@@ -624,169 +183,78 @@
               <span class="pattern-tag">${p.tag}</span>
             </div>
             <div class="pattern-meta">
-              <span>${width} × ${height} 网格 · ${beadCount} 颗</span>
+              <span>${p.matrix[0].length}×${p.matrix.length} 网格</span>
               <span style="color:#f59e0b;">${p.difficulty}</span>
             </div>
           </div>
         `;
-
-        card.addEventListener('click', () => openPatternModal(p));
+        card.addEventListener('click', () => openModal(p));
         gridContainer.appendChild(card);
-
-        // 绘制缩略图
-        const thumbCanvas = card.querySelector(`#canvas-${p.id}`);
-        renderBeadMatrixToCanvas(thumbCanvas, p.matrix, 16, false);
+        drawPattern(card.querySelector(`#cv-${p.id}`), p.matrix, 16, false);
       });
     }
 
-    // 弹窗逻辑
-    let currentSelectedPattern = null;
+    let selectedPattern = null;
     const modal = document.getElementById('pattern-modal');
     const modalCanvas = document.getElementById('modal-canvas');
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
     const modalColorList = document.getElementById('modal-color-list');
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    const modalExportBtn = document.getElementById('modal-export-btn');
 
-    function openPatternModal(p) {
-      currentSelectedPattern = p;
+    function openModal(p) {
+      selectedPattern = p;
       modalTitle.textContent = p.title;
-      modalDesc.textContent = `${p.tag} · 难度：${p.difficulty} — ${p.desc}`;
+      modalDesc.textContent = `${p.tag} · ${p.desc}`;
+      drawPattern(modalCanvas, p.matrix, 30, true);
 
-      // 统计色号
       const colorMap = {};
-      let totalCount = 0;
-      p.matrix.forEach(row => {
-        row.forEach(b => {
-          if (b) {
-            colorMap[b.code] = colorMap[b.code] || { ...b, count: 0 };
-            colorMap[b.code].count++;
-            totalCount++;
-          }
-        });
-      });
+      p.matrix.forEach(row => row.forEach(b => {
+        if (b) {
+          colorMap[b.code] = colorMap[b.code] || { ...b, count: 0 };
+          colorMap[b.code].count++;
+        }
+      }));
 
-      // 绘制详细 Canvas（带色号）
-      renderBeadMatrixToCanvas(modalCanvas, p.matrix, 34, true);
-
-      // 渲染颜色清单
       modalColorList.innerHTML = '';
       Object.values(colorMap).sort((a, b) => b.count - a.count).forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'color-list-item';
-        row.innerHTML = `
-          <div>
-            <span class="color-dot" style="background: ${item.hex};"></span>
-            <strong>${item.code}</strong> (${item.name})
-          </div>
-          <span style="font-weight: 600; color: #475569;">${item.count} 颗</span>
+        const div = document.createElement('div');
+        div.className = 'color-list-item';
+        div.innerHTML = `
+          <div><span class="color-dot" style="background:${item.hex};"></span><strong>${item.code}</strong> (${item.name})</div>
+          <span>${item.count} 颗</span>
         `;
-        modalColorList.appendChild(row);
+        modalColorList.appendChild(div);
       });
 
       modal.classList.add('open');
     }
 
-    modalCloseBtn.addEventListener('click', () => modal.classList.remove('open'));
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.classList.remove('open');
+    document.getElementById('modal-close-btn').addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+    // 一键携带图纸跳转创作页
+    document.getElementById('modal-transfer-btn').addEventListener('click', () => {
+      if (!selectedPattern) return;
+      window.location.href = `create.html?patternId=${encodeURIComponent(selectedPattern.id)}`;
     });
 
-    // 导出超清图纸
-    modalExportBtn.addEventListener('click', () => {
-      if (!currentSelectedPattern) return;
-      const p = currentSelectedPattern;
-      const height = p.matrix.length;
-      const width = p.matrix[0].length;
-      const cellSize = 60;
-      const ruler = 40;
-
-      const hdCanvas = document.createElement('canvas');
-      hdCanvas.width = width * cellSize + ruler;
-      hdCanvas.height = height * cellSize + ruler;
-      const ctx = hdCanvas.getContext('2d');
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, hdCanvas.width, hdCanvas.height);
-
-      ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 15px monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      // 绘制标尺
-      for (let x = 0; x < width; x++) {
-        ctx.fillText((x + 1).toString(), ruler + x * cellSize + cellSize / 2, ruler / 2);
-      }
-      for (let y = 0; y < height; y++) {
-        ctx.fillText((y + 1).toString(), ruler / 2, ruler + y * cellSize + cellSize / 2);
-      }
-
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(ruler, 0); ctx.lineTo(ruler, hdCanvas.height);
-      ctx.moveTo(0, ruler); ctx.lineTo(hdCanvas.width, ruler);
-      ctx.stroke();
-
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const cx = ruler + x * cellSize;
-          const cy = ruler + y * cellSize;
-          const bead = p.matrix[y][x];
-
-          ctx.strokeStyle = '#e2e8f0';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(cx, cy, cellSize, cellSize);
-
-          if (bead) {
-            const centerX = cx + cellSize / 2;
-            const centerY = cy + cellSize / 2;
-            const radius = cellSize * 0.44;
-
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.fillStyle = bead.hex;
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-            ctx.stroke();
-
-            // 孔
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fill();
-
-            // 标注色号
-            const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-            const isLight = lum > 140;
-            ctx.font = `bold ${Math.floor(cellSize * 0.32)}px monospace, sans-serif`;
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = isLight ? '#ffffff' : '#000000';
-            ctx.strokeText(bead.code, centerX, centerY);
-            ctx.fillStyle = isLight ? '#000000' : '#ffffff';
-            ctx.fillText(bead.code, centerX, centerY);
-          }
-        }
-      }
-
+    // 导出 PNG
+    document.getElementById('modal-export-btn').addEventListener('click', () => {
+      if (!selectedPattern) return;
       const link = document.createElement('a');
-      link.download = `Micheal-Beads-${p.id}.png`;
-      link.href = hdCanvas.toDataURL('image/png', 1.0);
+      link.download = `Micheal-Beads-${selectedPattern.id}.png`;
+      link.href = modalCanvas.toDataURL('image/png');
       link.click();
     });
 
-    // 标签切换过滤
     document.querySelectorAll('.filter-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        renderCards(btn.getAttribute('data-category'));
+        renderCards(btn.dataset.category);
       });
     });
 
-    // 初始渲染全部
     renderCards('all');
   </script>
 </body>
