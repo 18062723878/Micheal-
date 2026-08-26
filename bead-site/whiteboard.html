@@ -186,10 +186,10 @@
         <div class="color-swatches" id="swatches-container"></div>
       </div>
 
-      <!-- 工作台：左侧画板（立体纯净），右侧色号对照图 -->
+      <!-- 工作台：左侧纯色实体画板，右侧色号对照图 -->
       <div class="workbench-row">
         <div class="board-workbench">
-          <span class="workbench-label">🖌️ 自由画板（真实立体拼豆）</span>
+          <span class="workbench-label">🖌️ 自由画板（纯色实体豆豆）</span>
           <canvas id="wb-canvas"></canvas>
         </div>
         <div class="board-workbench">
@@ -282,7 +282,7 @@
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
-      // 1. 左侧纯净画板
+      // 1. 左侧纯色实体画板（无白点孔洞）
       canvas.width = boardSize * CELL_SIZE;
       canvas.height = boardSize * CELL_SIZE;
       ctx.fillStyle = canvasBg;
@@ -307,14 +307,9 @@
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fillStyle = bead.hex;
             ctx.fill();
-            ctx.lineWidth = 1.2;
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
             ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-            ctx.fill();
           }
         }
       }
