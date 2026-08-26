@@ -7,95 +7,614 @@
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
   <style>
-    .whiteboard-container {
-      max-width: 1200px;
+    .wb-container {
+      max-width: 1300px;
       margin: 24px auto;
-      padding: 24px;
-      background: var(--bg-card, #ffffff);
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      padding: 0 20px;
     }
-    .whiteboard-header {
+    .wb-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .wb-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
       padding-bottom: 16px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
     }
-    .whiteboard-header h2 {
+    .wb-header h1 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 22px;
+      color: var(--text-main);
+    }
+    
+    /* 工具栏与设置栏 */
+    .wb-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .tool-group {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .tool-btn {
+      padding: 6px 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .tool-btn:hover {
+      background: var(--bg-card);
+      border-color: var(--border-color);
+    }
+    .tool-btn.active {
+      background: var(--primary);
+      color: #ffffff !important;
+      font-weight: 700;
+    }
+    .wb-select {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    /* 调色板区域 */
+    .palette-box {
+      margin-bottom: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .palette-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+    .swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .swatch:hover {
+      transform: scale(1.15);
+      z-index: 2;
+    }
+    .swatch.selected {
+      border-color: #ffffff;
+      outline: 2px solid var(--primary);
+      transform: scale(1.1);
+      z-index: 3;
+    }
+
+    /* 画布工作台 */
+    .board-workbench {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      overflow: auto;
+      max-height: 720px;
+    }
+    #wb-canvas {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    /* 底部材料清单 */
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+    .stats-table th, .stats-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .stats-table th {
+      background: var(--table-head);
+      color: var(--text-main);
+    }
+    .color-chip {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 6px;
+      border: 1px solid rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
   <div id="site-header"></div>
 
-  <main>
-    <section class="whiteboard-container">
-      <div class="whiteboard-header">
-        <h2>🎨 白板像素画板</h2>
-        <a href="create.html" class="btn" style="text-decoration: none;">← 返回创作页</a>
+  <main class="wb-container">
+    <section class="wb-card">
+      <div class="wb-header">
+        <h1>🎨 白板像素画板</h1>
+        <a href="create.html" class="btn" style="text-decoration: none;">← 返回设计工坊</a>
       </div>
 
-      <!-- 白板编辑器挂载容器 -->
-      <div id="whiteboard-root"></div>
+      <!-- 工具栏 -->
+      <div class="wb-toolbar">
+        <div class="tool-group">
+          <button id="tool-pen" class="tool-btn active" type="button">✏️ 画笔</button>
+          <button id="tool-eraser" class="tool-btn" type="button">🧹 橡皮</button>
+          <button id="tool-picker" class="tool-btn" type="button">💉 吸管</button>
+          <button id="tool-bucket" class="tool-btn" type="button">🪣 油漆桶</button>
+        </div>
+
+        <div class="tool-group">
+          <button id="btn-undo" class="tool-btn" type="button">↩️ 撤销</button>
+          <button id="btn-hflip" class="tool-btn" type="button">⇄ 水平镜像</button>
+          <button id="btn-vflip" class="tool-btn" type="button">⇅ 垂直镜像</button>
+          <button id="btn-clear" class="tool-btn" type="button">🗑️ 清空画板</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="color: var(--text-main); font-size: 13px; font-weight: 500;">板型尺寸：</label>
+          <select id="board-size-select" class="wb-select">
+            <option value="16">16 × 16 (迷你板)</option>
+            <option value="20">20 × 20 (小板)</option>
+            <option value="29" selected>29 × 29 (标准拼豆方板)</option>
+            <option value="32">32 × 32 (经典像素板)</option>
+            <option value="40">40 × 40 (大板)</option>
+          </select>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px; cursor: pointer;">
+          <input id="toggle-grid" type="checkbox" checked /> 显示网格线
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px; cursor: pointer;">
+          <input id="toggle-labels" type="checkbox" checked /> 标注色号
+        </label>
+      </div>
+
+      <!-- 调色板 -->
+      <div class="palette-box">
+        <div class="palette-title-row">
+          <span>当前选取颜色：<strong id="active-color-name" style="color: var(--text-main);">S03 正红 (#DC2626)</strong></span>
+          <span>点击色块即可切换画笔颜色</span>
+        </div>
+        <div class="color-swatches" id="swatches-container"></div>
+      </div>
+
+      <!-- 画布区域 -->
+      <div class="board-workbench">
+        <canvas id="wb-canvas"></canvas>
+      </div>
+
+      <!-- 导出按钮行 -->
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button id="btn-export-png" class="btn btn-primary" type="button">✨ 导出超清图纸 (Ultra-HD PNG)</button>
+        <button id="btn-export-csv" class="btn" type="button">📊 导出用色清单 (CSV)</button>
+      </div>
     </section>
 
-    <!-- 兼容隐藏层：提供 create.js 运行所需的必要节点，防止脚本报错中断 -->
-    <div style="display: none !important;" aria-hidden="true">
-      <button id="whiteboard-btn" type="button"></button>
-
-      <input id="upload-input" type="file" />
-      <input id="bg-toggle" type="checkbox" />
-      <span id="board-width-val">29</span>
-      <input id="board-width" type="range" value="29" />
-      <input id="labels-toggle" type="checkbox" />
-      <select id="palette-select"><option value="artkal55">Artkal 55</option></select>
-      <button id="convert-btn" type="button"></button>
-      <p id="convert-status"></p>
-      <canvas id="board-canvas"></canvas>
-      <canvas id="preview-canvas"></canvas>
-      <div id="stats"></div>
-      <button id="export-png" type="button"></button>
-      <button id="export-pdf" type="button"></button>
-      <button id="export-csv" type="button"></button>
-
-      <input id="similar-input" type="file" />
-      <span id="similar-width-val">29</span>
-      <input id="similar-width" type="range" value="29" />
-      <button id="similar-convert" type="button"></button>
-      <p id="similar-status"></p>
-      <canvas id="similar-canvas"></canvas>
-      <div id="similar-stats"></div>
-      <button id="similar-export-png" type="button"></button>
-      <button id="similar-export-csv" type="button"></button>
-      <button id="similar-export-pdf" type="button"></button>
-    </div>
+    <!-- 实时材料清单 -->
+    <section class="wb-card">
+      <h3 style="margin-top: 0; color: var(--text-main);">📋 所需材料清单 (实时计算)</h3>
+      <div id="stats-container">
+        <p style="color: var(--text-muted); font-size: 13px;">画布为空，快用画笔点缀你的作品吧！</p>
+      </div>
+    </section>
   </main>
 
   <div id="site-footer"></div>
 
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
-    import './assets/js/create.js';
+    import { C } from './assets/js/patterns-data.js';
 
-    injectChrome('create');
+    try { injectChrome('create'); } catch (e) { console.warn(e); }
 
-    // 页面与脚本加载就绪后，自动触发白板渲染
-    const initWhiteboard = () => {
-      const wbBtn = document.getElementById('whiteboard-btn');
-      if (wbBtn) {
-        wbBtn.click();
-      }
-    };
+    // 调色盘色系
+    const COLOR_LIST = Object.values(C).filter(Boolean);
+    let activeColor = COLOR_LIST.find(c => c.code === 'S03') || COLOR_LIST[2];
+    let currentTool = 'pen'; // 'pen', 'eraser', 'picker', 'bucket'
+    let boardSize = 29;
+    let grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+    let historyStack = [];
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initWhiteboard);
-    } else {
-      initWhiteboard();
+    const canvas = document.getElementById('wb-canvas');
+    const ctx = canvas.getContext('2d');
+    const swatchesContainer = document.getElementById('swatches-container');
+    const activeColorName = document.getElementById('active-color-name');
+    const boardSizeSelect = document.getElementById('board-size-select');
+    const toggleGrid = document.getElementById('toggle-grid');
+    const toggleLabels = document.getElementById('toggle-labels');
+    const statsContainer = document.getElementById('stats-container');
+
+    // 生成调色盘色块
+    function initPalette() {
+      swatchesContainer.innerHTML = '';
+      COLOR_LIST.forEach(item => {
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch';
+        swatch.style.backgroundColor = item.hex;
+        swatch.title = `${item.code} ${item.name}`;
+        if (item.code === activeColor.code) swatch.classList.add('selected');
+
+        swatch.addEventListener('click', () => {
+          activeColor = item;
+          document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+          swatch.classList.add('selected');
+          activeColorName.textContent = `${item.code} ${item.name} (${item.hex})`;
+          if (currentTool === 'eraser' || currentTool === 'picker') {
+            setTool('pen');
+          }
+        });
+        swatchesContainer.appendChild(swatch);
+      });
     }
+
+    // 记录历史（用于撤销）
+    function pushHistory() {
+      if (historyStack.length >= 25) historyStack.shift();
+      historyStack.push(JSON.stringify(grid));
+    }
+
+    // 切换工具
+    function setTool(tool) {
+      currentTool = tool;
+      document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+      const btn = document.getElementById(`tool-${tool}`);
+      if (btn) btn.classList.add('active');
+    }
+
+    document.getElementById('tool-pen').addEventListener('click', () => setTool('pen'));
+    document.getElementById('tool-eraser').addEventListener('click', () => setTool('eraser'));
+    document.getElementById('tool-picker').addEventListener('click', () => setTool('picker'));
+    document.getElementById('tool-bucket').addEventListener('click', () => setTool('bucket'));
+
+    // 渲染画板
+    const CELL_SIZE = 26; // 单格显示尺寸
+    function renderBoard() {
+      canvas.width = boardSize * CELL_SIZE;
+      canvas.height = boardSize * CELL_SIZE;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const showGrid = toggleGrid.checked;
+      const showLabels = toggleLabels.checked;
+
+      for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+          const cx = x * CELL_SIZE;
+          const cy = y * CELL_SIZE;
+
+          // 绘制网格线
+          if (showGrid) {
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+          }
+
+          const bead = grid[y][x];
+          if (bead) {
+            const centerX = cx + CELL_SIZE / 2;
+            const centerY = cy + CELL_SIZE / 2;
+            const radius = CELL_SIZE * 0.44;
+
+            // 拼豆主体
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = bead.hex;
+            ctx.fill();
+            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.stroke();
+
+            // 小孔
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+            ctx.fill();
+
+            // 色号标注
+            if (showLabels) {
+              const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
+              ctx.font = `bold ${Math.floor(CELL_SIZE * 0.32)}px monospace`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
+              ctx.fillText(bead.code, centerX, centerY);
+            }
+          }
+        }
+      }
+      updateStats();
+    }
+
+    // 交互绘制逻辑
+    let isDrawing = false;
+
+    function handleDrawAt(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = Math.floor(((clientX - rect.left) * scaleX) / CELL_SIZE);
+      const y = Math.floor(((clientY - rect.top) * scaleY) / CELL_SIZE);
+
+      if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) return;
+
+      if (currentTool === 'picker') {
+        const picked = grid[y][x];
+        if (picked) {
+          activeColor = picked;
+          document.querySelectorAll('.swatch').forEach(s => {
+            s.classList.toggle('selected', s.title.startsWith(picked.code));
+          });
+          activeColorName.textContent = `${picked.code} ${picked.name} (${picked.hex})`;
+          setTool('pen');
+        }
+        return;
+      }
+
+      if (currentTool === 'bucket') {
+        pushHistory();
+        const targetBead = grid[y][x];
+        const fillBead = activeColor;
+        if ((targetBead ? targetBead.code : null) === fillBead.code) return;
+
+        const queue = [[x, y]];
+        const targetCode = targetBead ? targetBead.code : null;
+
+        while (queue.length) {
+          const [cx, cy] = queue.pop();
+          if (cx < 0 || cx >= boardSize || cy < 0 || cy >= boardSize) continue;
+          const curr = grid[cy][cx];
+          const currCode = curr ? curr.code : null;
+
+          if (currCode === targetCode) {
+            grid[cy][cx] = fillBead;
+            queue.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+          }
+        }
+        renderBoard();
+        return;
+      }
+
+      const newVal = currentTool === 'eraser' ? null : activeColor;
+      if (grid[y][x] !== newVal) {
+        grid[y][x] = newVal;
+        renderBoard();
+      }
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDrawing = true;
+      pushHistory();
+      handleDrawAt(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (isDrawing && (currentTool === 'pen' || currentTool === 'eraser')) {
+        handleDrawAt(e.clientX, e.clientY);
+      }
+    });
+
+    window.addEventListener('pointerup', () => { isDrawing = false; });
+
+    // 撤销
+    document.getElementById('btn-undo').addEventListener('click', () => {
+      if (historyStack.length === 0) return;
+      grid = JSON.parse(historyStack.pop());
+      renderBoard();
+    });
+
+    // 清空画板
+    document.getElementById('btn-clear').addEventListener('click', () => {
+      if (confirm('确认清空当前画板吗？')) {
+        pushHistory();
+        grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+        renderBoard();
+      }
+    });
+
+    // 镜像
+    document.getElementById('btn-hflip').addEventListener('click', () => {
+      pushHistory();
+      grid = grid.map(row => [...row].reverse());
+      renderBoard();
+    });
+
+    document.getElementById('btn-vflip').addEventListener('click', () => {
+      pushHistory();
+      grid = [...grid].reverse();
+      renderBoard();
+    });
+
+    // 尺寸切换
+    boardSizeSelect.addEventListener('change', (e) => {
+      if (confirm('切换尺寸将重置当前画板，是否继续？')) {
+        boardSize = parseInt(e.target.value, 10);
+        grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+        historyStack = [];
+        renderBoard();
+      } else {
+        e.target.value = boardSize.toString();
+      }
+    });
+
+    toggleGrid.addEventListener('change', renderBoard);
+    toggleLabels.addEventListener('change', renderBoard);
+
+    // 实时材料清单更新
+    function updateStats() {
+      const statsMap = {};
+      let total = 0;
+      grid.forEach(row => row.forEach(b => {
+        if (b) {
+          statsMap[b.code] = statsMap[b.code] || { ...b, count: 0 };
+          statsMap[b.code].count++;
+          total++;
+        }
+      }));
+
+      const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
+      if (items.length === 0) {
+        statsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">画布为空，快用画笔点缀你的作品吧！</p>';
+        return;
+      }
+
+      let html = `
+        <table class="stats-table">
+          <thead><tr><th>色号</th><th>颜色</th><th>名称</th><th>所需数量</th></tr></thead>
+          <tbody>
+      `;
+      for (const item of items) {
+        html += `
+          <tr>
+            <td><strong>${item.code}</strong></td>
+            <td><span class="color-chip" style="background:${item.hex};"></span></td>
+            <td>${item.name}</td>
+            <td>${item.count} 颗</td>
+          </tr>
+        `;
+      }
+      html += `</tbody></table><p style="margin-top: 10px; font-weight: 600; color: var(--text-main);">共计 ${items.length} 种颜色，${total} 颗拼豆</p>`;
+      statsContainer.innerHTML = html;
+    }
+
+    // 导出超清 PNG
+    document.getElementById('btn-export-png').addEventListener('click', () => {
+      const cellSize = 60;
+      const ruler = 40;
+      const hdCanvas = document.createElement('canvas');
+      hdCanvas.width = boardSize * cellSize + ruler;
+      hdCanvas.height = boardSize * cellSize + ruler;
+      const hCtx = hdCanvas.getContext('2d');
+
+      hCtx.fillStyle = '#ffffff';
+      hCtx.fillRect(0, 0, hdCanvas.width, hdCanvas.height);
+
+      hCtx.fillStyle = '#64748b';
+      hCtx.font = 'bold 15px monospace';
+      hCtx.textAlign = 'center';
+      hCtx.textBaseline = 'middle';
+
+      for (let i = 0; i < boardSize; i++) {
+        hCtx.fillText((i + 1).toString(), ruler + i * cellSize + cellSize / 2, ruler / 2);
+        hCtx.fillText((i + 1).toString(), ruler / 2, ruler + i * cellSize + cellSize / 2);
+      }
+
+      hCtx.strokeStyle = '#cbd5e1';
+      hCtx.lineWidth = 2;
+      hCtx.beginPath();
+      hCtx.moveTo(ruler, 0); hCtx.lineTo(ruler, hdCanvas.height);
+      hCtx.moveTo(0, ruler); hCtx.lineTo(hdCanvas.width, ruler);
+      hCtx.stroke();
+
+      for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+          const cx = ruler + x * cellSize;
+          const cy = ruler + y * cellSize;
+
+          hCtx.strokeStyle = '#e2e8f0';
+          hCtx.lineWidth = 1;
+          hCtx.strokeRect(cx, cy, cellSize, cellSize);
+
+          const bead = grid[y][x];
+          if (bead) {
+            const centerX = cx + cellSize / 2;
+            const centerY = cy + cellSize / 2;
+            const radius = cellSize * 0.44;
+
+            hCtx.beginPath();
+            hCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            hCtx.fillStyle = bead.hex;
+            hCtx.fill();
+            hCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+            hCtx.stroke();
+
+            hCtx.beginPath();
+            hCtx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
+            hCtx.fillStyle = 'rgba(255,255,255,0.75)';
+            hCtx.fill();
+
+            const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
+            hCtx.font = `bold ${Math.floor(cellSize * 0.32)}px monospace`;
+            hCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
+            hCtx.fillText(bead.code, centerX, centerY);
+          }
+        }
+      }
+
+      const link = document.createElement('a');
+      link.download = `Micheal-Whiteboard-${boardSize}x${boardSize}.png`;
+      link.href = hdCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // 导出 CSV
+    document.getElementById('btn-export-csv').addEventListener('click', () => {
+      let csv = '\uFEFF色号,颜色名称,所需颗粒数\n';
+      const statsMap = {};
+      grid.flat().filter(Boolean).forEach(b => {
+        statsMap[b.code] = statsMap[b.code] || { name: b.name, count: 0 };
+        statsMap[b.code].count++;
+      });
+      for (const code in statsMap) {
+        csv += `"${code}","${statsMap[code].name}",${statsMap[code].count}\n`;
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'whiteboard-shopping-list.csv';
+      link.click();
+    });
+
+    // 初始化运行
+    initPalette();
+    renderBoard();
   </script>
 </body>
 </html>
