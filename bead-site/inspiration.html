@@ -37,7 +37,7 @@
     .pattern-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(37, 99, 235, 0.12); color: var(--primary); font-weight: 600; }
     .pattern-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
 
-    /* Modal */
+    /* Modal 弹窗 */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(11, 15, 25, 0.75); backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -127,6 +127,7 @@
 
     try { injectChrome('inspiration'); } catch (e) { console.warn(e); }
 
+    // 绘制纯色实体拼豆（去除任何多余白点）
     function drawPattern(canvas, matrix, cellSize = 22) {
       const h = matrix.length;
       const w = matrix[0].length;
@@ -156,18 +157,14 @@
           const centerY = cy + cellSize / 2;
           const radius = cellSize * 0.44;
 
+          // 纯色实体拼豆
           ctx.beginPath();
           ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
           ctx.fillStyle = bead.hex;
           ctx.fill();
           ctx.lineWidth = 1;
-          ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+          ctx.strokeStyle = 'rgba(0,0,0,0.15)';
           ctx.stroke();
-
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.7)';
-          ctx.fill();
         }
       }
     }
