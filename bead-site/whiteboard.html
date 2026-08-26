@@ -3,23 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>白板编辑器 · Micheal 的拼豆网</title>
+  <title>白板像素画板 · Micheal 的拼豆网</title>
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
+  <style>
+    .whiteboard-container {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 24px;
+      background: var(--bg-card, #ffffff);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    .whiteboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .whiteboard-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main>
-    <section class="tool-section" style="max-width: 1200px; margin: 0 auto; padding: 24px 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <section class="whiteboard-container">
+      <div class="whiteboard-header">
         <h2>🎨 白板像素画板</h2>
         <a href="create.html" class="btn" style="text-decoration: none;">← 返回创作页</a>
       </div>
-      
+
       <!-- 白板编辑器挂载容器 -->
       <div id="whiteboard-root"></div>
     </section>
+
+    <!-- 兼容隐藏层：提供 create.js 运行所需的必要节点，防止脚本报错中断 -->
+    <div style="display: none !important;" aria-hidden="true">
+      <button id="whiteboard-btn" type="button"></button>
+
+      <input id="upload-input" type="file" />
+      <input id="bg-toggle" type="checkbox" />
+      <span id="board-width-val">29</span>
+      <input id="board-width" type="range" value="29" />
+      <input id="labels-toggle" type="checkbox" />
+      <select id="palette-select"><option value="artkal55">Artkal 55</option></select>
+      <button id="convert-btn" type="button"></button>
+      <p id="convert-status"></p>
+      <canvas id="board-canvas"></canvas>
+      <canvas id="preview-canvas"></canvas>
+      <div id="stats"></div>
+      <button id="export-png" type="button"></button>
+      <button id="export-pdf" type="button"></button>
+      <button id="export-csv" type="button"></button>
+
+      <input id="similar-input" type="file" />
+      <span id="similar-width-val">29</span>
+      <input id="similar-width" type="range" value="29" />
+      <button id="similar-convert" type="button"></button>
+      <p id="similar-status"></p>
+      <canvas id="similar-canvas"></canvas>
+      <div id="similar-stats"></div>
+      <button id="similar-export-png" type="button"></button>
+      <button id="similar-export-csv" type="button"></button>
+      <button id="similar-export-pdf" type="button"></button>
+    </div>
   </main>
 
   <div id="site-footer"></div>
@@ -27,15 +80,22 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import './assets/js/create.js';
+
     injectChrome('create');
 
-    // 页面加载完成后自动触发白板初始化
-    window.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('whiteboard-btn');
-      if (btn) {
-        btn.click();
+    // 页面与脚本加载就绪后，自动触发白板渲染
+    const initWhiteboard = () => {
+      const wbBtn = document.getElementById('whiteboard-btn');
+      if (wbBtn) {
+        wbBtn.click();
       }
-    });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initWhiteboard);
+    } else {
+      initWhiteboard();
+    }
   </script>
 </body>
 </html>
