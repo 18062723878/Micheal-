@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>白板编辑器 · Micheal 的拼豆网</title>
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <section class="tool-section" style="max-width: 1200px; margin: 0 auto; padding: 24px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>🎨 白板像素画板</h2>
+        <a href="create.html" class="btn" style="text-decoration: none;">← 返回创作页</a>
+      </div>
+      
+      <!-- 白板编辑器挂载容器 -->
+      <div id="whiteboard-root"></div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
+    import './assets/js/create.js';
+    injectChrome('create');
+
+    // 页面加载完成后自动触发白板初始化
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('whiteboard-btn');
+      if (btn) {
+        btn.click();
+      }
+    });
+  </script>
+</body>
+</html>
