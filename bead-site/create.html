@@ -127,7 +127,7 @@
 
       <p id="convert-status" style="color: var(--text-muted); font-weight: 500; margin: 4px 0;"></p>
 
-      <!-- 双画板：左侧纯色实体拼豆，右侧带标尺编号图纸 -->
+      <!-- 双画板联动展示 -->
       <div class="canvas-row">
         <div class="canvas-box">
           <span class="canvas-label">✨ 纯色实体拼豆效果（暗色模式纯净自适应）</span>
@@ -139,10 +139,10 @@
         </div>
       </div>
 
-      <!-- 页面下方用色明细展示 -->
+      <!-- 用色明细展示 -->
       <div id="stats"></div>
 
-      <!-- 导出选项 -->
+      <!-- 导出 -->
       <div style="display: flex; gap: 14px; margin-top: 24px;">
         <button id="export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (PNG)</button>
         <button id="export-csv" class="btn" type="button">🗺️ 导出图纸网格矩阵 (CSV 色号对应位置)</button>
@@ -258,18 +258,40 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
-    // 载入 URL 传入图纸
+    // 载入 URL 传入的图纸并构建动态图像源
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
     if (patternId) {
       const found = ALL_PATTERNS.find(p => p.id === patternId);
       if (found) {
-        gridData = found.matrix;
-        boardWidthInput.value = found.matrix[0].length;
-        boardWidthVal.textContent = found.matrix[0].length;
-        renderCanvases();
-        buildStatsFromGrid();
-        statusText.textContent = `已载入图纸：「${found.title}」(${found.matrix[0].length}×${found.matrix.length} 网格)`;
+        const pHeight = found.matrix.length;
+        const pWidth = found.matrix[0].length;
+
+        // 生成离屏像素图片
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = pWidth;
+        pCanvas.height = pHeight;
+        const pCtx = pCanvas.getContext('2d');
+
+        for (let y = 0; y < pHeight; y++) {
+          for (let x = 0; x < pWidth; x++) {
+            const bead = found.matrix[y][x];
+            if (bead) {
+              pCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
+              pCtx.fillRect(x, y, 1, 1);
+            }
+          }
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          currentImg = img;
+          boardWidthInput.value = pWidth;
+          boardWidthVal.textContent = pWidth;
+          processImage();
+          statusText.textContent = `已载入图纸：「${found.title}」(${pWidth}×${pHeight} 网格，可自由滑动调节板宽)`;
+        };
+        img.src = pCanvas.toDataURL();
       }
     }
 
@@ -313,18 +335,20 @@
       return matched;
     }
 
+    // 核心转换：支持最近邻插值缩放，保持像素锐利不模糊
     function processImage() {
       if (!currentImg) return;
-      statusText.textContent = '正在转换图像为拼豆图纸...';
+      statusText.textContent = '正在实时缩放与转换拼豆图纸...';
 
       const targetWidth = parseInt(boardWidthInput.value, 10);
-      const aspectRatio = currentImg.naturalHeight / currentImg.naturalWidth;
+      const aspectRatio = (currentImg.naturalHeight || currentImg.height) / (currentImg.naturalWidth || currentImg.width);
       const targetHeight = Math.max(1, Math.round(targetWidth * aspectRatio));
 
       const offCanvas = document.createElement('canvas');
       offCanvas.width = targetWidth;
       offCanvas.height = targetHeight;
       const offCtx = offCanvas.getContext('2d');
+      offCtx.imageSmoothingEnabled = false; // 禁用平滑，保证像素图形边缘锐利
       offCtx.drawImage(currentImg, 0, 0, targetWidth, targetHeight);
 
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
@@ -346,7 +370,7 @@
           const a = imgData[idx + 3];
 
           let isBg = false;
-          if (a < 60) isBg = true;
+          if (a < 50) isBg = true;
           else if (autoBg && r > 230 && g > 230 && b > 230) isBg = true;
           else if (autoBg && cornerA > 200) {
             const dist = Math.hypot(r - cornerR, g - cornerG, b - cornerB);
@@ -367,22 +391,22 @@
 
       renderCanvases();
       renderStats(statsMap);
-      statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色板)`;
+      statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色色板)`;
     }
 
+    // 渲染双画布
     function renderCanvases() {
       if (gridData.length === 0) return;
       const height = gridData.length;
       const width = gridData[0].length;
 
-      // 动态获取当前暗黑/明亮主题色
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
       const cellSize = 30;
 
-      // 1. 左侧纯色实体拼豆（暗色模式纯黑底，纯色实体无孔洞）
+      // 1. 左侧纯色实体拼豆画板（暗色模式自适应背景，纯色实体无孔洞）
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -468,21 +492,9 @@
       }
     }
 
-    // 监听暗黑主题切换并即时重绘画布底色
-    window.addEventListener('storage', renderCanvases);
+    // 监听暗黑主题切换并即时重绘画布
     const observer = new MutationObserver(() => renderCanvases());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    function buildStatsFromGrid() {
-      const statsMap = {};
-      gridData.forEach(row => row.forEach(b => {
-        if (b) {
-          statsMap[b.code] = statsMap[b.code] || { ...b, count: 0 };
-          statsMap[b.code].count++;
-        }
-      }));
-      renderStats(statsMap);
-    }
 
     function renderStats(statsMap) {
       const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
