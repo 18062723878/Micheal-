@@ -119,10 +119,10 @@
 
       <p id="convert-status" style="color: var(--text-muted); font-weight: 500; margin: 4px 0;"></p>
 
-      <!-- 双画板联动：左侧纯净立体豆豆效果，右侧色号对照图纸 -->
+      <!-- 双画板：左侧纯色实体拼豆，右侧带标尺编号图纸 -->
       <div class="canvas-row">
         <div class="canvas-box">
-          <span class="canvas-label">✨ 纯净立体拼豆效果（无遮挡质感）</span>
+          <span class="canvas-label">✨ 纯色实体拼豆效果（纯净无孔点）</span>
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
@@ -157,7 +157,6 @@
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
-    // 丰富的多色系调色盘库
     const PALETTES = {
       artkal: [
         { code: 'S01', name: '纯白', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
@@ -251,7 +250,6 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
-    // 载入 URL 传入的图纸
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
     if (patternId) {
@@ -363,7 +361,6 @@
       statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色板)`;
     }
 
-    // 渲染双画布
     function renderCanvases() {
       if (gridData.length === 0) return;
       const height = gridData.length;
@@ -375,7 +372,7 @@
 
       const cellSize = 30;
 
-      // 1. 左侧：纯净立体豆豆画板（不印字，还原质感）
+      // 1. 左侧：纯色实体拼豆（无任何白点穿孔）
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -397,24 +394,19 @@
             const centerY = cy + cellSize / 2;
             const radius = cellSize * 0.44;
 
+            // 纯色实体圆豆豆
             bCtx.beginPath();
             bCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             bCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
             bCtx.fill();
-            bCtx.lineWidth = 1.2;
-            bCtx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            bCtx.lineWidth = 1;
+            bCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
             bCtx.stroke();
-
-            // 拼豆立体小孔
-            bCtx.beginPath();
-            bCtx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-            bCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-            bCtx.fill();
           }
         }
       }
 
-      // 2. 右侧：色号对照图纸（带坐标轴、清晰色号）
+      // 2. 右侧：色号对照图纸（带坐标标尺与高对比色号）
       const ruler = 28;
       schematicCanvas.width = width * cellSize + ruler;
       schematicCanvas.height = height * cellSize + ruler;
@@ -422,7 +414,6 @@
       sCtx.fillStyle = canvasBg;
       sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
 
-      // 绘制标尺
       sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       sCtx.font = 'bold 11px monospace';
       sCtx.textAlign = 'center';
@@ -454,10 +445,9 @@
             sCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             sCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
             sCtx.fill();
-            sCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+            sCtx.strokeStyle = 'rgba(0,0,0,0.15)';
             sCtx.stroke();
 
-            // 高对比度标注编号
             const lum = 0.299 * (bead.r || 100) + 0.587 * (bead.g || 100) + 0.114 * (bead.b || 100);
             sCtx.font = `bold 10px monospace`;
             sCtx.textAlign = 'center';
@@ -507,7 +497,6 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出超清色号图纸
     exportPngBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const link = document.createElement('a');
@@ -516,7 +505,6 @@
       link.click();
     });
 
-    // 导出 CSV
     exportCsvBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       let csv = '\uFEFF色号,颜色名称,所需颗粒数\n';
