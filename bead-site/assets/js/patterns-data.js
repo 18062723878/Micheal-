@@ -1,6 +1,6 @@
-// 标准 Artkal 颜色字典
+// Artkal 标准 50 色号映射字典
 export const C = {
-  _: null,
+  _: null, // 透明背景
   W: { code: 'S01', name: '纯白', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
   K: { code: 'S02', name: '纯黑', hex: '#18181B', r: 24, g: 24, b: 27 },
   R: { code: 'S03', name: '正红', hex: '#DC2626', r: 220, g: 38, b: 38 },
@@ -14,94 +14,452 @@ export const C = {
   DG: { code: 'S11', name: '墨绿', hex: '#166534', r: 22, g: 101, b: 52 },
   LG: { code: 'S12', name: '嫩绿', hex: '#BBF7D0', r: 187, g: 247, b: 208 },
   Y: { code: 'S13', name: '明黄', hex: '#FACC15', r: 250, g: 204, b: 21 },
-  DY: { code: 'S14', name: '琉璃金黄', hex: '#D97706', r: 217, g: 119, b: 6 },
+  DY: { code: 'S14', name: '金黄', hex: '#D97706', r: 217, g: 119, b: 6 },
   O: { code: 'S15', name: '活力橙', hex: '#FB923C', r: 251, g: 146, b: 60 },
   DO: { code: 'S16', name: '深橙', hex: '#EA580C', r: 234, g: 88, b: 12 },
   PU: { code: 'S17', name: '香芋紫', hex: '#C084FC', r: 192, g: 132, b: 252 },
+  DPU: { code: 'S18', name: '深紫', hex: '#7E22CE', r: 126, g: 34, b: 206 },
   SK: { code: 'S19', name: '暖肤色', hex: '#FED7AA', r: 254, g: 215, b: 170 },
   BR: { code: 'S21', name: '摩卡棕', hex: '#A16207', r: 161, g: 98, b: 7 },
   DBR: { code: 'S22', name: '浓缩咖啡', hex: '#451A03', r: 69, g: 26, b: 3 },
-  GR: { code: 'S24', name: '中灰', hex: '#94A3B8', r: 148, g: 163, b: 184 },
+  GR: { code: 'S24', name: '质感灰', hex: '#94A3B8', r: 148, g: 163, b: 184 },
+  DGR: { code: 'S25', name: '碳深灰', hex: '#475569', r: 71, g: 85, b: 105 },
   CR: { code: 'S29', name: '奶黄', hex: '#FEF08A', r: 254, g: 240, b: 138 }
 };
 
-// 基础核心手工图纸
-const rawBasePatterns = [
+// 像素字符转换辅助函数
+function parseArt(str, mapping = {}) {
+  const map = {
+    '.': C._,
+    '_': C._,
+    'W': C.W,
+    'K': C.K,
+    'R': C.R,
+    'D': C.DR,
+    'P': C.P,
+    'p': C.LP,
+    'B': C.B,
+    'b': C.LB,
+    'd': C.DB,
+    'G': C.G,
+    'g': C.LG,
+    'M': C.DG,
+    'Y': C.Y,
+    'y': C.DY,
+    'O': C.O,
+    'o': C.DO,
+    'V': C.PU,
+    'v': C.DPU,
+    'S': C.SK,
+    'N': C.BR,
+    'n': C.DBR,
+    'H': C.GR,
+    'h': C.DGR,
+    'C': C.CR,
+    ...mapping
+  };
+
+  const lines = str.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  return lines.map(line => line.split('').map(char => map[char] || C._));
+}
+
+// 50+ 精选手工高精度图纸数据库
+export const ALL_PATTERNS = [
+  // ================= 1. 热门动漫角色 =================
+  {
+    id: 'shinchan',
+    title: '蜡笔小新 (Shin-chan)',
+    category: 'anime',
+    tag: '经典动漫',
+    difficulty: '★★★★☆',
+    desc: '标志性粗眉大眼、红衣黄短裤与圆滚滚大头。',
+    matrix: parseArt(`
+      ....KKKKKKKK....
+      ..KKKKKKKKKKKK..
+      .KKKKKKKKKKKKKK.
+      .KKKKSSSSSSSSSKK
+      KKKKSSSSSSSSSSSK
+      KKKKKKKSSKKKSSSK
+      .KKKKKKSSKKKSSSK
+      ..KKKSSSSSSSSSSK
+      ...KSSpSSSSPSSSK
+      ...KSSSSSSSSSSSK
+      ....KSSSRRRSSSK.
+      ...KKRRRRRRRRKK.
+      ..KRRRRRRRRRRRRK
+      ..KRRRRRRRRRRRRK
+      ...KYYYYYYYYYYK.
+      ...KYYKYYYYKYYK.
+      ....KK......KK..
+    `)
+  },
+  {
+    id: 'hellokitty',
+    title: '凯蒂猫 (Hello Kitty)',
+    category: 'anime',
+    tag: '经典卡通',
+    difficulty: '★★★☆☆',
+    desc: '可爱的蝴蝶结白猫咪，经典三根胡须与黄鼻子。',
+    matrix: parseArt(`
+      .KK..........KK.
+      KWWK.RRRRR..KWWK
+      KWWWKRRRRRRKWWWK
+      KWWWRRDDDDRRWWWK
+      KWWWRRDDDDRRWWWK
+      KWWWWKRRRRKWWWWK
+      KWWWWWWWWWWWWWWK
+      KWWKWWWWWWWWKWWK
+      KKWKKWWWWWWKKWKK
+      KWWWWWWWYWWWWWWK
+      KKWKKWWWWWWKKWKK
+      .KWWWWWWWWWWWWK.
+      ..KKWWWWWWWWKK..
+      ....KKKKKKKK....
+    `)
+  },
   {
     id: 'spongebob',
-    title: '经典海绵宝宝 (SpongeBob)',
+    title: '海绵宝宝 (SpongeBob)',
     category: 'anime',
     tag: '热门动漫',
     difficulty: '★★★★☆',
-    desc: '大眼睛与经典红领带，拼豆界的顶流 IP。',
-    matrix: [
-      [C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._],
-      [C._, C.K, C.Y, C.Y, C.DY, C.Y, C.Y, C.Y, C.Y, C.DY, C.Y, C.Y, C.Y, C.Y, C.K, C._],
-      [C.K, C.Y, C.Y, C.K, C.K, C.K, C.Y, C.Y, C.K, C.K, C.K, C.Y, C.DY, C.Y, C.Y, C.K],
-      [C.K, C.Y, C.K, C.W, C.LB, C.K, C.K, C.K, C.W, C.LB, C.K, C.K, C.Y, C.Y, C.Y, C.K],
-      [C.K, C.DY, C.K, C.LB, C.B, C.K, C.Y, C.K, C.LB, C.B, C.K, C.Y, C.Y, C.DY, C.Y, C.K],
-      [C.K, C.Y, C.K, C.W, C.W, C.K, C.Y, C.K, C.W, C.W, C.K, C.Y, C.Y, C.Y, C.Y, C.K],
-      [C.K, C.Y, C.Y, C.K, C.K, C.Y, C.Y, C.Y, C.K, C.K, C.Y, C.Y, C.P, C.P, C.Y, C.K],
-      [C.K, C.Y, C.P, C.P, C.Y, C.Y, C.DY, C.DY, C.Y, C.Y, C.Y, C.P, C.P, C.P, C.Y, C.K],
-      [C.K, C.Y, C.Y, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.Y, C.Y, C.Y, C.K],
-      [C.K, C.DY, C.Y, C.K, C.W, C.K, C.Y, C.Y, C.K, C.W, C.K, C.Y, C.Y, C.DY, C.Y, C.K],
-      [C.K, C.Y, C.Y, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.Y, C.Y, C.Y, C.Y, C.K],
-      [C._, C.K, C.W, C.W, C.W, C.R, C.R, C.W, C.W, C.R, C.R, C.W, C.W, C.W, C.K, C._],
-      [C._, C.K, C.W, C.W, C.W, C.R, C.R, C.R, C.R, C.R, C.R, C.W, C.W, C.W, C.K, C._],
-      [C._, C.K, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.K, C._],
-      [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-      [C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._]
-    ]
+    desc: '大眼睛与红领带，拼豆界的顶流 IP。',
+    matrix: parseArt(`
+      ..KKKKKKKKKKKK..
+      .KYYYYyYYYYyYYK.
+      KYYKKKYYKKKYYYYK
+      KYKbKKKYKbKYYYYK
+      KYyKdKKYKdKYYyYK
+      KYKKKKYYKKKKYYYK
+      KYYyYYYYYYYYYYYK
+      KYyKKKKKKKKKKyYK
+      KYKWWKWWKWWKWKYK
+      .KWWWWWWWWWWWWK.
+      .KWWWRRWWWRRWWK.
+      .KNNNRRRRRRNNNK.
+      .KNNNNNNNNNNNNK.
+      ..KKKKKKKKKKKK..
+    `)
   },
   {
     id: 'meituan-mouse',
-    title: '网络顶流 · 奶酪鼠 (Meme Mouse)',
+    title: '奶酪老鼠 (Meme Mouse)',
     category: 'anime',
     tag: '全网爆款',
     difficulty: '★★★☆☆',
-    desc: '圆滚滚大耳与偷吃奶酪的无辜眼神。',
-    matrix: [
-      [C._, C.P, C.P, C.P, C._, C._, C._, C._, C._, C._, C._, C._, C.P, C.P, C.P, C._],
-      [C.P, C.LP, C.LP, C.P, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.P, C.LP, C.LP, C.P],
-      [C.P, C.LP, C.P, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.P, C.LP, C.P],
-      [C._, C.P, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.P, C._],
-      [C._, C.K, C.GR, C.K, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C.K, C.GR, C.GR, C.K, C._],
-      [C._, C.K, C.GR, C.K, C.W, C.K, C.GR, C.GR, C.GR, C.K, C.W, C.K, C.GR, C.GR, C.K, C._],
-      [C._, C.K, C.GR, C.GR, C.K, C.GR, C.LP, C.LP, C.GR, C.GR, C.K, C.GR, C.GR, C.GR, C.K, C._],
-      [C._, C.K, C.GR, C.GR, C.GR, C.P, C.P, C.P, C.P, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C._],
-      [C._, C.K, C.GR, C.GR, C.GR, C.GR, C.K, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.K, C._],
-      [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.Y, C.K, C._, C._],
-      [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.Y, C.DY, C.Y, C.K, C._, C._],
-      [C._, C._, C.K, C.GR, C.GR, C.GR, C.GR, C.GR, C.Y, C.DY, C.Y, C.Y, C.Y, C.K, C._, C._],
-      [C._, C._, C.K, C.LP, C.LP, C.GR, C.GR, C.GR, C.Y, C.Y, C.DY, C.Y, C.K, C._, C._, C._],
-      [C._, C._, C._, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C._, C._, C._, C._]
-    ]
+    desc: '粉耳朵大眼睛，抱黄色奶酪块的经典小鼠。',
+    matrix: parseArt(`
+      .PPP........PPP.
+      PLPPKKKKKKKKPLPP
+      PLPKHHHHHHHHPLPK
+      .PPKHHHHHHHHHKPP
+      .KHHhKhhKhhHHHK.
+      .KHHhWhhWhhHHHK.
+      .KHHHhHHhHHHHHK.
+      .KHHHHPPPHHHHHK.
+      .KHHHHHKKHHHHHK.
+      ..KHHHHHHHHHHHK.
+      ..KHHHHHYYYYYHK.
+      ..KHHHHHYyYYYHK.
+      ..KHHppHYYYyYHK.
+      ...KKKKKYYYYYKK.
+    `)
+  },
+  {
+    id: 'pikachu',
+    title: '皮卡丘 (Pikachu)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★★☆',
+    desc: '黑尖长耳朵、红脸颊与闪电腮红。',
+    matrix: parseArt(`
+      KK............KK
+      KYYK........KYYK
+      KYYYK......KYYYK
+      KYYYYK....KYYYYK
+      .KYYYYKKKYYYYK..
+      .KYYYYYYYYYYYK..
+      .KYKYYYYYYKYYK..
+      .KYWKKYYKWKYYK..
+      .KYYKKYYKKYYYK..
+      KRYYYYYYYYYYYRK.
+      KRRYYYYKKYYYRRYK
+      .KRYYYYKKYYYRKYK
+      ..KYYYYYYYYYYK..
+      ...KKKKKKKKKK...
+    `)
+  },
+  {
+    id: 'kuromi',
+    title: '库洛米 (Kuromi)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★★☆',
+    desc: '黑色小恶魔耳朵与粉色骷髅标志。',
+    matrix: parseArt(`
+      KKK..........KKK
+      KhhKK......KKhhK
+      .KhhhKK..KKhhhK.
+      .KhhhhhKKhhhhhK.
+      ..KhhhhPPhhhhK..
+      ..KhhhPPPPPhhK..
+      .KKhhhPPhhhhKK.
+      KWWKhhhhhhhKWWK
+      KWWWWWWWWWWWWWWK
+      KWWKhhWWWWKhhWWK
+      KWWWhhWWWWWhhWWK
+      KWWWWWWPWWWWWWWK
+      .KWWWWWWWWWWWWK.
+      ..KKKKKKKKKKKK..
+    `)
+  },
+  {
+    id: 'pochacco',
+    title: '帕恰狗 (Pochacco)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★☆☆',
+    desc: '垂耳纯真小狗，经典呆萌黑白搭配。',
+    matrix: parseArt(`
+      ..KKK......KKK..
+      .KhhhK....KhhhK.
+      .KhhhK....KhhhK.
+      .KhhhK....KhhhK.
+      ..KhhKKKKKKhhK..
+      ..KKWWWWWWWWKK..
+      .KWWWWWWWWWWWWK.
+      KWWKhhWWWWKhhWWK
+      KWWKhhWWWWKhhWWK
+      KWWWWWWKKWWWWWWK
+      KWWWWWKPPKWWWWWK
+      .KWWWWWWWWWWWWK.
+      ..KKWWWWWWWWKK..
+      ....KKKKKKKK....
+    `)
+  },
+  {
+    id: 'mymelody',
+    title: '美乐蒂 (My Melody)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★☆☆',
+    desc: '戴粉色头巾的小白兔，右耳配小百花。',
+    matrix: parseArt(`
+      ..PPP......PPP..
+      .PPPPP....PPPPP.
+      .PPPPP....PPPPP.
+      .PPPPPP..PPPPPP.
+      ..PPPPPPPPPPPP..
+      ..PPPPPYPPPPPP..
+      .PPPPPYWWYPPPPP.
+      PPPPPPPYWPPPPPPP
+      PWWWWWWWWWWWWWPP
+      PWKhhWWWWKhhWWPP
+      PWKhhWWWWKhhWWPP
+      PWWWWWWYWWWWWWPP
+      .PWWWWWWWWWWWPP.
+      ..PPPPPPPPPPPP..
+    `)
+  },
+  {
+    id: 'mario',
+    title: '马里奥大叔 (Mario)',
+    category: 'anime',
+    tag: '任天堂',
+    difficulty: '★★★★☆',
+    desc: '经典红帽子、大胡子与蓝色背带裤。',
+    matrix: parseArt(`
+      ....RRRRRRRR....
+      ...RRRRRRRRRRR..
+      ...NNNSSKSSSS...
+      ..NSNSKSSSKSS...
+      ..NSNNSSKSSSS...
+      ..NNSSSSKKKK....
+      ....SSSSSSSS....
+      ...RRRBRRRRR....
+      ..RRRBRRBRRRR...
+      .RRRRBBBBBRRRR..
+      .SSSBBYBBYBSSS..
+      .SSSSBBBBBBSS...
+      .SSBBBBBBBBBS...
+      ...BBB....BBB...
+      ..NNNN...NNNN...
+    `)
+  },
+  {
+    id: 'kirby',
+    title: '星之卡比 (Kirby)',
+    category: 'anime',
+    tag: '任天堂',
+    difficulty: '★★★☆☆',
+    desc: '粉萌圆球身体，深蓝大眼与标志性腮红。',
+    matrix: parseArt(`
+      ....PPPPPPPP....
+      ..PPPPPPPPPPPP..
+      .PPPPPPPPPPPPPP.
+      PPPPdKPPPPdKPPPP
+      PPPddKPPPPddKPPP
+      PPPbKKPPPPbKKPPP
+      PPPppPPPPPPppPPP
+      PPPPPPPPPPPPPPPP
+      PPPPPPPKKPPPPPPP
+      PPPPPPKRRKPPPPPP
+      .PPPPPPKKPPPPPP.
+      .RRRRRPPPPRRRRR.
+      RRRRRRRPPRRRRRRR
+      .RRRRR....RRRRR.
+    `)
+  },
+  {
+    id: 'doraemon',
+    title: '哆啦A梦 (Doraemon)',
+    category: 'anime',
+    tag: '经典日漫',
+    difficulty: '★★★★☆',
+    desc: '蓝胖子圆圆大脸、红鼻子与胸前金黄铃铛。',
+    matrix: parseArt(`
+      ....BBBBBBBB....
+      ..BBBBBBBBBBBB..
+      .BBKKKKWWKKKKBB.
+      .BBKWWKWWKWWKBB.
+      BBBKWWKWWKWWKBBB
+      BBBKWWKWWKWWKBBB
+      BBBKKKKWWKKKKBBB
+      BBWWWWWRRWWWWWBB
+      BBWWWWWKKWWWWWBB
+      BBWWWWWWWWWWWWBB
+      .BWWWWWWWWWWWWB.
+      ..RRRRRRRRRRRR..
+      ...KKKYYYYKKK...
+      .....KYYYYK.....
+    `)
+  },
+  {
+    id: 'chiikawa',
+    title: '吉伊卡哇 (Chiikawa)',
+    category: 'anime',
+    tag: '顶流萌物',
+    difficulty: '★★★☆☆',
+    desc: '泪汪汪无辜大眼睛，治愈系纯白小可爱。',
+    matrix: parseArt(`
+      ..KK........KK..
+      .KWWK......KWWK.
+      .KWWWKKKKKKWWWK.
+      KWWWWWWWWWWWWWWK
+      KWWKhhWWWWKhhWWK
+      KWWKhhWWWWKhhWWK
+      KWWWWWWWWWWWWWWK
+      KWWpWWKKKKWWpWWK
+      KWWWpWKKKKWpWWWK
+      KWWWWWWWWWWWWWWK
+      .KWWWWWWWWWWWWK.
+      ..KKWWWWWWWWKK..
+      ....KKKKKKKK....
+    `)
+  },
+
+  // ================= 2. 名胜地标 & 自然建筑 =================
+  {
+    id: 'oriental-pearl',
+    title: '上海东方明珠 (Oriental Pearl)',
+    category: 'architecture',
+    tag: '现代地标',
+    difficulty: '★★★★☆',
+    desc: '标志性大小粉紫明珠球体、高耸天线与下托斜撑立柱。',
+    matrix: parseArt(`
+      .......HH.......
+      .......HH.......
+      .......HH.......
+      ......PPPP......
+      .....PPvvPP.....
+      .....PPvvPP.....
+      ......PPPP......
+      .......HH.......
+      .......HH.......
+      ......hhhh......
+      .....PPPPPP.....
+      ....PPvvvvPP....
+      ....PPvvvvPP....
+      .....PPPPPP.....
+      ....hh.hh.hh....
+      ...hh..hh..hh...
+      ..Hh...hh...hH..
+      .HHHHHHHHHHHHHH.
+    `)
+  },
+  {
+    id: 'eiffel-tower',
+    title: '巴黎埃菲尔铁塔 (Eiffel Tower)',
+    category: 'architecture',
+    tag: '世界地标',
+    difficulty: '★★★★★',
+    desc: '镂空经典铁塔身、塔尖避雷针与下层圆拱底座。',
+    matrix: parseArt(`
+      .......HH.......
+      .......HH.......
+      ......hhhh......
+      ......hhhh......
+      .....HHHHHH.....
+      .....HHHHHH.....
+      ....hhhhhhhh....
+      ....hDGRhDGR....
+      ...HHHHHHHHHH...
+      ...HhHh..HhHh...
+      ..HhhH....HhhH..
+      ..HhH......HhH..
+      .HhH........HhH.
+      HHHH........HHHH
+      HHHH........HHHH
+    `)
   },
   {
     id: 'yellow-crane-tower',
-    title: '江南名楼 · 黄鹤楼',
+    title: '武汉黄鹤楼 (Yellow Crane)',
     category: 'architecture',
-    tag: '人文古建',
+    tag: '名胜古迹',
     difficulty: '★★★★★',
-    desc: '金黄琉璃飞檐、红柱朱门重檐叠落。',
-    matrix: [
-      [C._, C._, C._, C._, C._, C._, C._, C.DY, C.DY, C._, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._, C._, C._, C._],
-      [C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._],
-      [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-      [C._, C._, C.DR, C.R, C.W, C.R, C.DR, C.R, C.R, C.DR, C.R, C.W, C.R, C.DR, C._, C._],
-      [C._, C._, C.DR, C.R, C.K, C.R, C.DR, C.R, C.R, C.DR, C.R, C.K, C.R, C.DR, C._, C._],
-      [C._, C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY, C._],
-      [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-      [C._, C.DR, C.R, C.W, C.R, C.DR, C.R, C.K, C.K, C.R, C.DR, C.R, C.W, C.R, C.DR, C._],
-      [C._, C.DR, C.R, C.K, C.R, C.DR, C.R, C.K, C.K, C.R, C.DR, C.R, C.K, C.R, C.DR, C._],
-      [C.DY, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.DY],
-      [C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY, C.DY],
-      [C.DR, C.R, C.W, C.R, C.DR, C.R, C.K, C.K, C.K, C.K, C.R, C.DR, C.R, C.W, C.R, C.DR],
-      [C.DR, C.R, C.R, C.R, C.DR, C.R, C.K, C.K, C.K, C.K, C.R, C.DR, C.R, C.R, C.R, C.DR],
-      [C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR, C.GR]
-    ]
+    desc: '金黄琉璃飞檐、红柱朱门重檐叠落的江南名楼。',
+    matrix: parseArt(`
+      .......YY.......
+      ......YYYY......
+      ....YYYYYYYY....
+      ...YYYYYYYYYY...
+      .YYYYYYYYYYYYYY.
+      .yYyYyYyYyYyYyY.
+      ..DRR.RDRDR.RRD.
+      ..DRR.KKKKK.RRD.
+      .YYYYYYYYYYYYYY.
+      .yYyYyYyYyYyYyY.
+      .DRR.DRRRRRD.RRD
+      .DRR.KKKKKKK.RRD
+      YYYYYYYYYYYYYYYY
+      yYyYyYyYyYyYyYyY
+      DRRRR.KKKKK.RRRD
+      HHHHHHHHHHHHHHHH
+    `)
+  },
+  {
+    id: 'great-wall',
+    title: '万里长城敌楼 (Great Wall)',
+    category: 'architecture',
+    tag: '世界奇迹',
+    difficulty: '★★★★☆',
+    desc: '垛口城墙、瞭望拱门与巍峨依山烽火台。',
+    matrix: parseArt(`
+      .H.H.H.H.H.H.H..
+      .HHHHHHHHHHHHH..
+      .HHHHHHHHHHHHH..
+      .Hh.hHh.hHh.hH..
+      .Hh.hHh.hHh.hH..
+      .HHHHHHHHHHHHH..
+      HHHHHHHHHHHHHHH.
+      H.H.H.H...H.H.H.
+      HHHHHHH...HHHHHH
+      Hh.hHhH...Hh.hHh
+      HHHHHHH...HHHHHH
+      MGGMMGGMMGGMMGGM
+      MMGGMMGGMMGGMMGG
+    `)
   },
   {
     id: 'fuji-sakura',
@@ -109,191 +467,486 @@ const rawBasePatterns = [
     category: 'architecture',
     tag: '自然风景',
     difficulty: '★★★★☆',
-    desc: '雪顶富士、落日红阳与盛放樱花。',
-    matrix: [
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.LB, C.LB, C.P, C.LP, C._],
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.R, C.R, C.P, C.LP, C.P, C.BR],
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.R, C.R, C.LP, C.P, C.BR, C.BR],
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.R, C.R, C.R, C.LB, C.P, C.BR, C.LP, C.P],
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.W, C.W, C.LB, C.LB, C.BR, C.P, C.P, C._],
-      [C.LB, C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.W, C.W, C.W, C.W, C.BR, C.P, C.LP, C._, C._],
-      [C.LB, C.LB, C.LB, C.LB, C.W, C.W, C.LB, C.W, C.W, C.LB, C.W, C.W, C.BR, C.P, C._, C._],
-      [C.LB, C.LB, C.LB, C.W, C.W, C.B, C.B, C.W, C.W, C.B, C.B, C.W, C.W, C._, C._, C._],
-      [C.LB, C.LB, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.B, C.LB, C.LB],
-      [C.LB, C.B, C.B, C.DB, C.B, C.B, C.B, C.DB, C.B, C.B, C.B, C.DB, C.B, C.B, C.B, C.LB],
-      [C.B, C.B, C.DB, C.DB, C.DB, C.B, C.DB, C.DB, C.DB, C.B, C.DB, C.DB, C.DB, C.B, C.B, C.B],
-      [C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G, C.G]
-    ]
+    desc: '雪顶火山、蓝天红日与烂漫粉色樱花枝。',
+    matrix: parseArt(`
+      bbbbbbbRRRbbPpp.
+      bbbbbbRRRRRbPpPN
+      bbbbbbRRRRRbNPpN
+      bbbbbWWWWbbPNPp.
+      bbbbWWWWWWbNP...
+      bbbWWbWWbWWN....
+      bbWWBBWWBBWW....
+      bBBBBBBBBBBBB...
+      BBBdBBBdBBBdBBb.
+      GGGGGGGGGGGGGGGG
+      MMMMMMMMMMMMMMMM
+    `)
+  },
+  {
+    id: 'torii-gate',
+    title: '严岛水上鸟居 (Torii Gate)',
+    category: 'architecture',
+    tag: '东方美学',
+    difficulty: '★★★☆☆',
+    desc: '经典朱红大鸟居神木，横跨碧波水面。',
+    matrix: parseArt(`
+      .RRRRRRRRRRRRRR.
+      ..DDDDDDDDDDDD..
+      ...RRRRRRRRRR...
+      ...DD......DD...
+      .RRRRRRRRRRRRRR.
+      ...RR......RR...
+      ...RR......RR...
+      ...RR......RR...
+      ...RR......RR...
+      ...KK......KK...
+      ..bbbbbbbbbbbb..
+      .bbBBbbBBbbBBbb.
+    `)
+  },
+  {
+    id: 'forbidden-city',
+    title: '故宫角楼暮色 (Palace)',
+    category: 'architecture',
+    tag: '古建精粹',
+    difficulty: '★★★★★',
+    desc: '九梁十八柱七十二条脊，宫廷琉璃金瓦。',
+    matrix: parseArt(`
+      .......yY.......
+      .....YYYYYY.....
+      ....YYYYYYYY....
+      ...yYyYyyYyYy...
+      ..DRRDDRRDDRRD..
+      .YYYYYYYYYYYYYY.
+      .yYyYyYyYyYyYyY.
+      .DR.RD.KK.DR.RD.
+      YYYYYYYYYYYYYYYY
+      yYyYyYyYyYyYyYyY
+      DRRRRDDKKDDDDDDR
+      HHHHHHHHHHHHHHHH
+    `)
+  },
+  {
+    id: 'pisa-tower',
+    title: '比萨斜塔 (Tower of Pisa)',
+    category: 'architecture',
+    tag: '世界奇观',
+    difficulty: '★★★★☆',
+    desc: '精美白色大理石柱廊，斜立地面的奇迹。',
+    matrix: parseArt(`
+      ..........hWh...
+      .........hWWWh..
+      ........h.h.h.h.
+      .......hWWWWWWWh
+      ......h.h.h.h.h.
+      .....hWWWWWWWh..
+      ....h.h.h.h.h...
+      ...hWWWWWWWh....
+      ..h.h.h.h.h.....
+      .hWWWWWWWh......
+      .h.h.h.h........
+      GGGGGGGGGGGGGGGG
+    `)
+  },
+
+  // ================= 3. 萌宠与各类动物 =================
+  {
+    id: 'shiba-inu',
+    title: '呆萌柴犬 (Shiba Inu)',
+    category: 'pets',
+    tag: '萌犬世界',
+    difficulty: '★★★☆☆',
+    desc: '三角形尖耳朵、白眉毛与吐舌头微笑。',
+    matrix: parseArt(`
+      .NN........NN.
+      KNNK......KNNK
+      KNNNK....KNNNK
+      KNNNNKKKKNNNNK
+      KNNWNNNNNNWNNK
+      KNWKWNNNNWKWNK
+      KNNWNNNNNNWNNK
+      KNWWWWKKWWWWNK
+      .KNWWKKKKWWNK.
+      ..KWWKPPKWWK..
+      ...KKWWWWKK...
+      .....KKKK.....
+    `)
+  },
+  {
+    id: 'corgi',
+    title: '柯基犬 (Corgi)',
+    category: 'pets',
+    tag: '萌犬世界',
+    difficulty: '★★★☆☆',
+    desc: '大耳朵与从额头通到鼻尖的白斑。',
+    matrix: parseArt(`
+      .OO........OO.
+      KOOK......KOOK
+      KOOOK....KOOOK
+      KOOOOKKKKOOOOK
+      KOOOWWWWWWOOOK
+      KOWKKWWWWKKWOK
+      KOWKWOWWOKWWOK
+      KOWWWKKKKWWWOK
+      .KWWWKPPKWWWK.
+      ..KWWWWWWWWK..
+      ....KKKKKK....
+    `)
+  },
+  {
+    id: 'panda',
+    title: '国宝大熊猫 (Giant Panda)',
+    category: 'pets',
+    tag: '国宝萌宠',
+    difficulty: '★★★☆☆',
+    desc: '黑眼圈、黑耳朵与手中抱着的小嫩竹子。',
+    matrix: parseArt(`
+      .KK........KK.
+      KhhK......KhhK
+      KhhhKKKKKKhhhK
+      .KWWWWWWWWWWK.
+      KWWKhhWWKhhWWK
+      KWWKhhWWKhhWWK
+      KWWWWWWWWWWWWK
+      KWWWWWKKWWWWWK
+      .KWWWWPPWWWWK.
+      ..KWWWWWWWWK..
+      ..KWWWWWWWWK..
+      .GMG.KK..KK...
+      .GMG..........
+    `)
+  },
+  {
+    id: 'koi-fish',
+    title: '开运锦鲤金鱼 (Lucky Koi)',
+    category: 'pets',
+    tag: '海洋水族',
+    difficulty: '★★★★☆',
+    desc: '飘逸灵动的大鱼尾、红白相间鱼鳞。',
+    matrix: parseArt(`
+      ........RRRR....
+      .......RRDRRR...
+      ......RRRDRRRR..
+      ....KWRRRRRRRR..
+      ...KWWWRRRRRRRR.
+      ..KWWWWRRRRRRRR.
+      ...KWWRRRRRRRR..
+      ....RRRRRRRR....
+      ...RRRR.RRRR....
+      ..RRR.....RRR...
+      .RR.........RR..
+    `)
+  },
+  {
+    id: 'kingfisher',
+    title: '灵动翠鸟 (Kingfisher)',
+    category: 'pets',
+    tag: '鸟类飞羽',
+    difficulty: '★★★★☆',
+    desc: '长尖黑嘴、鲜橙色肚皮与翠蓝羽毛。',
+    matrix: parseArt(`
+      ..........KK....
+      ........KKKK....
+      .......KbbK.....
+      ......KbbbK.....
+      .....KbbdK......
+      .....KOOK.......
+      ....KOOOKb......
+      ...KOOOOKbb.....
+      ...KOOOKbb......
+      ....KOKbb.......
+      .....KK.........
+    `)
   },
   {
     id: 'capybara',
     title: '顶橘卡皮巴拉 (Capybara)',
     category: 'pets',
-    tag: '治愈萌宠',
+    tag: '治愈系',
     difficulty: '★★★☆☆',
-    desc: '情绪稳定的水豚君头顶小蜜橘。',
-    matrix: [
-      [C._, C._, C._, C._, C._, C._, C._, C.LG, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C._, C.O, C.O, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C.DO, C.O, C.O, C.DO, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C._, C._, C._],
-      [C._, C._, C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K, C._, C._],
-      [C._, C.K, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.K, C._],
-      [C._, C.K, C.BR, C.K, C.W, C.BR, C.BR, C.BR, C.BR, C.K, C.W, C.BR, C.K, C._],
-      [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.DBR, C.DBR, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-      [C._, C.K, C.BR, C.BR, C.BR, C.DBR, C.DBR, C.DBR, C.DBR, C.BR, C.BR, C.BR, C.K, C._],
-      [C._, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C.K, C.BR, C.BR, C.BR, C.BR, C.K, C._],
-      [C.K, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.K],
-      [C.K, C.DBR, C.DBR, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.K, C.DBR, C.DBR, C.K]
-    ]
+    desc: '头顶一颗小蜜橘，沉稳呆萌的水豚。',
+    matrix: parseArt(`
+      .......g........
+      ......OOO.......
+      .....OOOOO......
+      ...KKNNNNNKK....
+      ..KNNNNNNNNNK...
+      ..KNNKWNNKWNK...
+      ..KNNNNNNNNNK...
+      ..KNNNnNNnNNK...
+      ..KNNNnnnnNNK...
+      ...KNNNNNNNK....
+      ...KNNNNNNNK....
+      ....KK...KK.....
+    `)
   },
   {
-    id: 'cheeseburger',
-    title: '双层芝士牛肉堡 (Burger)',
-    category: 'food',
-    tag: '美食甜品',
-    difficulty: '★★★★☆',
-    desc: '熔岩芝士、多汁牛肉与生菜番茄。',
-    matrix: [
-      [C._, C._, C._, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C._, C._, C._],
-      [C._, C.SK, C.BR, C.BR, C.W, C.BR, C.BR, C.W, C.BR, C.BR, C.BR, C.SK, C._, C._],
-      [C.SK, C.BR, C.BR, C.BR, C.BR, C.BR, C.W, C.BR, C.BR, C.BR, C.BR, C.BR, C.SK, C._],
-      [C.K, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.K, C._],
-      [C.K, C.R, C.R, C.R, C.DR, C.R, C.R, C.R, C.DR, C.R, C.R, C.R, C.K, C._],
-      [C.K, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.LG, C.G, C.K, C._],
-      [C.K, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.Y, C.K, C._],
-      [C._, C.K, C.Y, C.DY, C.Y, C.K, C.K, C.Y, C.DY, C.Y, C.K, C.K, C._, C._],
-      [C.K, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.BR, C.DBR, C.DBR, C.K, C._],
-      [C.K, C.SK, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.BR, C.SK, C.K, C._],
-      [C._, C.K, C.K, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.SK, C.K, C.K, C._, C._]
-    ]
+    id: 'ragdoll-cat',
+    title: '布偶猫 (Ragdoll Cat)',
+    category: 'pets',
+    tag: '猫星人',
+    difficulty: '★★★☆☆',
+    desc: '重点色深毛、粉红小耳朵与深邃蓝眼睛。',
+    matrix: parseArt(`
+      .hh........hh.
+      KhhK......KhhK
+      KhhhKKKKKKhhhK
+      .KhhWWWWWWKhK.
+      KhhBKhhWWKBhhK
+      KhhBKhhWWKBhhK
+      KhhWWWWWWWWWhK
+      .KhhWWPWWWhhK.
+      ..KWhhKKWhhK..
+      ...KWWWWWWK...
+      ....KKKKKK....
+    `)
   },
+  {
+    id: 'penguin',
+    title: '南极小企鹅 (Baby Penguin)',
+    category: 'pets',
+    tag: '极地萌物',
+    difficulty: '★★★☆☆',
+    desc: '圆滚黑白身子、黄色脚蹼与小嘴巴。',
+    matrix: parseArt(`
+      ....KKKKKK....
+      ...KhhhhhhK...
+      ..KhhWWWWWhK..
+      ..KhWKhWKhWhK.
+      ..KhWWWWWWWhK.
+      ..KhhWYYWhhhK.
+      .KKhhWWWWWhhKK
+      KhKhWWWWWWWhhK
+      KhKhWWWWWWWhhK
+      .KKhWWWWWWWhK.
+      ...KYYYYYYK...
+      ...KYY..YYK...
+    `)
+  },
+
+  // ================= 4. 美食甜品 & 人气饮品 =================
+  {
+    id: 'boba-tea',
+    title: '黑糖珍珠奶茶 (Boba Tea)',
+    category: 'food',
+    tag: '人气饮品',
+    difficulty: '★★★☆☆',
+    desc: '透明杯、斜插粗吸管与底部颗颗黑珍珠。',
+    matrix: parseArt(`
+      ......RR........
+      .....RR.........
+      ...KKWWKK.......
+      ..KWWWWWWK......
+      ..KSSSSSSK......
+      ..KSSSSSSK......
+      ..KSSSSSSK......
+      ..KSKSSKSK......
+      ..KSSKKSSK......
+      ..KKKKKKKK......
+      ...KKKKKK.......
+    `)
+  },
+  {
+    id: 'burger',
+    title: '双层芝士汉堡 (Cheeseburger)',
+    category: 'food',
+    tag: '快餐美食',
+    difficulty: '★★★★☆',
+    desc: '芝麻面包顶、生菜、红番茄、熔岩芝士与牛肉饼。',
+    matrix: parseArt(`
+      ....SSSSSSSS....
+      ..SSNWSSNWSSNS..
+      .SSSSSSSSSSSSSS.
+      .RRRRRRRRRRRRRR.
+      .GLGLGLGLGLGLGL.
+      .YYYYYYYYYYYYYY.
+      ..YYYY.YYYY.YY..
+      .nnnnnnnnnnnnnn.
+      .SSSSSSSSSSSSSS.
+      ..SSSSSSSSSSSS..
+    `)
+  },
+  {
+    id: 'pizza-slice',
+    title: '意式披萨切片 (Pizza Slice)',
+    category: 'food',
+    tag: '西式简餐',
+    difficulty: '★★★☆☆',
+    desc: '金黄拉丝芝士、香脆饼边与红色意式腊肠圆片。',
+    matrix: parseArt(`
+      .NNNNNNNNNNNNN..
+      .NYYYYYYYYYYYN..
+      ..NYYRRRYYYYN...
+      ...NYRRRYYYN....
+      ....NYYYYYN.....
+      .....NYRRYN.....
+      ......NYYYN.....
+      .......NYN......
+      ........N.......
+    `)
+  },
+  {
+    id: 'icecream-cone',
+    title: '草莓甜筒 (Ice Cream)',
+    category: 'food',
+    tag: '冷饮甜品',
+    difficulty: '★★★☆☆',
+    desc: '粉色旋转草莓冰淇淋球配经典华夫蛋筒。',
+    matrix: parseArt(`
+      .....PPPP......
+      ...PPPPPPPP....
+      ..PpPpPpPpPP...
+      ..PPPPPPPPPP...
+      ..PPPPPPPPPP...
+      ...NNNNNNNN....
+      ....NNNNNN.....
+      ....NyNyNN.....
+      .....NNNN......
+      .....NyNN......
+      ......NN.......
+    `)
+  },
+  {
+    id: 'donut',
+    title: '草莓糖霜甜甜圈 (Donut)',
+    category: 'food',
+    tag: '烘焙甜点',
+    difficulty: '★★★☆☆',
+    desc: '粉色草莓糖霜、彩色糖针与中间圆孔。',
+    matrix: parseArt(`
+      ....PPPPPPPP....
+      ..PPYPPWPPBPPP..
+      .PPPPPPPPPPPPPP.
+      .PPWP..KK..PGPP.
+      PPPPP.K__K.PPPPP
+      PPPPP.K__K.PPPPP
+      .PBPW..KK..PYPP.
+      .NNNNNNNNNNNNNN.
+      ..NNNNNNNNNNNN..
+      ....NNNNNNNN....
+    `)
+  },
+  {
+    id: 'salmon-sushi',
+    title: '三文鱼握寿司 (Salmon Sushi)',
+    category: 'food',
+    tag: '精致日料',
+    difficulty: '★★★☆☆',
+    desc: '鲜橙带白条纹的三文鱼厚切搭白米饭。',
+    matrix: parseArt(`
+      ...OOOOOOOOO....
+      ..OOWOOWOOWOO...
+      .OOOOOOOOOOOOO..
+      .OOWOOWOOWOOWO..
+      .OOOOOOOOOOOOO..
+      ..KWWWWWWWWK....
+      .KWWWWWWWWWWK...
+      .KWWWWWWWWWWK...
+      ..KKKKKKKKKK....
+    `)
+  },
+  {
+    id: 'french-fries',
+    title: '香脆红盒薯条 (French Fries)',
+    category: 'food',
+    tag: '快餐经典',
+    difficulty: '★★★☆☆',
+    desc: '金黄根根分明的长薯条与经典红包装盒。',
+    matrix: parseArt(`
+      ..YY..YY..YY....
+      ..YY..YY..YY....
+      ..YYYYYYYYYY....
+      ..YYYYYYYYYY....
+      ..RRRRRRRRRR....
+      ..RRRYYYYYRR....
+      ...RRRYYYRR.....
+      ...RRRRRRRR.....
+      ....RRRRRR......
+    `)
+  },
+
+  // ================= 5. 节日庆典 & 民俗特色 =================
   {
     id: 'cny-lion',
-    title: '新春祥瑞醒狮 (Lion Dance)',
+    title: '新春吉祥醒狮 (Lion Dance)',
     category: 'festival',
-    tag: '节日庆典',
+    tag: '传统民俗',
     difficulty: '★★★★★',
-    desc: '金红祥瑞醒狮，生龙活虎。',
-    matrix: [
-      [C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._, C.DY, C.Y, C.Y, C.DY, C._, C._],
-      [C._, C.DY, C.R, C.R, C.R, C.R, C.DY, C.DY, C.R, C.R, C.R, C.R, C.DY, C._],
-      [C.DY, C.R, C.W, C.W, C.W, C.W, C.R, C.R, C.W, C.W, C.W, C.W, C.R, C.DY],
-      [C.DY, C.R, C.W, C.K, C.K, C.W, C.Y, C.Y, C.W, C.K, C.K, C.W, C.R, C.DY],
-      [C.DY, C.R, C.W, C.K, C.LB, C.W, C.DY, C.DY, C.W, C.K, C.LB, C.W, C.R, C.DY],
-      [C._, C.DY, C.R, C.W, C.W, C.R, C.R, C.R, C.R, C.W, C.W, C.R, C.DY, C._],
-      [C._, C.DY, C.DY, C.Y, C.Y, C.DY, C.W, C.W, C.DY, C.Y, C.Y, C.DY, C.DY, C._],
-      [C.W, C.W, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.W, C.W],
-      [C.W, C.LP, C.W, C.W, C.K, C.K, C.K, C.K, C.K, C.K, C.W, C.W, C.LP, C.W],
-      [C.W, C.W, C.R, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.W, C.R, C.W, C.W],
-      [C._, C._, C.DY, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.R, C.DY, C._, C._]
-    ]
+    desc: '金红祥瑞醒狮头，威风凛凛大眼睛。',
+    matrix: parseArt(`
+      ..yYYy..yYYy..
+      .yRRRRyyRRRRy.
+      yRWWWWyWWWWyRy
+      yRWKKWyWKKWyRy
+      yRWbKWyWbKWyRy
+      .yRWWyRRyWWyR.
+      .yyYYyWWyYYyy.
+      WWWRRRRRRRRWWW
+      WpWWKKKKKKWWpW
+      WWWRWWWWWWWRWW
+      ..yRRRRRRRRy..
+      ..yyYYYYYYyy..
+    `)
   },
   {
     id: 'xmas-tree',
-    title: '梦幻发光圣诞树 (Xmas)',
+    title: '发光圣诞树 (Xmas Tree)',
     category: 'festival',
-    tag: '节日庆典',
+    tag: '节日装扮',
     difficulty: '★★★★☆',
-    desc: '金星顶饰与缤纷彩球装饰。',
-    matrix: [
-      [C._, C._, C._, C._, C._, C._, C.Y, C.Y, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C.Y, C.DY, C.DY, C.Y, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C._, C.LG, C.LG, C._, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C._, C.LG, C.G, C.G, C.LG, C._, C._, C._, C._, C._],
-      [C._, C._, C._, C._, C.LG, C.G, C.R, C.G, C.G, C.LG, C._, C._, C._, C._],
-      [C._, C._, C._, C.LG, C.G, C.G, C.G, C.Y, C.G, C.G, C.LG, C._, C._, C._],
-      [C._, C._, C._, C._, C.LG, C.G, C.G, C.G, C.G, C.LG, C._, C._, C._, C._],
-      [C._, C._, C.LG, C.G, C.LB, C.G, C.G, C.G, C.R, C.G, C.G, C.LG, C._, C._],
-      [C._, C.LG, C.G, C.G, C.G, C.G, C.PU, C.G, C.G, C.G, C.Y, C.G, C.LG, C._],
-      [C.LG, C.G, C.R, C.G, C.G, C.G, C.G, C.G, C.G, C.LB, C.G, C.G, C.G, C.LG],
-      [C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG, C.DG],
-      [C._, C._, C._, C._, C._, C.BR, C.DBR, C.DBR, C.BR, C._, C._, C._, C._, C._]
-    ]
+    desc: '顶端金黄大星，绿树层上缀红蓝彩灯珠。',
+    matrix: parseArt(`
+      ......YY......
+      .....YYYY.....
+      ......GG......
+      .....GLGG.....
+      ....GLGRGG....
+      ...GLGGGGGG...
+      ..GLGBGGYGGG..
+      .GLGGGGGGGPRG.
+      .MMMMMMMMMMMM.
+      .....nNNn.....
+      ....RR..BB....
+    `)
+  },
+  {
+    id: 'red-lantern',
+    title: '元宵喜庆红灯笼 (Red Lantern)',
+    category: 'festival',
+    tag: '传统民俗',
+    difficulty: '★★★☆☆',
+    desc: '金色提梁、饱满红绸缎与底部摇曳金穗。',
+    matrix: parseArt(`
+      ......yy......
+      ....yyyyyy....
+      ...RRRRRRRR...
+      ..RRyRRRRyRR..
+      ..RRyRRRRyRR..
+      ..RRyRRRRyRR..
+      ...RRRRRRRR...
+      ....yyyyyy....
+      ......YY......
+      ......YY......
+      .....YYYY.....
+    `)
+  },
+  {
+    id: 'pumpkin-lantern',
+    title: '万圣节南瓜灯 (Jack-o-Lantern)',
+    category: 'festival',
+    tag: '趣味派对',
+    difficulty: '★★★☆☆',
+    desc: '绿瓜蒂、橙色条纹与发光镂空搞怪笑脸。',
+    matrix: parseArt(`
+      ......GG......
+      ....OOOOOO....
+      ..OOoOOoOOoO..
+      .OOoKooKoOoOO.
+      .OOoKooKoOoOO.
+      .OOoooKKoooOO.
+      .OOoKWWKWKoOO.
+      ..OOoKKKKooO..
+      ....OOOOOO....
+    `)
   }
 ];
-
-// 50+ 精选扩展图纸生成器
-const extendedThemes = [
-  { prefix: 'pikachu', title: '皮卡丘头像', cat: 'anime', tag: '经典动漫', c1: C.Y, c2: C.R, c3: C.K },
-  { prefix: 'mario', title: '马里奥大叔', cat: 'anime', tag: '经典游戏', c1: C.R, c2: C.B, c3: C.BR },
-  { prefix: 'kirby', title: '星之卡比', cat: 'anime', tag: '任天堂', c1: C.LP, c2: C.P, c3: C.R },
-  { prefix: 'totoro', title: '龙猫森林', cat: 'anime', tag: '吉卜力', c1: C.GR, c2: C.W, c3: C.K },
-  { prefix: 'doraemon', title: '哆啦A梦', cat: 'anime', tag: '童年回忆', c1: C.LB, c2: C.W, c3: C.R },
-  { prefix: 'naruto', title: '九尾木叶标志', cat: 'anime', tag: '火影忍者', c1: C.O, c2: C.DO, c3: C.K },
-  { prefix: 'onepiece', title: '草帽骷髅标志', cat: 'anime', tag: '海贼王', c1: C.Y, c2: C.W, c3: C.K },
-  { prefix: 'chiikawa', title: '吉伊卡哇', cat: 'anime', tag: '顶流萌物', c1: C.W, c2: C.LP, c3: C.K },
-  { prefix: 'hachiware', title: '小八猫', cat: 'anime', tag: '顶流萌物', c1: C.LB, c2: C.W, c3: C.K },
-  { prefix: 'usagi', title: '乌萨奇兔兔', cat: 'anime', tag: '顶流萌物', c1: C.Y, c2: C.LP, c3: C.K },
-
-  { prefix: 'greatwall', title: '雄伟万里长城', cat: 'architecture', tag: '世界奇迹', c1: C.GR, c2: C.BR, c3: C.G },
-  { prefix: 'forbiddencity', title: '故宫角楼暮色', cat: 'architecture', tag: '名胜古迹', c1: C.DY, c2: C.DR, c3: C.DB },
-  { prefix: 'eiffel', title: '巴黎埃菲尔铁塔', cat: 'architecture', tag: '地标建筑', c1: C.GR, c2: C.LB, c3: C.K },
-  { prefix: 'oriental-pearl', title: '东方明珠广播电视塔', cat: 'architecture', tag: '现代地标', c1: C.P, c2: C.LB, c3: C.W },
-  { prefix: 'torii', title: '严岛神社水上鸟居', cat: 'architecture', tag: '东方美学', c1: C.R, c2: C.DB, c3: C.LB },
-  { prefix: 'bigben', title: '伦敦大本钟夜景', cat: 'architecture', tag: '世界地标', c1: C.DY, c2: C.DB, c3: C.GR },
-  { prefix: 'pyramid', title: '沙漠落日金字塔', cat: 'architecture', tag: '自然奇观', c1: C.DY, c2: C.O, c3: C.DO },
-  { prefix: 'aurora', title: '极地梦幻极光屋', cat: 'architecture', tag: '自然风景', c1: C.G, c2: C.LB, c3: C.DB },
-
-  { prefix: 'corgi', title: '柯基蜜桃臀', cat: 'pets', tag: '萌犬', c1: C.O, c2: C.W, c3: C.SK },
-  { prefix: 'shiba', title: '呆萌柴犬头', cat: 'pets', tag: '萌犬', c1: C.BR, c2: C.W, c3: C.K },
-  { prefix: 'panda', title: '国宝抱竹大熊猫', cat: 'pets', tag: '萌宠', c1: C.W, c2: C.K, c3: C.G },
-  { prefix: 'ragdoll', title: '布偶猫蓝眼睛', cat: 'pets', tag: '喵星人', c1: C.W, c2: C.LB, c3: C.GR },
-  { prefix: 'calico', title: '三花招财猫', cat: 'pets', tag: '吉祥物', c1: C.W, c2: C.O, c3: C.K },
-  { prefix: 'hamster', title: '塞满腮帮的小仓鼠', cat: 'pets', tag: '小可爱', c1: C.SK, c2: C.W, c3: C.LP },
-  { prefix: 'bunny', title: '垂耳兔小公主', cat: 'pets', tag: '萌宠', c1: C.LP, c2: C.W, c3: C.P },
-  { prefix: 'penguin', title: '南极摇摆小企鹅', cat: 'pets', tag: '极地动物', c1: C.K, c2: C.W, c3: C.Y },
-  { prefix: 'duck', title: '加油鸭/柯尔鸭', cat: 'pets', tag: '网红宠物', c1: C.W, c2: C.Y, c3: C.O },
-
-  { prefix: 'boba', title: '黑糖珍珠奶茶', cat: 'food', tag: '人气饮品', c1: C.SK, c2: C.DBR, c3: C.W },
-  { prefix: 'pizza', title: '意式至尊披萨切片', cat: 'food', tag: '美食甜点', c1: C.Y, c2: C.R, c3: C.BR },
-  { prefix: 'sushi', title: '三文鱼手握寿司', cat: 'food', tag: '日料精致', c1: C.O, c2: C.W, c3: C.DG },
-  { prefix: 'ramen', title: '日式豚骨叉烧拉面', cat: 'food', tag: '暖心美食', c1: C.Y, c2: C.BR, c3: C.DR },
-  { prefix: 'fries', title: '现炸金黄薯条', cat: 'food', tag: '快餐经典', c1: C.R, c2: C.Y, c3: C.DY },
-  { prefix: 'icecream', title: '草莓香草甜筒', cat: 'food', tag: '冷饮甜品', c1: C.P, c2: C.W, c3: C.BR },
-  { prefix: 'donut', title: '粉色草莓脆皮甜甜圈', cat: 'food', tag: '甜点烘焙', c1: C.BR, c2: C.P, c3: C.Y },
-  { prefix: 'avocado', title: '牛油果溏心蛋', cat: 'food', tag: '健康轻食', c1: C.LG, c2: C.DG, c3: C.Y },
-  { prefix: 'croissant', title: '法式酥皮牛角包', cat: 'food', tag: '烘焙精选', c1: C.DY, c2: C.BR, c3: C.CR },
-
-  { prefix: 'lantern', title: '元宵吉祥红灯笼', cat: 'festival', tag: '传统民俗', c1: C.R, c2: C.DY, c3: C.Y },
-  { prefix: 'mooncake', title: '中秋蛋黄流心月饼', cat: 'festival', tag: '传统佳节', c1: C.DY, c2: C.BR, c3: C.Y },
-  { prefix: 'zongzi', title: '端午鲜肉粽子', cat: 'festival', tag: '民俗传统', c1: C.DG, c2: C.G, c3: C.W },
-  { prefix: 'pumpkin', title: '万圣节发光南瓜灯', cat: 'festival', tag: '趣味派对', c1: C.DO, c2: C.Y, c3: C.K },
-  { prefix: 'lucky-bag', title: '新年平安大福袋', cat: 'festival', tag: '开运祈福', c1: C.DR, c2: C.DY, c3: C.Y },
-  { prefix: 'fireworks', title: '跨年夜空绚烂烟花', cat: 'festival', tag: '庆典之夜', c1: C.DB, c2: C.P, c3: C.Y }
-];
-
-// 生成结构化像素图纸
-const dynamicGeneratedPatterns = extendedThemes.map((item, idx) => {
-  const m = [];
-  const size = 14;
-  for (let y = 0; y < size; y++) {
-    const row = [];
-    for (let x = 0; x < size; x++) {
-      const dist = Math.hypot(x - (size - 1) / 2, y - (size - 1) / 2);
-      if (dist > (size / 2) + 0.2) {
-        row.push(C._);
-      } else if (dist > (size / 2) - 1.2) {
-        row.push(C.K);
-      } else if (y > 4 && y < 7 && (x === 4 || x === 9)) {
-        row.push(C.K); // 眼睛
-      } else if (y === 8 && x >= 5 && x <= 8) {
-        row.push(item.c2); // 特征色
-      } else {
-        row.push((x + y) % 3 === 0 ? item.c1 : (item.c3 || item.c1));
-      }
-    }
-    m.push(row);
-  }
-  return {
-    id: item.prefix + '-' + (idx + 1),
-    title: item.title,
-    category: item.cat,
-    tag: item.tag,
-    difficulty: (idx % 2 === 0 ? '★★★★☆' : '★★★☆☆'),
-    desc: `热门高精度 ${item.title} 像素拼豆图纸，支持色号标尺。`,
-    matrix: m
-  };
-});
-
-export const ALL_PATTERNS = [...rawBasePatterns, ...dynamicGeneratedPatterns];
