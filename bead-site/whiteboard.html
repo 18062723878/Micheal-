@@ -7,11 +7,7 @@
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
   <style>
-    .wb-container {
-      max-width: 1300px;
-      margin: 24px auto;
-      padding: 0 20px;
-    }
+    .wb-container { max-width: 1380px; margin: 24px auto; padding: 0 20px; }
     .wb-card {
       background: var(--bg-card);
       border-radius: 16px;
@@ -28,13 +24,6 @@
       border-bottom: 1px solid var(--border-color);
       margin-bottom: 20px;
     }
-    .wb-header h1 {
-      margin: 0;
-      font-size: 22px;
-      color: var(--text-main);
-    }
-    
-    /* 工具栏与设置栏 */
     .wb-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -59,14 +48,6 @@
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .tool-btn:hover {
-      background: var(--bg-card);
-      border-color: var(--border-color);
     }
     .tool-btn.active {
       background: var(--primary);
@@ -81,22 +62,12 @@
       border-radius: 8px;
       font-size: 13px;
     }
-
-    /* 调色板区域 */
     .palette-box {
       margin-bottom: 20px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 14px;
-    }
-    .palette-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 13px;
-      color: var(--text-muted);
     }
     .color-swatches {
       display: flex;
@@ -111,42 +82,42 @@
       border-radius: 6px;
       cursor: pointer;
       border: 2px solid transparent;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-      transition: transform 0.15s, border-color 0.15s;
-      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.15s;
     }
-    .swatch:hover {
-      transform: scale(1.15);
-      z-index: 2;
-    }
+    .swatch:hover { transform: scale(1.15); }
     .swatch.selected {
-      border-color: #ffffff;
       outline: 2px solid var(--primary);
       transform: scale(1.1);
-      z-index: 3;
     }
-
-    /* 画布工作台 */
+    .workbench-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
     .board-workbench {
+      flex: 1 1 480px;
       display: flex;
       flex-direction: column;
       align-items: center;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px;
       overflow: auto;
       max-height: 720px;
     }
-    #wb-canvas {
-      background: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-      cursor: crosshair;
-      touch-action: none;
+    .workbench-label {
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-main);
+      align-self: flex-start;
     }
-
-    /* 底部材料清单 */
+    #wb-canvas, #wb-schematic {
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      cursor: crosshair;
+    }
     .stats-table {
       width: 100%;
       border-collapse: collapse;
@@ -158,10 +129,7 @@
       padding: 8px 12px;
       text-align: center;
     }
-    .stats-table th {
-      background: var(--table-head);
-      color: var(--text-main);
-    }
+    .stats-table th { background: var(--table-head); color: var(--text-main); }
     .color-chip {
       display: inline-block;
       width: 16px;
@@ -169,7 +137,6 @@
       border-radius: 4px;
       vertical-align: middle;
       margin-right: 6px;
-      border: 1px solid rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -179,7 +146,7 @@
   <main class="wb-container">
     <section class="wb-card">
       <div class="wb-header">
-        <h1>🎨 白板像素画板</h1>
+        <h1 style="margin: 0; font-size: 22px; color: var(--text-main);">🎨 白板像素画板</h1>
         <a href="create.html" class="btn" style="text-decoration: none;">← 返回设计工坊</a>
       </div>
 
@@ -206,40 +173,39 @@
             <option value="20">20 × 20 (小板)</option>
             <option value="29" selected>29 × 29 (标准拼豆方板)</option>
             <option value="32">32 × 32 (经典像素板)</option>
-            <option value="40">40 × 40 (大板)</option>
           </select>
         </div>
-
-        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px; cursor: pointer;">
-          <input id="toggle-grid" type="checkbox" checked /> 显示网格线
-        </label>
-        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px; cursor: pointer;">
-          <input id="toggle-labels" type="checkbox" checked /> 标注色号
-        </label>
       </div>
 
       <!-- 调色板 -->
       <div class="palette-box">
-        <div class="palette-title-row">
-          <span>当前选取颜色：<strong id="active-color-name" style="color: var(--text-main);">S03 正红 (#DC2626)</strong></span>
-          <span>点击色块即可切换画笔颜色</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: var(--text-muted);">
+          <span>当前画笔颜色：<strong id="active-color-name" style="color: var(--text-main);">S03 正红 (#DC2626)</strong></span>
+          <span>点击色块即可切换</span>
         </div>
         <div class="color-swatches" id="swatches-container"></div>
       </div>
 
-      <!-- 画布区域 -->
-      <div class="board-workbench">
-        <canvas id="wb-canvas"></canvas>
+      <!-- 工作台：左侧画板（立体纯净），右侧色号对照图 -->
+      <div class="workbench-row">
+        <div class="board-workbench">
+          <span class="workbench-label">🖌️ 自由画板（真实立体拼豆）</span>
+          <canvas id="wb-canvas"></canvas>
+        </div>
+        <div class="board-workbench">
+          <span class="workbench-label">🔢 色号对照图（实时同步标尺）</span>
+          <canvas id="wb-schematic"></canvas>
+        </div>
       </div>
 
-      <!-- 导出按钮行 -->
+      <!-- 导出 -->
       <div style="display: flex; gap: 12px; margin-top: 20px;">
-        <button id="btn-export-png" class="btn btn-primary" type="button">✨ 导出超清图纸 (Ultra-HD PNG)</button>
+        <button id="btn-export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (PNG)</button>
         <button id="btn-export-csv" class="btn" type="button">📊 导出用色清单 (CSV)</button>
       </div>
     </section>
 
-    <!-- 实时材料清单 -->
+    <!-- 材料清单 -->
     <section class="wb-card">
       <h3 style="margin-top: 0; color: var(--text-main);">📋 所需材料清单 (实时计算)</h3>
       <div id="stats-container">
@@ -256,24 +222,22 @@
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
-    // 调色盘色系
     const COLOR_LIST = Object.values(C).filter(Boolean);
     let activeColor = COLOR_LIST.find(c => c.code === 'S03') || COLOR_LIST[2];
-    let currentTool = 'pen'; // 'pen', 'eraser', 'picker', 'bucket'
+    let currentTool = 'pen';
     let boardSize = 29;
     let grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
     let historyStack = [];
 
     const canvas = document.getElementById('wb-canvas');
     const ctx = canvas.getContext('2d');
+    const schematicCanvas = document.getElementById('wb-schematic');
+    const sCtx = schematicCanvas.getContext('2d');
     const swatchesContainer = document.getElementById('swatches-container');
     const activeColorName = document.getElementById('active-color-name');
     const boardSizeSelect = document.getElementById('board-size-select');
-    const toggleGrid = document.getElementById('toggle-grid');
-    const toggleLabels = document.getElementById('toggle-labels');
     const statsContainer = document.getElementById('stats-container');
 
-    // 生成调色盘色块
     function initPalette() {
       swatchesContainer.innerHTML = '';
       COLOR_LIST.forEach(item => {
@@ -288,21 +252,17 @@
           document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
           swatch.classList.add('selected');
           activeColorName.textContent = `${item.code} ${item.name} (${item.hex})`;
-          if (currentTool === 'eraser' || currentTool === 'picker') {
-            setTool('pen');
-          }
+          if (currentTool === 'eraser' || currentTool === 'picker') setTool('pen');
         });
         swatchesContainer.appendChild(swatch);
       });
     }
 
-    // 记录历史（用于撤销）
     function pushHistory() {
       if (historyStack.length >= 25) historyStack.shift();
       historyStack.push(JSON.stringify(grid));
     }
 
-    // 切换工具
     function setTool(tool) {
       currentTool = tool;
       document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
@@ -315,27 +275,27 @@
     document.getElementById('tool-picker').addEventListener('click', () => setTool('picker'));
     document.getElementById('tool-bucket').addEventListener('click', () => setTool('bucket'));
 
-    // 渲染画板
-    const CELL_SIZE = 26; // 单格显示尺寸
+    const CELL_SIZE = 26;
+
     function renderBoard() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const canvasBg = isDark ? '#0f172a' : '#ffffff';
+      const gridLine = isDark ? '#1e293b' : '#f1f5f9';
+
+      // 1. 左侧纯净画板
       canvas.width = boardSize * CELL_SIZE;
       canvas.height = boardSize * CELL_SIZE;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const showGrid = toggleGrid.checked;
-      const showLabels = toggleLabels.checked;
+      ctx.fillStyle = canvasBg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       for (let y = 0; y < boardSize; y++) {
         for (let x = 0; x < boardSize; x++) {
           const cx = x * CELL_SIZE;
           const cy = y * CELL_SIZE;
 
-          // 绘制网格线
-          if (showGrid) {
-            ctx.strokeStyle = '#e2e8f0';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
-          }
+          ctx.strokeStyle = gridLine;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
 
           const bead = grid[y][x];
           if (bead) {
@@ -343,7 +303,6 @@
             const centerY = cy + CELL_SIZE / 2;
             const radius = CELL_SIZE * 0.44;
 
-            // 拼豆主体
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fillStyle = bead.hex;
@@ -352,30 +311,63 @@
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
             ctx.stroke();
 
-            // 小孔
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
             ctx.fill();
-
-            // 色号标注
-            if (showLabels) {
-              const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-              ctx.font = `bold ${Math.floor(CELL_SIZE * 0.32)}px monospace`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
-              ctx.fillText(bead.code, centerX, centerY);
-            }
           }
         }
       }
+
+      // 2. 右侧色号对照图
+      const ruler = 28;
+      schematicCanvas.width = boardSize * CELL_SIZE + ruler;
+      schematicCanvas.height = boardSize * CELL_SIZE + ruler;
+      sCtx.fillStyle = canvasBg;
+      sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
+
+      sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+      sCtx.font = 'bold 10px monospace';
+      sCtx.textAlign = 'center';
+      sCtx.textBaseline = 'middle';
+
+      for (let i = 0; i < boardSize; i++) {
+        sCtx.fillText((i + 1).toString(), ruler + i * CELL_SIZE + CELL_SIZE / 2, ruler / 2);
+        sCtx.fillText((i + 1).toString(), ruler / 2, ruler + i * CELL_SIZE + CELL_SIZE / 2);
+      }
+
+      for (let y = 0; y < boardSize; y++) {
+        for (let x = 0; x < boardSize; x++) {
+          const cx = ruler + x * CELL_SIZE;
+          const cy = ruler + y * CELL_SIZE;
+
+          sCtx.strokeStyle = gridLine;
+          sCtx.lineWidth = 1;
+          sCtx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+
+          const bead = grid[y][x];
+          if (bead) {
+            const centerX = cx + CELL_SIZE / 2;
+            const centerY = cy + CELL_SIZE / 2;
+            const radius = CELL_SIZE * 0.44;
+
+            sCtx.beginPath();
+            sCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            sCtx.fillStyle = bead.hex;
+            sCtx.fill();
+
+            const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
+            sCtx.font = `bold 9px monospace`;
+            sCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
+            sCtx.fillText(bead.code, centerX, centerY);
+          }
+        }
+      }
+
       updateStats();
     }
 
-    // 交互绘制逻辑
     let isDrawing = false;
-
     function handleDrawAt(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -443,14 +435,12 @@
 
     window.addEventListener('pointerup', () => { isDrawing = false; });
 
-    // 撤销
     document.getElementById('btn-undo').addEventListener('click', () => {
       if (historyStack.length === 0) return;
       grid = JSON.parse(historyStack.pop());
       renderBoard();
     });
 
-    // 清空画板
     document.getElementById('btn-clear').addEventListener('click', () => {
       if (confirm('确认清空当前画板吗？')) {
         pushHistory();
@@ -459,7 +449,6 @@
       }
     });
 
-    // 镜像
     document.getElementById('btn-hflip').addEventListener('click', () => {
       pushHistory();
       grid = grid.map(row => [...row].reverse());
@@ -472,7 +461,6 @@
       renderBoard();
     });
 
-    // 尺寸切换
     boardSizeSelect.addEventListener('change', (e) => {
       if (confirm('切换尺寸将重置当前画板，是否继续？')) {
         boardSize = parseInt(e.target.value, 10);
@@ -484,10 +472,6 @@
       }
     });
 
-    toggleGrid.addEventListener('change', renderBoard);
-    toggleLabels.addEventListener('change', renderBoard);
-
-    // 实时材料清单更新
     function updateStats() {
       const statsMap = {};
       let total = 0;
@@ -524,77 +508,13 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出超清 PNG
     document.getElementById('btn-export-png').addEventListener('click', () => {
-      const cellSize = 60;
-      const ruler = 40;
-      const hdCanvas = document.createElement('canvas');
-      hdCanvas.width = boardSize * cellSize + ruler;
-      hdCanvas.height = boardSize * cellSize + ruler;
-      const hCtx = hdCanvas.getContext('2d');
-
-      hCtx.fillStyle = '#ffffff';
-      hCtx.fillRect(0, 0, hdCanvas.width, hdCanvas.height);
-
-      hCtx.fillStyle = '#64748b';
-      hCtx.font = 'bold 15px monospace';
-      hCtx.textAlign = 'center';
-      hCtx.textBaseline = 'middle';
-
-      for (let i = 0; i < boardSize; i++) {
-        hCtx.fillText((i + 1).toString(), ruler + i * cellSize + cellSize / 2, ruler / 2);
-        hCtx.fillText((i + 1).toString(), ruler / 2, ruler + i * cellSize + cellSize / 2);
-      }
-
-      hCtx.strokeStyle = '#cbd5e1';
-      hCtx.lineWidth = 2;
-      hCtx.beginPath();
-      hCtx.moveTo(ruler, 0); hCtx.lineTo(ruler, hdCanvas.height);
-      hCtx.moveTo(0, ruler); hCtx.lineTo(hdCanvas.width, ruler);
-      hCtx.stroke();
-
-      for (let y = 0; y < boardSize; y++) {
-        for (let x = 0; x < boardSize; x++) {
-          const cx = ruler + x * cellSize;
-          const cy = ruler + y * cellSize;
-
-          hCtx.strokeStyle = '#e2e8f0';
-          hCtx.lineWidth = 1;
-          hCtx.strokeRect(cx, cy, cellSize, cellSize);
-
-          const bead = grid[y][x];
-          if (bead) {
-            const centerX = cx + cellSize / 2;
-            const centerY = cy + cellSize / 2;
-            const radius = cellSize * 0.44;
-
-            hCtx.beginPath();
-            hCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            hCtx.fillStyle = bead.hex;
-            hCtx.fill();
-            hCtx.strokeStyle = 'rgba(0,0,0,0.2)';
-            hCtx.stroke();
-
-            hCtx.beginPath();
-            hCtx.arc(centerX, centerY, radius * 0.35, 0, Math.PI * 2);
-            hCtx.fillStyle = 'rgba(255,255,255,0.75)';
-            hCtx.fill();
-
-            const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-            hCtx.font = `bold ${Math.floor(cellSize * 0.32)}px monospace`;
-            hCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
-            hCtx.fillText(bead.code, centerX, centerY);
-          }
-        }
-      }
-
       const link = document.createElement('a');
       link.download = `Micheal-Whiteboard-${boardSize}x${boardSize}.png`;
-      link.href = hdCanvas.toDataURL('image/png');
+      link.href = schematicCanvas.toDataURL('image/png');
       link.click();
     });
 
-    // 导出 CSV
     document.getElementById('btn-export-csv').addEventListener('click', () => {
       let csv = '\uFEFF色号,颜色名称,所需颗粒数\n';
       const statsMap = {};
@@ -612,7 +532,6 @@
       link.click();
     });
 
-    // 初始化运行
     initPalette();
     renderBoard();
   </script>
