@@ -11,19 +11,6 @@
   <div id="site-header"></div>
 
   <main>
-    <!-- AI 生图板块 -->
-    <section class="ai-panel">
-      <h2>✨ AI 生图</h2>
-      <div class="ai-row">
-        <input id="ai-prompt" class="ai-prompt" type="text" placeholder="描述你想生成的画面，例如：一只戴帽子的卡通猫，扁平插画风" />
-        <button id="ai-generate" class="btn btn-accent" type="button">生成</button>
-      </div>
-      <div id="ai-preview" class="ai-preview"></div>
-      <p id="ai-status" class="ai-status"></p>
-      <p id="ai-tutorial" class="ai-tutorial">未配置 API Key，<a href="docs/api-integration.md" target="_blank" rel="noopener">点此查看接入教程</a></p>
-      <button id="ai-to-bead" class="btn btn-primary" type="button">把这张图送进拼豆 →</button>
-    </section>
-
     <!-- 主上传 / 转换流程 -->
     <section id="upload-section" class="upload-section">
       <h2>上传图片，开始拼豆</h2>
@@ -107,8 +94,7 @@
         <div class="entry-card">
           <h3>从白板开始</h3>
           <p>打开像素画板，自由绘制并实时统计用色，支持画笔 / 橡皮 / 油漆桶 / 镜像 / 撤销。</p>
-          <button id="whiteboard-btn" class="btn btn-primary" type="button">打开白板编辑器</button>
-          <div id="whiteboard-root"></div>
+          <a href="whiteboard.html" class="btn btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">打开白板编辑器</a>
         </div>
       </div>
     </section>
