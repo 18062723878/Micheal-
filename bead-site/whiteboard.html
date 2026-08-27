@@ -41,16 +41,17 @@
       font-size: 12px;
     }
 
-    /* 参数滑块栏 */
+    /* 参数滑块面板 (像素尺寸/亮度/对比度/饱和度) */
     .filter-controls-panel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 14px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 14px 18px;
       margin-bottom: 18px;
+      align-items: center;
     }
     .slider-item {
       display: flex;
@@ -142,6 +143,7 @@
       cursor: crosshair;
       transform-origin: center center;
       transition: transform 0.15s ease-out;
+      background: var(--canvas-bg);
     }
 
     /* 侧边常驻工具栏与调色盘 */
@@ -287,7 +289,7 @@
         <a href="create.html" class="btn" style="text-decoration: none;">← 返回设计工坊</a>
       </div>
 
-      <!-- 画板全局微调栏 -->
+      <!-- 画板全局微调栏 (支持真实色号重映射) -->
       <div class="filter-controls-panel">
         <div class="slider-item">
           <div class="slider-header">
@@ -299,7 +301,7 @@
 
         <div class="slider-item">
           <div class="slider-header">
-            <span class="slider-title">亮度增强</span>
+            <span class="slider-title">亮度调节</span>
             <span id="wb-bright-val" class="slider-val-box">0</span>
           </div>
           <input id="wb-bright-range" type="range" min="-100" max="100" step="1" value="0" />
@@ -307,7 +309,7 @@
 
         <div class="slider-item">
           <div class="slider-header">
-            <span class="slider-title">对比度</span>
+            <span class="slider-title">对比度调节</span>
             <span id="wb-contrast-val" class="slider-val-box">0</span>
           </div>
           <input id="wb-contrast-range" type="range" min="-100" max="100" step="1" value="0" />
@@ -315,10 +317,14 @@
 
         <div class="slider-item">
           <div class="slider-header">
-            <span class="slider-title">饱和度</span>
+            <span class="slider-title">饱和度调节</span>
             <span id="wb-saturate-val" class="slider-val-box">0</span>
           </div>
           <input id="wb-saturate-range" type="range" min="-100" max="100" step="1" value="0" />
+        </div>
+
+        <div style="display: flex; align-items: flex-end; padding-top: 14px;">
+          <button id="btn-reset-filters" class="btn btn-sm" type="button" style="width: 100%;">↺ 重置参数</button>
         </div>
       </div>
 
@@ -516,6 +522,9 @@
     let activeColor = activePaletteList[2];
     let currentTool = 'pen';
     let boardSize = 29;
+
+    // baseGrid 保存用户绘制的原始色块，grid 保存经滤镜调色并重新匹配色号后的实际豆豆数据
+    let baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
     let grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
     let historyStack = [];
     let schematicZoom = 1.0;
@@ -537,7 +546,7 @@
     const btnFsRight = document.getElementById('btn-fullscreen-right');
     const zoomLevelText = document.getElementById('zoom-level-text');
 
-    // 微调滑块
+    // 微调滑块控件
     const wbSizeSlider = document.getElementById('wb-size-slider');
     const boardSizeVal = document.getElementById('board-size-val');
     const wbBrightRange = document.getElementById('wb-bright-range');
@@ -546,6 +555,7 @@
     const wbContrastVal = document.getElementById('wb-contrast-val');
     const wbSaturateRange = document.getElementById('wb-saturate-range');
     const wbSaturateVal = document.getElementById('wb-saturate-val');
+    const btnResetFilters = document.getElementById('btn-reset-filters');
 
     function initPalette() {
       swatchesContainer.innerHTML = '';
@@ -574,6 +584,7 @@
       activeColorDot.style.backgroundColor = activeColor.hex;
       activeColorName.textContent = `${activeColor.code} ${activeColor.name}`;
       initPalette();
+      applyFiltersAndRender();
     });
 
     wbSizeSlider.addEventListener('input', (e) => {
@@ -581,9 +592,10 @@
       boardSizeVal.textContent = `${newSize}px`;
       if (confirm(`调整尺寸为 ${newSize}×${newSize} 将重置画板，是否继续？`)) {
         boardSize = newSize;
+        baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
         grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
         historyStack = [];
-        renderBoard();
+        applyFiltersAndRender();
       } else {
         e.target.value = boardSize;
         boardSizeVal.textContent = `${boardSize}px`;
@@ -592,20 +604,27 @@
 
     wbBrightRange.addEventListener('input', (e) => {
       wbBrightVal.textContent = e.target.value;
-      renderBoard();
+      applyFiltersAndRender();
     });
     wbContrastRange.addEventListener('input', (e) => {
       wbContrastVal.textContent = e.target.value;
-      renderBoard();
+      applyFiltersAndRender();
     });
     wbSaturateRange.addEventListener('input', (e) => {
       wbSaturateVal.textContent = e.target.value;
-      renderBoard();
+      applyFiltersAndRender();
+    });
+
+    btnResetFilters.addEventListener('click', () => {
+      wbBrightRange.value = 0; wbBrightVal.textContent = '0';
+      wbContrastRange.value = 0; wbContrastVal.textContent = '0';
+      wbSaturateRange.value = 0; wbSaturateVal.textContent = '0';
+      applyFiltersAndRender();
     });
 
     function pushHistory() {
       if (historyStack.length >= 25) historyStack.shift();
-      historyStack.push(JSON.stringify(grid));
+      historyStack.push(JSON.stringify(baseGrid));
     }
 
     function setTool(tool) {
@@ -620,22 +639,99 @@
     document.getElementById('tool-eraser').addEventListener('click', () => setTool('eraser'));
     document.getElementById('tool-picker').addEventListener('click', () => setTool('picker'));
 
+    // 颜色欧氏距离计算匹配
+    function findNearestColor(r, g, b, palette) {
+      let minDist = Infinity;
+      let matched = palette[0];
+      for (const item of palette) {
+        const rmean = (r + item.r) / 2;
+        const dr = r - item.r;
+        const dg = g - item.g;
+        const db = b - item.b;
+        const dist = (2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db;
+        if (dist < minDist) {
+          minDist = dist;
+          matched = item;
+        }
+      }
+      return matched;
+    }
+
+    // 核心转换：提取像素并对画板每一颗豆子应用真实滤镜变换与色号重映射
+    function applyFiltersAndRender() {
+      const bOffset = parseInt(wbBrightRange.value, 10);
+      const cOffset = parseInt(wbContrastRange.value, 10);
+      const sOffset = parseInt(wbSaturateRange.value, 10);
+
+      // 如果没有任何滤镜，直接使用绘制原色
+      if (bOffset === 0 && cOffset === 0 && sOffset === 0) {
+        grid = baseGrid.map(row => [...row]);
+      } else {
+        // 使用离屏 Canvas 像素管线真实重计算色彩
+        const offCanvas1 = document.createElement('canvas');
+        offCanvas1.width = boardSize;
+        offCanvas1.height = boardSize;
+        const offCtx1 = offCanvas1.getContext('2d');
+
+        for (let y = 0; y < boardSize; y++) {
+          for (let x = 0; x < boardSize; x++) {
+            const bead = baseGrid[y][x];
+            if (bead) {
+              offCtx1.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
+              offCtx1.fillRect(x, y, 1, 1);
+            }
+          }
+        }
+
+        const offCanvas2 = document.createElement('canvas');
+        offCanvas2.width = boardSize;
+        offCanvas2.height = boardSize;
+        const offCtx2 = offCanvas2.getContext('2d');
+        offCtx2.imageSmoothingEnabled = false;
+
+        const bVal = 100 + bOffset;
+        const cVal = 100 + cOffset;
+        const sVal = 100 + sOffset;
+        offCtx2.filter = `brightness(${bVal}%) contrast(${cVal}%) saturate(${sVal}%)`;
+        offCtx2.drawImage(offCanvas1, 0, 0);
+
+        const imgData = offCtx2.getImageData(0, 0, boardSize, boardSize).data;
+        grid = [];
+
+        for (let y = 0; y < boardSize; y++) {
+          const row = [];
+          for (let x = 0; x < boardSize; x++) {
+            const idx = (y * boardSize + x) * 4;
+            const a = imgData[idx + 3];
+            if (a < 50 || !baseGrid[y][x]) {
+              row.push(null);
+            } else {
+              const r = imgData[idx];
+              const g = imgData[idx + 1];
+              const b = imgData[idx + 2];
+              const matched = findNearestColor(r, g, b, activePaletteList);
+              row.push(matched);
+            }
+          }
+          grid.push(row);
+        }
+      }
+
+      renderBoard();
+      updateStats();
+    }
+
     const CELL_SIZE = 26;
 
+    // 绘制画板与色号图纸
     function renderBoard() {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
-      const bVal = 100 + parseInt(wbBrightRange.value, 10);
-      const cVal = 100 + parseInt(wbContrastRange.value, 10);
-      const sVal = 100 + parseInt(wbSaturateRange.value, 10);
-      const filterStyle = `brightness(${bVal}%) contrast(${cVal}%) saturate(${sVal}%)`;
-
-      // 1. 左侧自由实体画板
+      // 1. 左侧自由实体画板（实体纯色，无白点）
       canvas.width = boardSize * CELL_SIZE;
       canvas.height = boardSize * CELL_SIZE;
-      canvas.style.filter = filterStyle;
       ctx.fillStyle = canvasBg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -665,11 +761,10 @@
         }
       }
 
-      // 2. 右侧色号对照图
+      // 2. 右侧色号对照图（标尺坐标与编号）
       const ruler = 28;
       schematicCanvas.width = boardSize * CELL_SIZE + ruler;
       schematicCanvas.height = boardSize * CELL_SIZE + ruler;
-      schematicCanvas.style.filter = filterStyle;
       sCtx.fillStyle = canvasBg;
       sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
 
@@ -712,9 +807,10 @@
           }
         }
       }
-
-      updateStats();
     }
+
+    const observer = new MutationObserver(() => applyFiltersAndRender());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     function updateSchematicZoom() {
       schematicCanvas.style.transform = `scale(${schematicZoom})`;
@@ -762,6 +858,7 @@
       }
     });
 
+    // 交互绘制
     let isDrawing = false;
     function handleDrawAt(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
@@ -788,7 +885,7 @@
 
       if (currentTool === 'bucket') {
         pushHistory();
-        const targetBead = grid[y][x];
+        const targetBead = baseGrid[y][x];
         const fillBead = activeColor;
         if ((targetBead ? targetBead.code : null) === fillBead.code) return;
 
@@ -798,22 +895,22 @@
         while (queue.length) {
           const [cx, cy] = queue.pop();
           if (cx < 0 || cx >= boardSize || cy < 0 || cy >= boardSize) continue;
-          const curr = grid[cy][cx];
+          const curr = baseGrid[cy][cx];
           const currCode = curr ? curr.code : null;
 
           if (currCode === targetCode) {
-            grid[cy][cx] = fillBead;
+            baseGrid[cy][cx] = fillBead;
             queue.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
           }
         }
-        renderBoard();
+        applyFiltersAndRender();
         return;
       }
 
       const newVal = currentTool === 'eraser' ? null : activeColor;
-      if (grid[y][x] !== newVal) {
-        grid[y][x] = newVal;
-        renderBoard();
+      if (baseGrid[y][x] !== newVal) {
+        baseGrid[y][x] = newVal;
+        applyFiltersAndRender();
       }
     }
 
@@ -833,28 +930,28 @@
 
     document.getElementById('btn-undo').addEventListener('click', () => {
       if (historyStack.length === 0) return;
-      grid = JSON.parse(historyStack.pop());
-      renderBoard();
+      baseGrid = JSON.parse(historyStack.pop());
+      applyFiltersAndRender();
     });
 
     document.getElementById('btn-clear').addEventListener('click', () => {
       if (confirm('确认清空当前画板吗？')) {
         pushHistory();
-        grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-        renderBoard();
+        baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+        applyFiltersAndRender();
       }
     });
 
     document.getElementById('btn-hflip').addEventListener('click', () => {
       pushHistory();
-      grid = grid.map(row => [...row].reverse());
-      renderBoard();
+      baseGrid = baseGrid.map(row => [...row].reverse());
+      applyFiltersAndRender();
     });
 
     document.getElementById('btn-vflip').addEventListener('click', () => {
       pushHistory();
-      grid = [...grid].reverse();
-      renderBoard();
+      baseGrid = [...baseGrid].reverse();
+      applyFiltersAndRender();
     });
 
     function updateStats() {
@@ -919,7 +1016,7 @@
     });
 
     initPalette();
-    renderBoard();
+    applyFiltersAndRender();
   </script>
 </body>
 </html>
