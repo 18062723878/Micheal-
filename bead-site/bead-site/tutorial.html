@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>拼豆保姆级教程 · Micheal 的拼豆网</title>
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <style>
+    .tutorial-container {
+      max-width: 1100px;
+      margin: 32px auto 60px;
+      padding: 0 20px;
+    }
+    .tutorial-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .tutorial-header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 12px;
+    }
+    .tutorial-header p {
+      color: var(--text-muted);
+      font-size: 16px;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .guide-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      transition: border-color 0.2s;
+    }
+    .guide-section:hover {
+      border-color: var(--primary);
+    }
+    .section-badge-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .badge-num {
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .badge-title-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    /* 对比表格 */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .compare-table th, .compare-table td {
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      text-align: left;
+    }
+    .compare-table th {
+      background: var(--table-head);
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* 步骤卡片流 */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .step-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .step-item h4 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-item p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* 高亮警示框 */
+    .alert-box {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .alert-box strong {
+      color: var(--accent);
+    }
+
+    /* FAQ 卡片 */
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .faq-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .faq-q {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .faq-a {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="tutorial-container">
+    <div class="tutorial-header">
+      <h1>📖 拼豆完整制作教程与进阶避坑指南</h1>
+      <p>从工具选材、胶带法保板、精准温度熨烫到冷却定型，带你零基础避开所有翻车点，做出平整精致的拼豆手工作品。</p>
+    </div>
+
+    <!-- 1. 选材与工具 -->
+    <section class="guide-section">
+      <div class="section-badge-title">
+        <span class="badge-num">01</span>
+        <h2 class="badge-title-text">准备篇：拼豆选型与核心工具清单</h2>
+      </div>
+
+      <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">拼豆主要分为 <strong>2.6mm（迷你豆）</strong> 与 <strong>5mm（标准豆）</strong> 两种规格，建议根据制作用途进行选择：</p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>尺寸规格</th>
+            <th>推荐适用场景</th>
+            <th>优点</th>
+            <th>难点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2.6mm (迷你豆)</strong></td>
+            <td>钥匙扣、手机挂件、冰箱贴、立牌饰品</td>
+            <td>精致细腻、体积小巧、可做复杂高像素图</td>
+            <td>需配合弯头精细镊子，手部精细度要求高</td>
+          </tr>
+          <tr>
+            <td><strong>5mm (标准豆)</strong></td>
+            <td>杯垫、相框摆件、亲子手作、新手入门练习</td>
+            <td>颗粒大易夹取、上手快、不易散落</td>
+            <td>成品尺寸较大，大幅像素画占用桌面空间大</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="color: var(--text-main); font-size: 16px; margin-top: 20px;">🛠️ 必备工具清单：</h3>
+      <div class="step-list">
+        <div class="step-item">
+          <h4>📍 1. 拼豆模板（亚克力透明插齿板）</h4>
+          <p>选用耐温、齿尖整齐的方板或六角板。初学者建议常备 29×29 规格的标准透明方板，底部垫上图纸即可快速对准拼装。</p>
+        </div>
+        <div class="step-item">
+          <h4>🥢 2. 高精密弯头镊子</h4>
+          <p>拼豆专用不锈钢弯头镊子是夹取、微调豆子位置的神器，能大幅降低手抖误碰其他豆子的概率。</p>
+        </div>
+        <div class="step-item">
+          <h4>📜 3. 助烫纸 / 助烫片</h4>
+          <p><strong>助烫纸（磨砂质感）</strong>：熨烫后豆面呈现哑光雾面质感；<br><strong>助烫亮片（光滑质感）</strong>：熨烫后豆面呈现玻璃般晶莹高亮质感。严禁熨斗直接接触裸豆！</p>
+        </div>
+        <div class="step-item">
+          <h4>🔌 4. 调温电熨斗 / 拼豆专用小熨斗</h4>
+          <p>建议使用可精准控温的平底干烫熨斗（<strong>切勿开启蒸汽功能</strong>），受热均匀是防止局部焦糊的关键。</p>
+        </div>
+        <div class="step-item">
+          <h4>📚 5. 重物压板（厚字典、大理石板或整套书籍）</h4>
+          <p>作品刚熨烫完成时处于极高温度，必须趁热压平自然冷却，否则必定发生边缘翘曲变形。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 胶带法秘籍 -->
+    <section class="guide-section">
+      <div class="section-badge-title">
+        <span class="badge-num">02</span>
+        <h2 class="badge-title-text">进阶秘籍：美纹纸胶带法（100% 保护模板不被烫坏）</h2>
+      </div>
+
+      <div class="alert-box">
+        <strong>⚠️ 为什么要用胶带法？</strong> 直接在模板上熨烫，极易因温度过高导致亚克力模板的插齿融化变形报废。学会胶带法，一块模板可以永久循环使用！
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <h4>第一步：图纸拼装完毕后检查</h4>
+          <p>核对图纸色号与边缘无错位漏拼，用镊子轻轻下压所有拼豆，确保豆子平稳直立在齿位上。</p>
+        </div>
+        <div class="step-item">
+          <h4>第二步：平整粘贴美纹胶带</h4>
+          <p>撕取比作品略长一点的美纹纸胶带，从一端开始紧密粘贴，胶带之间重叠 2~3mm，不可留有气泡或褶皱。</p>
+        </div>
+        <div class="step-item">
+          <h4>第三步：彻底压实并扎孔排气</h4>
+          <p>用卡片或手指反复抹平压实胶带。<strong>关键点</strong>：用废弃模板或细针将每个拼豆中间的孔洞戳穿（防止熨烫时热气膨胀将豆子顶飞）。</p>
+        </div>
+        <div class="step-item">
+          <h4>第四步：完整脱模</h4>
+          <p>按住模板边缘，轻轻将粘牢胶带的作品完整揭下并移至平整桌面，此时模板安全脱离。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 熨烫技巧 -->
+    <section class="guide-section">
+      <div class="section-badge-title">
+        <span class="badge-num">03</span>
+        <h2 class="badge-title-text">核心实操：熨烫温度与匀速打圈手法</h2>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <h4>🌡️ 1. 档位与温度调节</h4>
+          <p>将熨斗调至<strong>中温档（约 130°C - 150°C，羊毛/棉麻档之间）</strong>，等待熨斗预热指示灯熄灭后再开始熨烫，避免温度剧烈波动。</p>
+        </div>
+        <div class="step-item">
+          <h4>🔄 2. 小圆周均匀打圈手法</h4>
+          <p>盖好助烫纸后，手持熨斗以轻微压力在作品上方<strong>顺时针/逆时针缓慢打小圈移动</strong>。切忌在某一固定点死压停留，以免单颗豆子过度融化溢胶。</p>
+        </div>
+        <div class="step-item">
+          <h4>👀 3. 观察融化状态（两种经典风格）</h4>
+          <p>
+            <strong>• 经典留孔风（微融）</strong>：透过助烫纸观察，拼豆边缘轻微粘连、中间保持清晰小圆孔即可停手，手感轻盈透气。<br>
+            <strong>• 全实心方格风（全融）</strong>：继续均匀加热至所有孔洞闭合融成整块像素方格，结构极度坚固耐摔。
+          </p>
+        </div>
+        <div class="step-item">
+          <h4>🔁 4. 翻面二次加固</h4>
+          <p>正面熨烫至微融粘连后，稍等 10 秒微凉，揭掉背面美纹胶带，盖上助烫纸将反面同样打圈熨烫封牢。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 冷却防弯 -->
+    <section class="guide-section">
+      <div class="section-badge-title">
+        <span class="badge-num">04</span>
+        <h2 class="badge-title-text">决定成败：冷却与重物压平定型</h2>
+      </div>
+
+      <div class="alert-box">
+        <strong>🔥 黄金定型法则：</strong> 拼豆是热塑性塑料，热胀冷缩极为剧烈。刚烫完的几分钟内若不施加平整外力，热应力会使边缘迅速卷翘！
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <h4>立刻平移并重压</h4>
+          <p>熨烫结束趁热（无需揭掉助烫纸），立刻将整张作品置于平整桌面，并在上方压上<strong>厚大字典、整摞书本或重物压板</strong>。</p>
+        </div>
+        <div class="step-item">
+          <h4>耐住性子自然冷却 15~30 分钟</h4>
+          <p>切忌在温热时提前拿掉重物或用手反复把玩。必须等待内部完全散至室温后再揭开助烫纸，即可获得平整如镜的完美拼豆作品！</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 避坑 Q&A -->
+    <section class="guide-section">
+      <div class="section-badge-title">
+        <span class="badge-num">05</span>
+        <h2 class="badge-title-text">避坑指南：常见翻车问题与补救技巧</h2>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-card">
+          <div class="faq-q">Q: 熨烫后拼豆轻易散开/掉豆？</div>
+          <p class="faq-a">A: 边缘受热时间不足或温度偏低导致没有形成有效粘连层。重新盖好助烫纸，重点在松动边缘打圈补烫 10~15 秒后重新压平。</p>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q">Q: 助烫纸粘在豆子上撕不下来？</div>
+          <p class="faq-a">A: 千万不能硬扯！这是温度过高导致的。等作品彻底完全冷却至常温后，顺着一个角落轻轻慢撕即可完整脱离。</p>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q">Q: 作品已经翘曲变弯了怎么救？</div>
+          <p class="faq-a">A: 重新盖上助烫纸，用熨斗在中温下将弯曲作品整体回温熨热至微软状态，立刻重新移入厚书下重压 20 分钟即可再次平整。</p>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-q">Q: 为什么熨烫出来豆子有的扁有的高？</div>
+          <p class="faq-a">A: 手部用力不均或熨斗底板不平。熨烫时只需轻轻带过匀速画圈，依靠热量传导自然融化，切忌手动使劲下压。</p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px;">
+        <a href="create.html" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px; text-decoration: none; font-weight: 700;">
+          🎨 已经掌握技巧？去工坊设计图纸 →
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
+    try { injectChrome('tutorial'); } catch (e) { console.warn(e); }
+  </script>
+</body>
+</html>
