@@ -93,12 +93,52 @@
       border-radius: 8px;
       font-size: 13px;
     }
+
+    /* 指南卡片样式 */
+    .guide-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .guide-item {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .guide-item:hover {
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+    .guide-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0d9488;
+      font-family: monospace, sans-serif;
+      min-width: 36px;
+    }
+    .guide-text {
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .guide-text strong {
+      color: var(--text-main);
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main class="create-container">
+    <!-- 主设计工坊 -->
     <section class="panel-card">
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
       <div class="control-row">
@@ -142,10 +182,41 @@
       <!-- 用色明细展示 -->
       <div id="stats"></div>
 
-      <!-- 导出 -->
+      <!-- 导出选项 -->
       <div style="display: flex; gap: 14px; margin-top: 24px;">
         <button id="export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (PNG)</button>
         <button id="export-csv" class="btn" type="button">🗺️ 导出图纸网格矩阵 (CSV 色号对应位置)</button>
+      </div>
+    </section>
+
+    <!-- 图片转像素画使用指南 -->
+    <section class="panel-card">
+      <div style="margin-bottom: 8px;">
+        <span style="font-size: 13px; font-weight: 700; color: #0d9488; letter-spacing: 0.5px;">图片转像素画</span>
+        <h3 style="margin: 4px 0 0 0; color: var(--text-main); font-size: 20px;">如何得到可用的图片转像素画结果</h3>
+      </div>
+
+      <div class="guide-box">
+        <div class="guide-item">
+          <span class="guide-num">01</span>
+          <p class="guide-text"><strong>先确定用途。</strong> 头像和插画可以保留更多细节；贴图、瓦片和方块参考通常需要更强的简化。</p>
+        </div>
+        <div class="guide-item">
+          <span class="guide-num">02</span>
+          <p class="guide-text"><strong>调整像素尺寸，直到主体一眼能看懂。</strong> 如果结果太碎，就调大像素尺寸；如果主体消失，就调小像素尺寸。</p>
+        </div>
+        <div class="guide-item">
+          <span class="guide-num">03</span>
+          <p class="guide-text"><strong>先调亮度、对比度和饱和度，再套用调色板。</strong> 原图明暗关系清楚时，调色板映射会更稳定。</p>
+        </div>
+        <div class="guide-item">
+          <span class="guide-num">04</span>
+          <p class="guide-text"><strong>只有在需要受限色彩风格时才开启套用调色板。</strong> 原图色预览、快速草稿或准备手动重绘的图片，可以先保持关闭。</p>
+        </div>
+        <div class="guide-item">
+          <span class="guide-num">05</span>
+          <p class="guide-text"><strong>小图 PNG 用于真实像素尺寸；大图 PNG 用于分享预览、网格参考或逐格重建。</strong></p>
+        </div>
       </div>
     </section>
 
@@ -267,7 +338,6 @@
         const pHeight = found.matrix.length;
         const pWidth = found.matrix[0].length;
 
-        // 生成离屏像素图片
         const pCanvas = document.createElement('canvas');
         pCanvas.width = pWidth;
         pCanvas.height = pHeight;
@@ -335,7 +405,6 @@
       return matched;
     }
 
-    // 核心转换：支持最近邻插值缩放，保持像素锐利不模糊
     function processImage() {
       if (!currentImg) return;
       statusText.textContent = '正在实时缩放与转换拼豆图纸...';
@@ -348,7 +417,7 @@
       offCanvas.width = targetWidth;
       offCanvas.height = targetHeight;
       const offCtx = offCanvas.getContext('2d');
-      offCtx.imageSmoothingEnabled = false; // 禁用平滑，保证像素图形边缘锐利
+      offCtx.imageSmoothingEnabled = false;
       offCtx.drawImage(currentImg, 0, 0, targetWidth, targetHeight);
 
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
@@ -394,7 +463,6 @@
       statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色色板)`;
     }
 
-    // 渲染双画布
     function renderCanvases() {
       if (gridData.length === 0) return;
       const height = gridData.length;
@@ -406,7 +474,7 @@
 
       const cellSize = 30;
 
-      // 1. 左侧纯色实体拼豆画板（暗色模式自适应背景，纯色实体无孔洞）
+      // 1. 左侧纯色实体拼豆画板
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -439,7 +507,7 @@
         }
       }
 
-      // 2. 右侧色号对照图纸（标尺坐标与编号）
+      // 2. 右侧色号对照图纸
       const ruler = 28;
       schematicCanvas.width = width * cellSize + ruler;
       schematicCanvas.height = height * cellSize + ruler;
@@ -492,7 +560,6 @@
       }
     }
 
-    // 监听暗黑主题切换并即时重绘画布
     const observer = new MutationObserver(() => renderCanvases());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
@@ -523,7 +590,6 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出超清 PNG
     exportPngBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const link = document.createElement('a');
@@ -532,7 +598,6 @@
       link.click();
     });
 
-    // 导出图纸网格色号矩阵 (CSV 格式对应色号矩阵位置)
     exportCsvBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const height = gridData.length;
