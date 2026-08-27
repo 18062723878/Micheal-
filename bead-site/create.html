@@ -20,6 +20,8 @@
       border: 1px solid var(--border-color);
       margin-bottom: 24px;
     }
+
+    /* 顶部主控制栏 */
     .control-row {
       display: flex;
       flex-wrap: wrap;
@@ -27,6 +29,50 @@
       align-items: center;
       margin: 16px 0;
     }
+
+    /* 参数滑块面板 (像素尺寸/亮度/对比度/饱和度) */
+    .filter-controls-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slider-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .slider-val-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+      font-weight: 700;
+      min-width: 38px;
+      text-align: center;
+    }
+    .slider-item input[type="range"] {
+      width: 100%;
+    }
+
+    /* 画布排版 */
     .canvas-row {
       display: flex;
       flex-wrap: wrap;
@@ -61,6 +107,7 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
       background: var(--canvas-bg);
     }
+
     .stats-table {
       width: 100%;
       border-collapse: collapse;
@@ -94,7 +141,7 @@
       font-size: 13px;
     }
 
-    /* 指南卡片样式 */
+    /* 指南板块 */
     .guide-box {
       display: flex;
       flex-direction: column;
@@ -109,7 +156,7 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 16px 20px;
-      transition: border-color 0.2s, transform 0.2s;
+      transition: transform 0.2s, border-color 0.2s;
     }
     .guide-item:hover {
       border-color: var(--primary);
@@ -119,7 +166,7 @@
       font-size: 24px;
       font-weight: 800;
       color: #0d9488;
-      font-family: monospace, sans-serif;
+      font-family: monospace;
       min-width: 36px;
     }
     .guide-text {
@@ -128,19 +175,16 @@
       line-height: 1.6;
       margin: 0;
     }
-    .guide-text strong {
-      color: var(--text-main);
-      font-weight: 700;
-    }
   </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main class="create-container">
-    <!-- 主设计工坊 -->
     <section class="panel-card">
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
+
+      <!-- 主控制条 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
           📁 上传图片 / 更换图片
@@ -149,25 +193,57 @@
         <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           <input id="bg-toggle" type="checkbox" /> 智能抠除背景色
         </label>
-        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-main);">
-          <label>板宽：<span id="board-width-val" style="font-weight: 700; color: var(--primary);">30</span> 格</label>
-          <input id="board-width" type="range" min="10" max="80" step="1" value="30" />
-        </div>
         <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           选色板：
           <select id="palette-select" class="form-select">
             <option value="artkal">Artkal 旗舰 72 色板</option>
-            <option value="perler">Perler 经典常用 48 色</option>
+            <option value="perler">Perler 经典 48 色板</option>
             <option value="pastel">马卡龙少女甜系 32 色</option>
             <option value="morandi">莫兰迪高级灰 24 色</option>
             <option value="retro">复古像素 16 色</option>
           </select>
         </label>
+        <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
+      </div>
+
+      <!-- 新增：像素尺寸、亮度、对比度、饱和度微调面板 -->
+      <div class="filter-controls-panel">
+        <div class="slider-item">
+          <div class="slider-header">
+            <span class="slider-title">像素尺寸 (板宽)</span>
+            <span id="board-width-val" class="slider-val-box">30px</span>
+          </div>
+          <input id="board-width" type="range" min="10" max="80" step="1" value="30" />
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span class="slider-title">亮度</span>
+            <span id="brightness-val" class="slider-val-box">0</span>
+          </div>
+          <input id="brightness-range" type="range" min="-100" max="100" step="1" value="0" />
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span class="slider-title">对比度</span>
+            <span id="contrast-val" class="slider-val-box">0</span>
+          </div>
+          <input id="contrast-range" type="range" min="-100" max="100" step="1" value="0" />
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span class="slider-title">饱和度</span>
+            <span id="saturate-val" class="slider-val-box">0</span>
+          </div>
+          <input id="saturate-range" type="range" min="-100" max="100" step="1" value="0" />
+        </div>
       </div>
 
       <p id="convert-status" style="color: var(--text-muted); font-weight: 500; margin: 4px 0;"></p>
 
-      <!-- 双画板联动展示 -->
+      <!-- 双画板联动 -->
       <div class="canvas-row">
         <div class="canvas-box">
           <span class="canvas-label">✨ 纯色实体拼豆效果（暗色模式纯净自适应）</span>
@@ -189,10 +265,10 @@
       </div>
     </section>
 
-    <!-- 图片转像素画使用指南 -->
+    <!-- 图片转像素画指南 -->
     <section class="panel-card">
       <div style="margin-bottom: 8px;">
-        <span style="font-size: 13px; font-weight: 700; color: #0d9488; letter-spacing: 0.5px;">图片转像素画</span>
+        <span style="font-size: 13px; font-weight: 700; color: #0d9488;">图片转像素画</span>
         <h3 style="margin: 4px 0 0 0; color: var(--text-main); font-size: 20px;">如何得到可用的图片转像素画结果</h3>
       </div>
 
@@ -223,7 +299,7 @@
     <!-- 快捷入口 -->
     <section class="panel-card">
       <h3 style="margin-top: 0; color: var(--text-main);">从白板自由创作</h3>
-      <p style="color: var(--text-muted); font-size: 14px;">打开独立像素画板自由涂鸦绘制，支持多种工具与用色实时统计。</p>
+      <p style="color: var(--text-muted); font-size: 14px;">打开独立像素画板自由涂鸦绘制，支持画笔、微调滤镜与用色实时统计。</p>
       <a href="whiteboard.html" class="btn btn-primary" style="text-decoration: none;">打开白板编辑器 →</a>
     </section>
   </main>
@@ -319,8 +395,6 @@
 
     const uploadInput = document.getElementById('upload-input');
     const bgToggle = document.getElementById('bg-toggle');
-    const boardWidthInput = document.getElementById('board-width');
-    const boardWidthVal = document.getElementById('board-width-val');
     const paletteSelect = document.getElementById('palette-select');
     const statusText = document.getElementById('convert-status');
     const boardCanvas = document.getElementById('board-canvas');
@@ -329,7 +403,18 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
-    // 载入 URL 传入的图纸并构建动态图像源
+    // 图像调节滑块元素
+    const boardWidthInput = document.getElementById('board-width');
+    const boardWidthVal = document.getElementById('board-width-val');
+    const brightnessRange = document.getElementById('brightness-range');
+    const brightnessVal = document.getElementById('brightness-val');
+    const contrastRange = document.getElementById('contrast-range');
+    const contrastVal = document.getElementById('contrast-val');
+    const saturateRange = document.getElementById('saturate-range');
+    const saturateVal = document.getElementById('saturate-val');
+    const btnResetFilters = document.getElementById('btn-reset-filters');
+
+    // 载入 URL 传入图纸
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
     if (patternId) {
@@ -357,9 +442,9 @@
         img.onload = () => {
           currentImg = img;
           boardWidthInput.value = pWidth;
-          boardWidthVal.textContent = pWidth;
+          boardWidthVal.textContent = `${pWidth}px`;
           processImage();
-          statusText.textContent = `已载入图纸：「${found.title}」(${pWidth}×${pHeight} 网格，可自由滑动调节板宽)`;
+          statusText.textContent = `已载入图纸：「${found.title}」(${pWidth}×${pHeight} 网格，可自由滑动调节参数)`;
         };
         img.src = pCanvas.toDataURL();
       }
@@ -380,8 +465,31 @@
       reader.readAsDataURL(file);
     });
 
+    // 监听滑块并更新数字框
     boardWidthInput.addEventListener('input', (e) => {
-      boardWidthVal.textContent = e.target.value;
+      boardWidthVal.textContent = `${e.target.value}px`;
+      if (currentImg) processImage();
+    });
+
+    brightnessRange.addEventListener('input', (e) => {
+      brightnessVal.textContent = e.target.value;
+      if (currentImg) processImage();
+    });
+
+    contrastRange.addEventListener('input', (e) => {
+      contrastVal.textContent = e.target.value;
+      if (currentImg) processImage();
+    });
+
+    saturateRange.addEventListener('input', (e) => {
+      saturateVal.textContent = e.target.value;
+      if (currentImg) processImage();
+    });
+
+    btnResetFilters.addEventListener('click', () => {
+      brightnessRange.value = 0; brightnessVal.textContent = '0';
+      contrastRange.value = 0; contrastVal.textContent = '0';
+      saturateRange.value = 0; saturateVal.textContent = '0';
       if (currentImg) processImage();
     });
 
@@ -405,9 +513,10 @@
       return matched;
     }
 
+    // 核心转换：应用亮度/对比度/饱和度与最近邻插值
     function processImage() {
       if (!currentImg) return;
-      statusText.textContent = '正在实时缩放与转换拼豆图纸...';
+      statusText.textContent = '正在实时渲染拼豆图纸...';
 
       const targetWidth = parseInt(boardWidthInput.value, 10);
       const aspectRatio = (currentImg.naturalHeight || currentImg.height) / (currentImg.naturalWidth || currentImg.width);
@@ -418,6 +527,13 @@
       offCanvas.height = targetHeight;
       const offCtx = offCanvas.getContext('2d');
       offCtx.imageSmoothingEnabled = false;
+
+      // 应用 CSS Filter
+      const bVal = 100 + parseInt(brightnessRange.value, 10);
+      const cVal = 100 + parseInt(contrastRange.value, 10);
+      const sVal = 100 + parseInt(saturateRange.value, 10);
+      offCtx.filter = `brightness(${bVal}%) contrast(${cVal}%) saturate(${sVal}%)`;
+
       offCtx.drawImage(currentImg, 0, 0, targetWidth, targetHeight);
 
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
@@ -474,7 +590,7 @@
 
       const cellSize = 30;
 
-      // 1. 左侧纯色实体拼豆画板
+      // 1. 左侧纯色实体拼豆
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
