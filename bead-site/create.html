@@ -25,9 +25,23 @@
     .control-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
       margin: 16px 0;
+    }
+
+    /* 外部图库引导横幅 */
+    .external-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(6, 182, 212, 0.08));
+      border: 1px dashed var(--primary);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     /* 参数滑块面板 (像素尺寸/亮度/对比度/饱和度) */
@@ -132,7 +146,7 @@
       margin-right: 6px;
       border: 1px solid rgba(0, 0, 0, 0.2);
     }
-    .form-select {
+    .form-select, .form-input {
       background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border-color);
@@ -182,17 +196,38 @@
 
   <main class="create-container">
     <section class="panel-card">
+      <!-- 外部图库快速联动横幅 -->
+      <div class="external-banner">
+        <div>
+          <strong style="color: var(--text-main); font-size: 15px;">🌐 需要海量现成拼豆灵感与官方图纸？</strong>
+          <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 13px;">
+            在 PerlerBeads 图库找到喜爱的图纸后，可直接<strong>复制图片链接</strong>粘贴到下方，或下载后直接上传导入！
+          </p>
+        </div>
+        <a href="https://perlerbeads.net/zh/gallery" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; font-size: 13px;">
+          前往 PerlerBeads 图纸大全 ↗
+        </a>
+      </div>
+
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
 
-      <!-- 主控制条 -->
+      <!-- 主控制条 (支持本地上传 + 网络链接直接导入) -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
-          📁 上传图片 / 更换图片
+          📁 上传本地图片
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
+        
+        <!-- 网络图片一键导入输入组 -->
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <input id="url-input" class="form-input" type="url" placeholder="粘贴外部图纸/图片链接 (URL)..." style="width: 240px;" />
+          <button id="btn-import-url" class="btn" type="button">🔗 导入网络图</button>
+        </div>
+
         <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           <input id="bg-toggle" type="checkbox" /> 智能抠除背景色
         </label>
+
         <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           选色板：
           <select id="palette-select" class="form-select">
@@ -203,10 +238,11 @@
             <option value="retro">复古像素 16 色</option>
           </select>
         </label>
+
         <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
       </div>
 
-      <!-- 新增：像素尺寸、亮度、对比度、饱和度微调面板 -->
+      <!-- 参数微调面板 -->
       <div class="filter-controls-panel">
         <div class="slider-item">
           <div class="slider-header">
@@ -265,7 +301,7 @@
       </div>
     </section>
 
-    <!-- 图片转像素画指南 -->
+    <!-- 图片转像素画使用指南 -->
     <section class="panel-card">
       <div style="margin-bottom: 8px;">
         <span style="font-size: 13px; font-weight: 700; color: #0d9488;">图片转像素画</span>
@@ -394,6 +430,8 @@
     let gridData = [];
 
     const uploadInput = document.getElementById('upload-input');
+    const urlInput = document.getElementById('url-input');
+    const btnImportUrl = document.getElementById('btn-import-url');
     const bgToggle = document.getElementById('bg-toggle');
     const paletteSelect = document.getElementById('palette-select');
     const statusText = document.getElementById('convert-status');
@@ -403,7 +441,6 @@
     const exportPngBtn = document.getElementById('export-png');
     const exportCsvBtn = document.getElementById('export-csv');
 
-    // 图像调节滑块元素
     const boardWidthInput = document.getElementById('board-width');
     const boardWidthVal = document.getElementById('board-width-val');
     const brightnessRange = document.getElementById('brightness-range');
@@ -414,15 +451,35 @@
     const saturateVal = document.getElementById('saturate-val');
     const btnResetFilters = document.getElementById('btn-reset-filters');
 
-    // 载入 URL 传入图纸
+    // 载入网络图片通用方法
+    function loadImgFromSrc(src, label = '网络图片') {
+      statusText.textContent = `正在读取并转换【${label}】...`;
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        currentImg = img;
+        processImage();
+        statusText.textContent = `已成功导入【${label}】，可自由滑动调节参数！`;
+      };
+      img.onerror = () => {
+        alert('无法直接加载该图片地址（可能存在防盗链限制）。建议右键保存图片后，点击【上传本地图片】即可！');
+        statusText.textContent = '导入失败，请尝试下载后本地上传。';
+      };
+      img.src = src;
+    }
+
+    // 检查 URL 携带的参数 (图纸 ID 或 图片 URL)
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
-    if (patternId) {
+    const extImageUrl = urlParams.get('imageUrl');
+
+    if (extImageUrl) {
+      loadImgFromSrc(decodeURIComponent(extImageUrl), '外部网络图纸');
+    } else if (patternId) {
       const found = ALL_PATTERNS.find(p => p.id === patternId);
       if (found) {
         const pHeight = found.matrix.length;
         const pWidth = found.matrix[0].length;
-
         const pCanvas = document.createElement('canvas');
         pCanvas.width = pWidth;
         pCanvas.height = pHeight;
@@ -450,22 +507,23 @@
       }
     }
 
+    // 粘贴网络图片导入
+    btnImportUrl.addEventListener('click', () => {
+      const url = urlInput.value.trim();
+      if (!url) return alert('请先粘贴图片或图纸的有效网络地址！');
+      loadImgFromSrc(url, '网络图纸');
+    });
+
     uploadInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          currentImg = img;
-          processImage();
-        };
-        img.src = event.target.result;
+        loadImgFromSrc(event.target.result, file.name);
       };
       reader.readAsDataURL(file);
     });
 
-    // 监听滑块并更新数字框
     boardWidthInput.addEventListener('input', (e) => {
       boardWidthVal.textContent = `${e.target.value}px`;
       if (currentImg) processImage();
@@ -513,7 +571,6 @@
       return matched;
     }
 
-    // 核心转换：应用亮度/对比度/饱和度与最近邻插值
     function processImage() {
       if (!currentImg) return;
       statusText.textContent = '正在实时渲染拼豆图纸...';
@@ -528,7 +585,6 @@
       const offCtx = offCanvas.getContext('2d');
       offCtx.imageSmoothingEnabled = false;
 
-      // 应用 CSS Filter
       const bVal = 100 + parseInt(brightnessRange.value, 10);
       const cVal = 100 + parseInt(contrastRange.value, 10);
       const sVal = 100 + parseInt(saturateRange.value, 10);
