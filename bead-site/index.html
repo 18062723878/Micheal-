@@ -55,21 +55,6 @@
       font-size: 14px;
       margin: 6px 0 0 0;
     }
-
-    /* 外部图库联动展区卡片 */
-    .more-library-card {
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(6, 182, 212, 0.08));
-      border: 1px dashed var(--primary);
-      border-radius: 16px;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 32px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
     .featured-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -140,9 +125,8 @@
       <p class="hero-subtitle">智能色号匹配 · 72色旗舰色板 · 一键导出 Ultra-HD 带标尺高清图纸与色号矩阵清单。</p>
       <div class="hero-buttons">
         <a href="create.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 15px; text-decoration: none; font-weight: 700;">🎨 开始自由创作</a>
-        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">✨ 浏览精选图纸库</a>
-        <a href="https://perlerbeads.net/zh/gallery" target="_blank" rel="noopener noreferrer" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: #06b6d4; color: #0891b2; font-weight: 700;">🌐 探索外部图库 ↗</a>
-        <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">📖 拼豆详细教程</a>
+        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">✨ 浏览潮流精选图纸库</a>
+        <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: var(--primary); color: var(--primary); font-weight: 700;">📖 拼豆详细教程</a>
       </div>
     </section>
 
@@ -150,31 +134,13 @@
     <section class="home-showcase">
       <div class="home-showcase-header">
         <div>
-          <h2>🔥 热门精选图纸</h2>
+          <h2>🔥 热门精选图纸 (网络爆款精选)</h2>
           <p>点击任意图纸即可直接载入创作工坊进行无级缩放微调与导出。</p>
         </div>
         <a href="inspiration.html" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 14px;">查看全部图纸 →</a>
       </div>
 
       <div class="featured-grid" id="featured-grid"></div>
-
-      <!-- 底部更多图纸引导 -->
-      <div class="more-library-card">
-        <div>
-          <h3 style="margin: 0 0 6px 0; color: var(--text-main); font-size: 18px;">🌐 想要探索更多全球玩家分享的图纸？</h3>
-          <p style="margin: 0; color: var(--text-muted); font-size: 14px;">
-            访问 PerlerBeads 免费图纸大全，挑选心仪图案后，直接复制图片链接到【创作工坊】即可一键生成属于你的专属拼装图纸！
-          </p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <a href="https://perlerbeads.net/zh/gallery" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px;">
-            前往图库浏览 ↗
-          </a>
-          <a href="create.html" class="btn" style="text-decoration: none; padding: 10px 20px;">
-            打开创作工坊导入 →
-          </a>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -191,7 +157,7 @@
       const w = matrix[0].length;
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
-      const cellSize = 16;
+      const cellSize = 12;
 
       canvas.width = w * cellSize;
       canvas.height = h * cellSize;
