@@ -29,6 +29,72 @@
       margin: 16px 0;
     }
 
+    /* 网络图片输入与帮助区域 */
+    .url-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+    .help-icon-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .help-icon-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    /* 弹出提示卡片 */
+    .url-help-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      width: 320px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      z-index: 100;
+    }
+    .url-help-popover.show {
+      display: block;
+    }
+    .url-help-popover h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+    .url-help-popover ol {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .url-help-popover .tip-box {
+      margin-top: 10px;
+      padding: 8px 10px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-left: 3px solid var(--accent);
+    }
+
+    /* 参数滑块面板 */
     .filter-controls-panel {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -183,13 +249,29 @@
       <!-- 控制条 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
-          📁 上传图片 / 更换图片
+          📁 上传本地图片
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
         
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <input id="url-input" class="form-input" type="url" placeholder="粘贴网络图片地址..." style="width: 220px;" />
+        <!-- 网络图片输入组与新手说明按钮 -->
+        <div class="url-input-wrap">
+          <input id="url-input" class="form-input" type="url" placeholder="粘贴图片链接..." style="width: 200px;" />
           <button id="btn-import-url" class="btn" type="button">🔗 导入网络图</button>
+          <button id="btn-url-help" class="help-icon-btn" type="button" title="点击查看使用说明">❓ 怎么填？</button>
+          
+          <!-- 悬浮新手指南 -->
+          <div id="url-help-popover" class="url-help-popover">
+            <h4>💡 怎么获取正确的图片地址？</h4>
+            <ol>
+              <li>在网页上找到你想做的图片。</li>
+              <li>在图片上<strong>点鼠标右键</strong>，选择<strong>「复制图片地址」</strong>（手机上是长按图片点复制链接）。</li>
+              <li>粘贴到左边输入框，点击【导入网络图】即可。</li>
+            </ol>
+            <div class="tip-box">
+              <strong>⚠️ 打不开怎么办？</strong><br>
+              部分网站有防盗链，直接右键把图片<strong>「保存到电脑/手机」</strong>，然后点左侧的<strong>【上传本地图片】</strong>即可 100% 成功！
+            </div>
+          </div>
         </div>
 
         <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
@@ -210,7 +292,7 @@
         <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
       </div>
 
-      <!-- 参数调节 -->
+      <!-- 参数调节面板 -->
       <div class="filter-controls-panel">
         <div class="slider-item">
           <div class="slider-header">
@@ -400,6 +482,9 @@
     const uploadInput = document.getElementById('upload-input');
     const urlInput = document.getElementById('url-input');
     const btnImportUrl = document.getElementById('btn-import-url');
+    const btnUrlHelp = document.getElementById('btn-url-help');
+    const urlHelpPopover = document.getElementById('url-help-popover');
+
     const bgToggle = document.getElementById('bg-toggle');
     const paletteSelect = document.getElementById('palette-select');
     const statusText = document.getElementById('convert-status');
@@ -419,6 +504,17 @@
     const saturateVal = document.getElementById('saturate-val');
     const btnResetFilters = document.getElementById('btn-reset-filters');
 
+    // 切换帮助提示卡片显示
+    btnUrlHelp.addEventListener('click', (e) => {
+      e.stopPropagation();
+      urlHelpPopover.classList.toggle('show');
+    });
+    document.addEventListener('click', (e) => {
+      if (!urlHelpPopover.contains(e.target) && e.target !== btnUrlHelp) {
+        urlHelpPopover.classList.remove('show');
+      }
+    });
+
     function loadImgFromSrc(src, label = '网络图片') {
       statusText.textContent = `正在读取并转换【${label}】...`;
       const img = new Image();
@@ -426,11 +522,11 @@
       img.onload = () => {
         currentImg = img;
         processImage();
-        statusText.textContent = `已成功导入【${label}】，可自由滑动调节参数！`;
+        statusText.textContent = `已成功导入【${label}】，可滑动调节参数！`;
       };
       img.onerror = () => {
-        alert('该网络图片受到防盗链限制，请将其保存到本地后点击【上传本地图片】进行转换！');
-        statusText.textContent = '导入失败，请尝试本地上传。';
+        alert('抱歉，该网络图片地址无法直接读取（由于对方网站开启了防盗链拦截）。\n\n【解决方法】：请直接把该图片「保存到本地电脑/手机」，然后点击左侧的【📁 上传本地图片】即可 100% 成功导入！');
+        statusText.textContent = '导入失败，请下载该图片后使用「上传本地图片」功能。';
       };
       img.src = src;
     }
@@ -471,7 +567,7 @@
 
     btnImportUrl.addEventListener('click', () => {
       const url = urlInput.value.trim();
-      if (!url) return alert('请先粘贴图片的有效网络链接！');
+      if (!url) return alert('请先在输入框中粘贴图片链接！');
       loadImgFromSrc(url, '网络图纸');
     });
 
