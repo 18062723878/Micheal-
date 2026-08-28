@@ -21,7 +21,6 @@
       margin-bottom: 24px;
     }
 
-    /* 顶部主控制栏 */
     .control-row {
       display: flex;
       flex-wrap: wrap;
@@ -30,21 +29,6 @@
       margin: 16px 0;
     }
 
-    /* 外部图库引导横幅 */
-    .external-banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(6, 182, 212, 0.08));
-      border: 1px dashed var(--primary);
-      border-radius: 12px;
-      padding: 14px 20px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    /* 参数滑块面板 (像素尺寸/亮度/对比度/饱和度) */
     .filter-controls-panel {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -86,7 +70,6 @@
       width: 100%;
     }
 
-    /* 画布排版 */
     .canvas-row {
       display: flex;
       flex-wrap: wrap;
@@ -155,7 +138,6 @@
       font-size: 13px;
     }
 
-    /* 指南板块 */
     .guide-box {
       display: flex;
       flex-direction: column;
@@ -196,31 +178,17 @@
 
   <main class="create-container">
     <section class="panel-card">
-      <!-- 外部图库快速联动横幅 -->
-      <div class="external-banner">
-        <div>
-          <strong style="color: var(--text-main); font-size: 15px;">🌐 需要海量现成拼豆灵感与官方图纸？</strong>
-          <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 13px;">
-            在 PerlerBeads 图库找到喜爱的图纸后，可直接<strong>复制图片链接</strong>粘贴到下方，或下载后直接上传导入！
-          </p>
-        </div>
-        <a href="https://perlerbeads.net/zh/gallery" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-decoration: none; font-size: 13px;">
-          前往 PerlerBeads 图纸大全 ↗
-        </a>
-      </div>
-
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
 
-      <!-- 主控制条 (支持本地上传 + 网络链接直接导入) -->
+      <!-- 控制条 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
-          📁 上传本地图片
+          📁 上传图片 / 更换图片
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
         
-        <!-- 网络图片一键导入输入组 -->
         <div style="display: flex; align-items: center; gap: 6px;">
-          <input id="url-input" class="form-input" type="url" placeholder="粘贴外部图纸/图片链接 (URL)..." style="width: 240px;" />
+          <input id="url-input" class="form-input" type="url" placeholder="粘贴网络图片地址..." style="width: 220px;" />
           <button id="btn-import-url" class="btn" type="button">🔗 导入网络图</button>
         </div>
 
@@ -242,7 +210,7 @@
         <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
       </div>
 
-      <!-- 参数微调面板 -->
+      <!-- 参数调节 -->
       <div class="filter-controls-panel">
         <div class="slider-item">
           <div class="slider-header">
@@ -301,7 +269,7 @@
       </div>
     </section>
 
-    <!-- 图片转像素画使用指南 -->
+    <!-- 图片转像素画指南 -->
     <section class="panel-card">
       <div style="margin-bottom: 8px;">
         <span style="font-size: 13px; font-weight: 700; color: #0d9488;">图片转像素画</span>
@@ -451,7 +419,6 @@
     const saturateVal = document.getElementById('saturate-val');
     const btnResetFilters = document.getElementById('btn-reset-filters');
 
-    // 载入网络图片通用方法
     function loadImgFromSrc(src, label = '网络图片') {
       statusText.textContent = `正在读取并转换【${label}】...`;
       const img = new Image();
@@ -462,20 +429,15 @@
         statusText.textContent = `已成功导入【${label}】，可自由滑动调节参数！`;
       };
       img.onerror = () => {
-        alert('无法直接加载该图片地址（可能存在防盗链限制）。建议右键保存图片后，点击【上传本地图片】即可！');
-        statusText.textContent = '导入失败，请尝试下载后本地上传。';
+        alert('该网络图片受到防盗链限制，请将其保存到本地后点击【上传本地图片】进行转换！');
+        statusText.textContent = '导入失败，请尝试本地上传。';
       };
       img.src = src;
     }
 
-    // 检查 URL 携带的参数 (图纸 ID 或 图片 URL)
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
-    const extImageUrl = urlParams.get('imageUrl');
-
-    if (extImageUrl) {
-      loadImgFromSrc(decodeURIComponent(extImageUrl), '外部网络图纸');
-    } else if (patternId) {
+    if (patternId) {
       const found = ALL_PATTERNS.find(p => p.id === patternId);
       if (found) {
         const pHeight = found.matrix.length;
@@ -501,16 +463,15 @@
           boardWidthInput.value = pWidth;
           boardWidthVal.textContent = `${pWidth}px`;
           processImage();
-          statusText.textContent = `已载入图纸：「${found.title}」(${pWidth}×${pHeight} 网格，可自由滑动调节参数)`;
+          statusText.textContent = `已载入精选图纸：「${found.title}」(${pWidth}×${pHeight} 网格)`;
         };
         img.src = pCanvas.toDataURL();
       }
     }
 
-    // 粘贴网络图片导入
     btnImportUrl.addEventListener('click', () => {
       const url = urlInput.value.trim();
-      if (!url) return alert('请先粘贴图片或图纸的有效网络地址！');
+      if (!url) return alert('请先粘贴图片的有效网络链接！');
       loadImgFromSrc(url, '网络图纸');
     });
 
