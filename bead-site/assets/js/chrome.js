@@ -33,7 +33,7 @@ function updateThemeButton() {
   }
 }
 
-// 注入赞助弹窗 DOM
+// 注入赞助弹窗 DOM 与交互逻辑
 function injectSponsorModal() {
   if (document.getElementById('sponsor-modal')) return;
 
@@ -42,55 +42,50 @@ function injectSponsorModal() {
       <div class="sponsor-dialog">
         <button id="sponsor-close-btn" class="sponsor-close">&times;</button>
         
-        <!-- 阶段 1：赞助支付展示区 -->
+        <!-- 阶段 1：扫码赞助界面 -->
         <div id="sponsor-step-pay">
-          <div style="text-align: center; margin-bottom: 18px;">
+          <div style="text-align: center; margin-bottom: 16px;">
             <div style="font-size: 32px; margin-bottom: 4px;">☕</div>
             <h3 style="margin: 0; color: var(--text-main); font-size: 20px;">请 Micheal 喝杯热咖啡</h3>
             <p style="color: var(--text-muted); font-size: 13px; margin: 8px auto 0; max-width: 380px; line-height: 1.6;">
-              如果这个拼豆工具为你的创作带来了便利与灵感，欢迎赞助支持！你的每一份鼓励都是网站持续维护与扩充图库的最大动力～
+              如果这个拼豆工具为你的创作带来了便利与灵感，欢迎赞助支持！你的鼓励是网站持续更新的最大动力～
             </p>
             <div class="sponsor-amount-badge">推荐赞助：<strong>¥ 5.00</strong> 元</div>
           </div>
 
-          <!-- 支付通道切换 -->
+          <!-- 支付方式切换 -->
           <div class="sponsor-tabs">
             <button id="tab-wechat" class="sponsor-tab active" type="button">💚 微信支付</button>
             <button id="tab-alipay" class="sponsor-tab" type="button">💙 支付宝</button>
           </div>
 
-          <!-- 二维码展示区域 (可替换为你的真实收款码图片) -->
+          <!-- 二维码图片展示区域 -->
           <div class="sponsor-qr-box">
-            <div id="qr-wechat" class="qr-panel active">
-              <div class="qr-placeholder">
-                <div style="font-size: 40px; margin-bottom: 8px;">📱</div>
-                <span style="font-weight: 700; color: #16a34a;">微信扫码赞助 ¥5</span>
-                <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">(可在代码中将此处替换为你的微信收款码)</span>
-              </div>
+            <div id="qr-wechat" class="qr-panel active" style="text-align: center;">
+              <img src="assets/images/wechat-pay.png" alt="微信收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>📱 请将微信收款码放置于<br><code>assets/images/wechat-pay.png</code></div>'" style="width: 190px; height: 190px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); background: #ffffff; padding: 6px;" />
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 700;">打开微信 [扫一扫] 赞助 ¥5</p>
             </div>
-            <div id="qr-alipay" class="qr-panel">
-              <div class="qr-placeholder">
-                <div style="font-size: 40px; margin-bottom: 8px;">⚡</div>
-                <span style="font-weight: 700; color: #2563eb;">支付宝扫码赞助 ¥5</span>
-                <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">(可在代码中将此处替换为你的支付宝收款码)</span>
-              </div>
+            
+            <div id="qr-alipay" class="qr-panel" style="text-align: center;">
+              <img src="assets/images/alipay.png" alt="支付宝收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>⚡ 请将支付宝收款码放置于<br><code>assets/images/alipay.png</code></div>'" style="width: 190px; height: 190px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); background: #ffffff; padding: 6px;" />
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #2563eb; font-weight: 700;">打开支付宝 [扫一扫] 赞助 ¥5</p>
             </div>
           </div>
 
-          <div style="margin-top: 20px; text-align: center;">
+          <div style="margin-top: 18px; text-align: center;">
             <button id="btn-confirm-sponsored" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">
               ✨ 我已完成赞助
             </button>
           </div>
         </div>
 
-        <!-- 阶段 2：赞助感谢回馈区 -->
+        <!-- 阶段 2：赞助感谢回馈界面 -->
         <div id="sponsor-step-thanks" style="display: none; text-align: center; padding: 20px 10px;">
-          <div style="font-size: 48px; margin-bottom: 12px; animation: bounce 1s infinite;">🎉</div>
+          <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
           <h3 style="color: var(--text-main); font-size: 22px; margin: 0 0 10px 0;">非常感谢你的温暖赞助！</h3>
           <div class="sponsor-thanks-card">
             <p style="margin: 0 0 10px 0; font-size: 14px; line-height: 1.7; color: var(--text-main);">
-              “已经收到你的咖啡支持啦！因为有你的认可，代码的每个像素都变得更加有意义。我会继续努力优化设计工坊、增加更多有趣的图纸功能！”
+              “已经收到你的咖啡支持啦！因为有你的认可，每一行代码都变得更加有温度。我会继续努力优化设计工坊与图纸系统！”
             </p>
             <p style="margin: 0; font-size: 13px; font-weight: 700; color: var(--primary);">
               — Micheal 敬上 ❤️ 祝你拼出独一无二的精美作品！
@@ -107,7 +102,7 @@ function injectSponsorModal() {
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-  // 绑定弹窗事件
+  // 绑定弹窗切换与感谢逻辑
   const modal = document.getElementById('sponsor-modal');
   const closeBtn = document.getElementById('sponsor-close-btn');
   const tabWechat = document.getElementById('tab-wechat');
@@ -167,7 +162,6 @@ export function injectChrome(activePage = 'home') {
           <a href="inspiration.html" style="color: ${activePage === 'inspiration' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'inspiration' ? '700' : '500'}; font-size: 14px;">灵感</a>
           <a href="tutorial.html" style="color: ${activePage === 'tutorial' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'tutorial' ? '700' : '500'}; font-size: 14px;">教程</a>
           
-          <!-- 赞助触发按钮 -->
           <button id="btn-open-sponsor" class="sponsor-nav-btn" type="button">
             ☕ 请喝咖啡
           </button>
