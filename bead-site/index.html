@@ -122,10 +122,10 @@
   <main>
     <section class="hero-section">
       <h1 class="hero-title">将喜爱的图片<br>变成清晰可拼的拼豆图纸</h1>
-      <p class="hero-subtitle">智能色号匹配 · 72色旗舰色板 · 一键导出 Ultra-HD 带标尺高清图纸与色号矩阵清单。</p>
+      <p class="hero-subtitle">智能色号匹配 · 规范国内色卡 · 一键导出 4K 超清带标尺图纸与矩阵清单。</p>
       <div class="hero-buttons">
         <a href="create.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 15px; text-decoration: none; font-weight: 700;">🎨 开始自由创作</a>
-        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">✨ 浏览潮流精选图纸库</a>
+        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">✨ 浏览精选图纸大全</a>
         <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: var(--primary); color: var(--primary); font-weight: 700;">📖 拼豆详细教程</a>
       </div>
     </section>
@@ -157,7 +157,7 @@
       const w = matrix[0].length;
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
-      const cellSize = 12;
+      const cellSize = 16;
 
       canvas.width = w * cellSize;
       canvas.height = h * cellSize;
@@ -173,7 +173,7 @@
           const cy = y * cellSize + cellSize / 2;
           ctx.beginPath();
           ctx.arc(cx, cy, cellSize * 0.44, 0, Math.PI * 2);
-          ctx.fillStyle = bead.hex;
+          ctx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
           ctx.fill();
         }
       }
