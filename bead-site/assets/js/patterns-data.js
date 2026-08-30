@@ -243,21 +243,20 @@ const M_PALETTE = [
   { code: 'M15', name: '夜光金', hex: '#FEF08A', r: 254, g: 240, b: 138 }
 ];
 
-// 10. 88色经典盒装全谱系 (X1 ~ X88)
-const X88_PALETTE = Array.from({ length: 88 }, (_, i) => {
-  const code = `X${i + 1}`;
-  const allRef = [...H_PALETTE, ...A_PALETTE, ...B_PALETTE, ...C_PALETTE, ...D_PALETTE, ...E_PALETTE, ...F_PALETTE, ...G_PALETTE, ...M_PALETTE];
-  const ref = allRef[i % allRef.length];
-  return { code, name: `${code} ${ref.name}`, hex: ref.hex, r: ref.r, g: ref.g, b: ref.b };
-});
-
-// 组装 221 色豪华全套色板
+// 组装 221 色全套
 const FULL_221_PALETTE = [
   ...A_PALETTE, ...B_PALETTE, ...C_PALETTE, ...D_PALETTE,
   ...E_PALETTE, ...F_PALETTE, ...G_PALETTE, ...H_PALETTE, ...M_PALETTE
 ];
 
-// 组装 72 色标准常用版
+// 组装 88 色盒装经典版
+const X88_PALETTE = Array.from({ length: 88 }, (_, i) => {
+  const code = `X${i + 1}`;
+  const ref = FULL_221_PALETTE[i % FULL_221_PALETTE.length];
+  return { code, name: `${code} ${ref.name}`, hex: ref.hex, r: ref.r, g: ref.g, b: ref.b };
+});
+
+// 组装 72 色常用版
 const STD_72_PALETTE = [
   A_PALETTE[1], A_PALETTE[2], A_PALETTE[6], A_PALETTE[7], A_PALETTE[8], A_PALETTE[10], A_PALETTE[15], A_PALETTE[19], A_PALETTE[23],
   B_PALETTE[1], B_PALETTE[2], B_PALETTE[5], B_PALETTE[9], B_PALETTE[11], B_PALETTE[17], B_PALETTE[19], B_PALETTE[21], B_PALETTE[27], B_PALETTE[28],
@@ -271,9 +270,8 @@ const STD_72_PALETTE = [
 ];
 
 // 组装 144 色进阶版
-const ADV_144_PALETTE = FULL_221_PALETTE.filter((_, idx) => idx % 3 !== 0 || idx < 50);
+const ADV_144_PALETTE = FULL_221_PALETTE.filter((_, idx) => idx % 3 !== 0 || idx < 60);
 
-// 导出全站可引用的色板字典
 export const PALETTES = {
   standard72: STD_72_PALETTE,
   classic88: X88_PALETTE,
@@ -281,7 +279,7 @@ export const PALETTES = {
   full221: FULL_221_PALETTE
 };
 
-// 快捷单色映射（用于精选图纸构建）
+// 快捷单色映射字典
 export const C_MAP = {
   H1: H_PALETTE[0],  // 纯白
   H2: H_PALETTE[1],  // 浅灰
@@ -294,15 +292,18 @@ export const C_MAP = {
   A4: A_PALETTE[3],  // 明黄
   A7: A_PALETTE[6],  // 浅肤色
   A8: A_PALETTE[7],  // 蜜桃肤
+  A9: A_PALETTE[8],  // 浅橙
   A10: A_PALETTE[9], // 活力橙
   A20: A_PALETTE[19],// 金黄
 
   B2: B_PALETTE[1],  // 薄荷绿
   B4: B_PALETTE[3],  // 草绿
+  B6: B_PALETTE[5],  // 正绿
   B8: B_PALETTE[7],  // 墨绿
   B28: B_PALETTE[27],// 水绿
   B29: B_PALETTE[28],// 孔雀绿
 
+  C2: C_PALETTE[1],  // 浅天蓝
   C3: C_PALETTE[2],  // 天蓝
   C4: C_PALETTE[3],  // 亮天蓝
   C15: C_PALETTE[14],// 宝蓝
@@ -314,13 +315,16 @@ export const C_MAP = {
   D24: D_PALETTE[23],// 经典紫
   D26: D_PALETTE[25],// 星空深紫
 
+  E2: E_PALETTE[1],  // 极浅粉
   E3: E_PALETTE[2],  // 嫩粉
   E4: E_PALETTE[3],  // 少女粉
+  E5: E_PALETTE[4],  // 珊瑚粉
   E14: E_PALETTE[13],// 芭比粉
   E15: E_PALETTE[14],// 亮粉红
   E7: E_PALETTE[6],  // 玫红
 
   F5: F_PALETTE[4],  // 鲜红
+  F6: F_PALETTE[5],  // 朱红
   F7: F_PALETTE[6],  // 中国红
   F8: F_PALETTE[7],  // 深红
   F15: F_PALETTE[14],// 亮橙
@@ -332,12 +336,19 @@ export const C_MAP = {
   G19: G_PALETTE[18] // 摩卡棕
 };
 
-// 矩阵解析器
-function buildMatrix(rows, map) {
-  return rows.map(r => r.split('').map(char => map[char] || null));
+// ==========================================
+// 严密矩阵构建函数 (基于空格分词，杜绝拆字 bug)
+// ==========================================
+function buildMatrix(rows, cmap) {
+  return rows.map(r => {
+    const tokens = r.trim().split(/\s+/);
+    return tokens.map(t => (t === '.' || !t) ? null : (cmap[t] || null));
+  });
 }
 
-// 精选图纸数据库 (全部采用 A/B/C/D/E/F/G/H/M 标准色号)
+// ==========================================
+// 潮流精选图纸数据库 (100% 对应标准色卡)
+// ==========================================
 export const ALL_PATTERNS = [
   {
     id: 'kuromi-goth',
@@ -347,35 +358,29 @@ export const ALL_PATTERNS = [
     difficulty: '★★★★★',
     desc: '三丽鸥顶流库洛米，经典暗夜小恶魔头套与粉色骷髅标志。',
     matrix: buildMatrix([
-      "....H7................H7....",
-      "...H7H7..............H7H7...",
-      "..H7D26D7............H7D26D7..",
-      "..H7D26D7............H7D26D7..",
-      "..H7D26D7............H7D26D7..",
-      "...H7H7H7H7H7H7H7H7H7H7H7H7...",
-      "..H7D26D24D24D24D24D24D24D24D24D24D26H7..",
-      ".H7D26D24D24D24D24D24D24D24D24D24D24D24D26H7.",
-      ".H7D24D24D24D24D24D24D24D24D24D24D24D24D24D7.",
-      ".H7D24D24D24D24D24E14E14E14E14D24D24D24D24D7.",
-      ".H7D24D24D24D24E14E14E14E14E14E14D24D24D24D7.",
-      ".H7D24D24D24D24E14H7E14E14H7E14D24D24D24D7.",
-      ".H7D24D24D24D24E14E14E14E14E14E14D24D24D24D7.",
-      ".H7D24D24D24D24D24E14E14E14E14D24D24D24D24D7.",
-      ".H7D24D24D24H1H1H1H1H1H1H1H1H1H1D24D24D24D7.",
-      ".H7D24D24H1H1H1H1H1H1H1H1H1H1H1H1H1H1D24D7.",
-      ".H7H7D24H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1D24H7.",
-      "..H7H1H1H1H1H7H1H1H1H1H1H1H7H1H1H1H1H7...",
-      "..H7H1H1H1H1H7H1H1H1H1H1H1H7H1H1H1H1H7...",
-      "..H7H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H7...",
-      "..H7H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H7...",
-      "..H7H1H1H1H1H1H1E14E14E14E14H1H1H1H1H7...",
-      "...H7H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H7....",
-      "....H7H7H1H1H1H1H1H1H1H1H1H1H1H1H7H7.....",
-      "......H7H7H7H7H7H7H7H7H7H7H7H7H7H7......."
-    ], {
-      'H7': C_MAP.H7, 'H1': C_MAP.H1, 'D26': C_MAP.D26, 'D24': C_MAP.D24,
-      'D7': C_MAP.D26, 'E14': C_MAP.E14
-    })
+      ". . . H7 . . . . . . . . H7 . . .",
+      ". . H7 H7 . . . . . . . . H7 H7 . .",
+      ". H7 D26 D24 . . . . . . . . D24 D26 H7 .",
+      ". H7 D26 D24 . . . . . . . . D24 D26 H7 .",
+      ". H7 D26 D24 . . . . . . . . D24 D26 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7 .",
+      "H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7",
+      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7",
+      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7",
+      "H7 D24 D24 D24 E14 H7 E14 E14 H7 E14 D24 D24 D24 H7",
+      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7",
+      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7",
+      "H7 D24 D24 H1 H1 H1 H1 H1 H1 H1 H1 D24 D24 H7",
+      "H7 D24 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 D24 H7",
+      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 .",
+      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". H7 H1 H1 H1 E14 E14 E14 E14 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . .",
+      ". . . . . H7 H7 H7 H7 . . . . ."
+    ], C_MAP)
   },
   {
     id: 'chiikawa-happy',
@@ -385,27 +390,23 @@ export const ALL_PATTERNS = [
     difficulty: '★★★★☆',
     desc: '全网爆火的软萌吉伊卡哇，圆滚滚小身材与粉嫩腮红。',
     matrix: buildMatrix([
-      "......H7H7H7H7H7H7H7H7H7H7......",
-      "....H7H1H1H1H1H1H1H1H1H1H1H7....",
-      "...H7H1H1H1H1H1H1H1H1H1H1H1H1H7...",
-      "..H7H1H7H7H1H1H1H1H1H1H7H7H1H7..",
-      ".H7H1H1H1H7H1H1H1H1H1H7H1H1H1H7.",
-      ".H7H1H1H1H1H1H1H1H1H1H1H1H1H1H7.",
-      "H7H1H1H1H1H1H1H1H1H1H1H1H1H1H1H7",
-      "H7H1H7H7H1H1H1H1H1H1H1H7H7H1H1H7",
-      "H7H1H7H7H1H1H1H1H1H1H1H7H7H1H1H7",
-      "H7H1H1H1H1H1H7H7H7H1H1H1H1H1H1H7",
-      "H7H1E3E4E3H1H1H1H1H1H1E3E4E3H1H7",
-      "H7H1E3E4E3H1H1H1H1H1H1E3E4E3H1H7",
-      ".H7H1H1H1H1H1H1H1H1H1H1H1H1H1H7.",
-      "..H7H1H1H1H1H1H1H1H1H1H1H1H1H7..",
-      "...H7H7H1H1H1H1H1H1H1H1H1H7H7...",
-      "....H7H1H1H1H1H1H1H1H1H1H1H7....",
-      "...H7H1H1H1H1H1H1H1H1H1H1H1H7...",
-      "...H7H7H7H7H7H7H7H7H7H7H7H7H7..."
-    ], {
-      'H7': C_MAP.H7, 'H1': C_MAP.H1, 'E3': C_MAP.E3, 'E4': C_MAP.E4
-    })
+      ". . . . H7 H7 H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H1 H1 H1 H7 H7 H7 H7 H1 H1 H1 H1 H7",
+      "H7 H1 E3 E4 E3 H1 H1 H1 H1 E3 E4 E3 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . .",
+      ". . . . H7 H1 H1 H1 H1 H7 . . . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H7 . . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
   },
   {
     id: 'cinnamoroll',
@@ -415,21 +416,19 @@ export const ALL_PATTERNS = [
     difficulty: '★★★★☆',
     desc: '三丽鸥人气王大耳狗，如云朵般轻盈的大耳朵与湛蓝眼睛。',
     matrix: buildMatrix([
-      "H7..........................H7",
-      "H7H1H7......................H7H1H7",
-      "H7H1H1H7....................H7H1H1H7",
-      ".H7H1H1H7H7................H7H7H1H1H7.",
-      "..H7H1H1H1H7H7H7H7H7H7H7H7H7H1H1H1H7..",
-      "..H7H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H7..",
-      "...H7H1H1H1C3H1H1H1H1H1C3H1H1H1H7...",
-      "...H7H1H1H1C3H1H1H1H1H1C3H1H1H1H7...",
-      "...H7H1E3H1H1H1H1H1H1H1H1H1E3H1H7...",
-      "....H7H1H1H1H1H1H1H1H1H1H1H1H1H7....",
-      ".....H7H7H1H1H1H1H1H1H1H1H1H7H7.....",
-      ".......H7H7H7H7H7H7H7H7H7H7H7......."
-    ], {
-      'H7': C_MAP.H7, 'H1': C_MAP.H1, 'C3': C_MAP.C3, 'E3': C_MAP.E3
-    })
+      "H7 . . . . . . . . . . . . . . . . . . . . . . . . H7",
+      "H7 H1 H7 . . . . . . . . . . . . . . . . . . H7 H1 H7",
+      "H7 H1 H1 H7 . . . . . . . . . . . . . . . . H7 H1 H1 H7",
+      ". H7 H1 H1 H7 H7 . . . . . . . . . . H7 H7 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H7 H7 H7 H7 H7 H7 H7 H7 H1 H1 H1 H7 . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H1 H1 H1 C3 H1 H1 H1 H1 C3 H1 H1 H1 H7 . . .",
+      ". . . H7 H1 H1 H1 C3 H1 H1 H1 H1 C3 H1 H1 H1 H7 . . .",
+      ". . . H7 H1 E3 H1 H1 H1 H1 H1 H1 H1 H1 E3 H1 H7 . . .",
+      ". . . . H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 . . . .",
+      ". . . . . H7 H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 H7 . . . . .",
+      ". . . . . . . H7 H7 H7 H7 H7 H7 H7 H7 . . . . . . ."
+    ], C_MAP)
   },
   {
     id: 'wukong-head',
@@ -439,25 +438,21 @@ export const ALL_PATTERNS = [
     difficulty: '★★★★★',
     desc: '国产 3A 现象级神作齐天大圣，凤翅紫金冠与威严神韵。',
     matrix: buildMatrix([
-      "...........F7F7F7F7F7F7...........",
-      ".........F7F7F7F7F7F7F7F7.........",
-      ".......H7A20A20A20A20A20A20H7.......",
-      "......H7A20A4A4A4A4A4A20H7......",
-      ".....H7A20A4A4H7H7H7A4A4A20H7.....",
-      "....H7A4A4H7G17G17H7A4A4A20H7....",
-      "....H7A4A4H7G17G17G17H7A4A4A20H7....",
-      ".....H7H7H7G17G17G17G17H7H7H7H7......",
-      ".....H7A7A7G19G19A7A7G19G19A7A7H7.........",
-      "....H7A7A7H7A7H7A7A7H7A7H7A7A7H7........",
-      "...H7A7A7A7A7A7A7A7A7A7A7A7A7A7H7.......",
-      "....H7A7A7A7A7F7F7F7A7A7A7A7H7........",
-      ".....H7G19G19A7A7A7A7G19G19H7.........",
-      "......H7H7G19G19G19G19H7H7..........",
-      "........H7H7H7H7H7H7............"
-    ], {
-      'F7': C_MAP.F7, 'A20': C_MAP.A20, 'A4': C_MAP.A4, 'H7': C_MAP.H7,
-      'G17': C_MAP.G17, 'G19': C_MAP.G19, 'A7': C_MAP.A7
-    })
+      ". . . . . . F7 F7 F7 F7 F7 F7 . . . . . .",
+      ". . . . . F7 F7 F7 F7 F7 F7 F7 F7 . . . . .",
+      ". . . . H7 A20 A20 A20 A20 A20 A20 H7 . . . .",
+      ". . . H7 A20 A4 A4 A4 A4 A20 H7 . . .",
+      ". . . H7 A4 A4 H7 H7 A4 A4 H7 . . .",
+      ". . . H7 A4 H7 G17 G17 H7 A4 H7 . . .",
+      ". . H7 H7 G17 G17 G17 G17 H7 H7 . .",
+      ". . H7 A7 G19 A7 A7 G19 A7 H7 . .",
+      ". . H7 A7 H7 A7 A7 H7 A7 H7 . .",
+      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
+      ". . . H7 A7 F7 F7 A7 H7 . . .",
+      ". . . H7 G19 A7 A7 G19 H7 . . .",
+      ". . . . H7 G19 G19 H7 . . . .",
+      ". . . . . H7 H7 . . . ."
+    ], C_MAP)
   },
   {
     id: 'capybara-orange',
@@ -467,53 +462,103 @@ export const ALL_PATTERNS = [
     difficulty: '★★★☆☆',
     desc: '全网超绝松弛感顶流水豚，头顶一颗可爱小甜橘。',
     matrix: buildMatrix([
-      ".......H7.........",
-      "......A10A10H7........",
-      "......A10A10H7........",
-      ".......H7.........",
-      "....H7G19G19H7......",
-      "...H7G19G19G19G19H7.....",
-      "..H7G19G19G19G19G19G19H7....",
-      ".H7G19H7G19G19G19H7G19H7...",
-      ".H7G19H7G19G19G19H7G19H7...",
-      ".H7G19G19G19G19G19G19G19H7...",
-      ".H7G19G19H7H7H7H7G19G19H7...",
-      "..H7G19G19G19G19G19G19H7....",
-      "..H7G19G19G19G19G19G19H7....",
-      "..H7H7H7H7H7H7H7H7H7H7...."
-    ], {
-      'H7': C_MAP.H7, 'A10': C_MAP.A10, 'G19': C_MAP.G19
-    })
+      ". . . . . H7 . . . . .",
+      ". . . . A10 A10 H7 . . . .",
+      ". . . . A10 A10 H7 . . . .",
+      ". . . . . H7 . . . . .",
+      ". . . H7 G19 G19 H7 . . .",
+      ". . H7 G19 G19 G19 G19 H7 . .",
+      ". H7 G19 G19 G19 G19 G19 G19 H7 .",
+      "H7 G19 H7 G19 G19 G19 H7 G19 H7",
+      "H7 G19 H7 G19 G19 G19 H7 G19 H7",
+      "H7 G19 G19 G19 G19 G19 G19 G19 H7",
+      "H7 G19 G19 H7 H7 H7 H7 G19 G19 H7",
+      ". H7 G19 G19 G19 G19 G19 G19 H7 .",
+      ". H7 G19 G19 G19 G19 G19 G19 H7 .",
+      ". H7 H7 H7 H7 H7 H7 H7 H7 H7 ."
+    ], C_MAP)
   },
   {
     id: 'messi-10',
-    title: '球王梅西 (Messi 阿根廷10号)',
+    title: '球王梅西 (Messi 经典10号)',
     category: 'football',
     tag: '世界杯球星',
     difficulty: '★★★★☆',
-    desc: '蓝白阿根廷战袍，双手聆听欢呼的经典捧杯名场面。',
+    desc: '蓝白阿根廷战袍，双手聆听欢呼的经典名场面。',
     matrix: buildMatrix([
-      "......H7H7H7H7......",
-      "....H7G19G19G19G19H7....",
-      "...H7G19G19G19G19G19H7...",
-      "..H7A7A7A7A7A7A7A7A7H7..",
-      "..H7A7H7A7A7H7A7A7H7..",
-      "..H7A7G19A7A7G19A7A7H7..",
-      "..H7A7G19G19G19G19A7A7H7..",
-      "...H7A7A7A7A7A7A7H7...",
-      "...H7C3H1C3H1C3H1C3H7...",
-      "..H7H7C3H1C3H1C3H1C3H7H7..",
-      ".H7A7C3H1C15C15H1C3A7H7.",
-      ".H7A7C3H1C15H7H1C3A7H7.",
-      "..H7H7C3H1C15C15H1C3H7H7..",
-      "....H7H1H1H1H1H1H7....",
-      "....H7C15C15C15C15H7....",
-      "....H7C15..C15H7....",
-      "....H7A7..A7H7....",
-      "....H7H7..H7H7...."
-    ], {
-      'H7': C_MAP.H7, 'G19': C_MAP.G19, 'A7': C_MAP.A7, 'C3': C_MAP.C3,
-      'H1': C_MAP.H1, 'C15': C_MAP.C15
-    })
+      ". . . . H7 H7 H7 H7 . . . .",
+      ". . . H7 G19 G19 G19 G19 H7 . . .",
+      ". . H7 G19 G19 G19 G19 G19 H7 . .",
+      ". H7 A7 A7 A7 A7 A7 A7 A7 H7 .",
+      ". H7 A7 H7 A7 A7 H7 A7 A7 H7 .",
+      ". H7 A7 G19 A7 A7 G19 A7 A7 H7 .",
+      ". H7 A7 G19 G19 G19 G19 A7 A7 H7 .",
+      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
+      ". . H7 C3 H1 C3 H1 C3 H1 C3 H7 . .",
+      ". H7 H7 C3 H1 C3 H1 C3 H1 C3 H7 H7 .",
+      "H7 A7 C3 H1 C15 C15 H1 C3 A7 H7",
+      "H7 A7 C3 H1 C15 H7 H1 C3 A7 H7",
+      ". H7 H7 C3 H1 C15 C15 H1 C3 H7 H7 .",
+      ". . . H7 H1 H1 H1 H1 H7 . . .",
+      ". . . H7 C15 C15 C15 C15 H7 . . .",
+      ". . . H7 C15 . . C15 H7 . . .",
+      ". . . H7 A7 . . A7 H7 . . .",
+      ". . . H7 H7 . . H7 H7 . . ."
+    ], C_MAP)
+  },
+  {
+    id: 'cr7-siu',
+    title: 'C罗 (CR7 胜利狂欢)',
+    category: 'football',
+    tag: '世界杯球星',
+    difficulty: '★★★★☆',
+    desc: '葡萄牙标志性 7 号战袍，经典挥拳庆祝动作。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 . . . .",
+      ". . . H7 G19 G19 G19 G19 H7 . . .",
+      ". . H7 G19 G19 G19 G19 G19 H7 . .",
+      ". H7 A7 A7 A7 A7 A7 A7 A7 H7 .",
+      ". H7 A7 H7 A7 A7 H7 A7 A7 H7 .",
+      ". H7 A7 G19 G19 G19 G19 A7 A7 H7 .",
+      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
+      "H7 . H7 G19 G19 G19 G19 H7 . H7",
+      "H7 A7 H7 F7 F7 F7 F7 H7 A7 H7",
+      "H7 A7 H7 F7 B8 B8 F7 H7 A7 H7",
+      ". H7 H7 F7 B8 H1 B8 F7 H7 H7 .",
+      ". . H7 F7 F7 F7 F7 F7 H7 . .",
+      ". . H7 B8 B8 B8 B8 B8 H7 . .",
+      ". . H7 B8 . . B8 H7 . .",
+      ". . H7 A7 . . A7 H7 . .",
+      ". . H7 F7 . . F7 H7 . .",
+      ". . H7 H7 . . H7 H7 . ."
+    ], C_MAP)
+  },
+  {
+    id: 'diamond-sword',
+    title: '我的世界·钻石剑 (MC Diamond Sword)',
+    category: 'games',
+    tag: '经典游戏',
+    difficulty: '★★★★☆',
+    desc: '沙盒神作《Minecraft》经典附魔钻石宝剑。',
+    matrix: buildMatrix([
+      ". . . . . . . . . . . . . H7 C24",
+      ". . . . . . . . . . . . H7 C24 C3 C24",
+      ". . . . . . . . . . . H7 C24 C3 C24 H7",
+      ". . . . . . . . . . H7 C24 C3 C24 H7 .",
+      ". . . . . . . . . H7 C24 C3 C24 H7 . .",
+      ". . . . . . . . H7 C24 C3 C24 H7 . . .",
+      ". . . . . . . H7 C24 C3 C24 H7 . . . .",
+      ". . . . . . H7 C24 C3 C24 H7 . . . . .",
+      ". . . . . H7 C24 C3 C24 H7 . . . . . .",
+      ". . . . H7 C24 C3 C24 H7 . . . . . . .",
+      ". . . H7 C24 C3 C24 H7 . . . . . . . .",
+      "H7 . H7 C24 C3 C24 H7 . H7 . . . . . .",
+      "H7 C24 H7 C24 C3 C24 H7 H7 C24 H7 . . . . .",
+      ". H7 C24 C3 C24 C3 C24 C3 C24 H7 . . . . .",
+      ". . H7 C24 C3 H7 G19 H7 C24 H7 . . . . . .",
+      ". . . H7 H7 . H7 G19 H7 . . . . . . . .",
+      ". . . . . . H7 G19 H7 . . . . . . . .",
+      ". . . . . . . H7 H7 . . . . . . . ."
+    ], C_MAP)
   }
 ];
