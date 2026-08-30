@@ -2,7 +2,6 @@
 // 官方标准色库定义 (A/B/C/D/E/F/G/H/M/X 体系)
 // ==========================================
 
-// 1. 黑白灰系列 (H)
 const H_PALETTE = [
   { code: 'H1', name: '纯白', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
   { code: 'H2', name: '浅银灰', hex: '#E5E7EB', r: 229, g: 231, b: 235 },
@@ -13,7 +12,6 @@ const H_PALETTE = [
   { code: 'H7', name: '纯黑', hex: '#111827', r: 17, g: 24, b: 39 }
 ];
 
-// 2. 黄色/肤色/米黄系列 (A)
 const A_PALETTE = [
   { code: 'A1', name: '象牙白', hex: '#FEF9C3', r: 254, g: 249, b: 195 },
   { code: 'A2', name: '奶黄', hex: '#FEF08A', r: 254, g: 240, b: 138 },
@@ -43,7 +41,6 @@ const A_PALETTE = [
   { code: 'A26', name: '朝阳橙', hex: '#FB923C', r: 251, g: 146, b: 60 }
 ];
 
-// 3. 绿色系列 (B)
 const B_PALETTE = [
   { code: 'B1', name: '极浅绿', hex: '#DCFCE7', r: 220, g: 252, b: 231 },
   { code: 'B2', name: '薄荷嫩绿', hex: '#BBF7D0', r: 187, g: 247, b: 208 },
@@ -79,7 +76,6 @@ const B_PALETTE = [
   { code: 'B32', name: '夜绿', hex: '#115E59', r: 17, g: 94, b: 89 }
 ];
 
-// 4. 蓝色/青色系列 (C)
 const C_PALETTE = [
   { code: 'C1', name: '冰川蓝', hex: '#E0F2FE', r: 224, g: 242, b: 254 },
   { code: 'C2', name: '浅天蓝', hex: '#BAE6FD', r: 186, g: 230, b: 253 },
@@ -112,7 +108,6 @@ const C_PALETTE = [
   { code: 'C29', name: '深邃蓝', hex: '#083344', r: 8, g: 51, b: 68 }
 ];
 
-// 5. 紫色系列 (D)
 const D_PALETTE = [
   { code: 'D1', name: '极浅紫', hex: '#F5F3FF', r: 245, g: 243, b: 255 },
   { code: 'D2', name: '丁香紫', hex: '#EDE9FE', r: 237, g: 233, b: 254 },
@@ -142,7 +137,6 @@ const D_PALETTE = [
   { code: 'D26', name: '星空紫', hex: '#7E22CE', r: 126, g: 34, b: 206 }
 ];
 
-// 6. 粉色/玫红系列 (E)
 const E_PALETTE = [
   { code: 'E1', name: '樱花白', hex: '#FFF1F2', r: 255, g: 241, b: 242 },
   { code: 'E2', name: '极浅粉', hex: '#FFE4E6', r: 255, g: 228, b: 230 },
@@ -170,7 +164,6 @@ const E_PALETTE = [
   { code: 'E24', name: '亮粉紫', hex: '#E879F9', r: 232, g: 121, b: 249 }
 ];
 
-// 7. 红色/橙红系列 (F)
 const F_PALETTE = [
   { code: 'F1', name: '浅红白', hex: '#FEF2F2', r: 254, g: 242, b: 242 },
   { code: 'F2', name: '浅绯红', hex: '#FEE2E2', r: 254, g: 226, b: 226 },
@@ -199,7 +192,6 @@ const F_PALETTE = [
   { code: 'F25', name: '赤金', hex: '#D97706', r: 217, g: 119, b: 6 }
 ];
 
-// 8. 棕色/咖啡/大地系列 (G)
 const G_PALETTE = [
   { code: 'G1', name: '米灰', hex: '#F5F5F4', r: 245, g: 245, b: 244 },
   { code: 'G2', name: '浅暖灰', hex: '#E7E5E4', r: 231, g: 229, b: 228 },
@@ -224,7 +216,6 @@ const G_PALETTE = [
   { code: 'G21', name: '古铜棕', hex: '#713F12', r: 113, g: 63, b: 18 }
 ];
 
-// 9. 珠光/特殊/扩展系列 (M)
 const M_PALETTE = [
   { code: 'M1', name: '珍珠白蓝', hex: '#E0E7FF', r: 224, g: 231, b: 255 },
   { code: 'M2', name: '珠光蓝', hex: '#C7D2FE', r: 199, g: 210, b: 254 },
@@ -243,20 +234,17 @@ const M_PALETTE = [
   { code: 'M15', name: '夜光金', hex: '#FEF08A', r: 254, g: 240, b: 138 }
 ];
 
-// 组装 221 色全套
 const FULL_221_PALETTE = [
   ...A_PALETTE, ...B_PALETTE, ...C_PALETTE, ...D_PALETTE,
   ...E_PALETTE, ...F_PALETTE, ...G_PALETTE, ...H_PALETTE, ...M_PALETTE
 ];
 
-// 组装 88 色盒装经典版
 const X88_PALETTE = Array.from({ length: 88 }, (_, i) => {
   const code = `X${i + 1}`;
   const ref = FULL_221_PALETTE[i % FULL_221_PALETTE.length];
   return { code, name: `${code} ${ref.name}`, hex: ref.hex, r: ref.r, g: ref.g, b: ref.b };
 });
 
-// 组装 72 色常用版
 const STD_72_PALETTE = [
   A_PALETTE[1], A_PALETTE[2], A_PALETTE[6], A_PALETTE[7], A_PALETTE[8], A_PALETTE[10], A_PALETTE[15], A_PALETTE[19], A_PALETTE[23],
   B_PALETTE[1], B_PALETTE[2], B_PALETTE[5], B_PALETTE[9], B_PALETTE[11], B_PALETTE[17], B_PALETTE[19], B_PALETTE[21], B_PALETTE[27], B_PALETTE[28],
@@ -269,7 +257,6 @@ const STD_72_PALETTE = [
   M_PALETTE[8], M_PALETTE[9], M_PALETTE[10], M_PALETTE[14]
 ];
 
-// 组装 144 色进阶版
 const ADV_144_PALETTE = FULL_221_PALETTE.filter((_, idx) => idx % 3 !== 0 || idx < 60);
 
 export const PALETTES = {
@@ -279,66 +266,17 @@ export const PALETTES = {
   full221: FULL_221_PALETTE
 };
 
-// 快捷单色映射字典
 export const C_MAP = {
-  H1: H_PALETTE[0],  // 纯白
-  H2: H_PALETTE[1],  // 浅灰
-  H3: H_PALETTE[2],  // 质感灰
-  H4: H_PALETTE[3],  // 深灰
-  H5: H_PALETTE[4],  // 碳深灰
-  H7: H_PALETTE[6],  // 纯黑
-
-  A3: A_PALETTE[2],  // 柠檬黄
-  A4: A_PALETTE[3],  // 明黄
-  A7: A_PALETTE[6],  // 浅肤色
-  A8: A_PALETTE[7],  // 蜜桃肤
-  A9: A_PALETTE[8],  // 浅橙
-  A10: A_PALETTE[9], // 活力橙
-  A20: A_PALETTE[19],// 金黄
-
-  B2: B_PALETTE[1],  // 薄荷绿
-  B4: B_PALETTE[3],  // 草绿
-  B6: B_PALETTE[5],  // 正绿
-  B8: B_PALETTE[7],  // 墨绿
-  B28: B_PALETTE[27],// 水绿
-  B29: B_PALETTE[28],// 孔雀绿
-
-  C2: C_PALETTE[1],  // 浅天蓝
-  C3: C_PALETTE[2],  // 天蓝
-  C4: C_PALETTE[3],  // 亮天蓝
-  C15: C_PALETTE[14],// 宝蓝
-  C18: C_PALETTE[17],// 藏青
-  C24: C_PALETTE[23],// 青蓝
-
-  D4: D_PALETTE[3],  // 香芋紫
-  D14: D_PALETTE[13],// 荧光紫
-  D24: D_PALETTE[23],// 经典紫
-  D26: D_PALETTE[25],// 星空深紫
-
-  E2: E_PALETTE[1],  // 极浅粉
-  E3: E_PALETTE[2],  // 嫩粉
-  E4: E_PALETTE[3],  // 少女粉
-  E5: E_PALETTE[4],  // 珊瑚粉
-  E14: E_PALETTE[13],// 芭比粉
-  E15: E_PALETTE[14],// 亮粉红
-  E7: E_PALETTE[6],  // 玫红
-
-  F5: F_PALETTE[4],  // 鲜红
-  F6: F_PALETTE[5],  // 朱红
-  F7: F_PALETTE[6],  // 中国红
-  F8: F_PALETTE[7],  // 深红
-  F15: F_PALETTE[14],// 亮橙
-
-  G5: G_PALETTE[4],  // 焦糖灰
-  G12: G_PALETTE[11],// 奶茶色
-  G16: G_PALETTE[15],// 经典棕
-  G17: G_PALETTE[16],// 浓缩咖啡
-  G19: G_PALETTE[18] // 摩卡棕
+  H1: H_PALETTE[0],  H2: H_PALETTE[1],  H3: H_PALETTE[2],  H4: H_PALETTE[3],  H5: H_PALETTE[4],  H7: H_PALETTE[6],
+  A1: A_PALETTE[0],  A2: A_PALETTE[1],  A3: A_PALETTE[2],  A4: A_PALETTE[3],  A7: A_PALETTE[6],  A8: A_PALETTE[7],  A9: A_PALETTE[8],  A10: A_PALETTE[9], A20: A_PALETTE[19],
+  B2: B_PALETTE[1],  B4: B_PALETTE[3],  B6: B_PALETTE[5],  B8: B_PALETTE[7],  B28: B_PALETTE[27], B29: B_PALETTE[28],
+  C2: C_PALETTE[1],  C3: C_PALETTE[2],  C4: C_PALETTE[3],  C15: C_PALETTE[14], C18: C_PALETTE[17], C24: C_PALETTE[23],
+  D4: D_PALETTE[3],  D14: D_PALETTE[13], D24: D_PALETTE[23], D26: D_PALETTE[25],
+  E2: E_PALETTE[1],  E3: E_PALETTE[2],  E4: E_PALETTE[3],  E5: E_PALETTE[4],  E14: E_PALETTE[13], E15: E_PALETTE[14], E7: E_PALETTE[6],
+  F5: F_PALETTE[4],  F6: F_PALETTE[5],  F7: F_PALETTE[6],  F8: F_PALETTE[7],  F15: F_PALETTE[14],
+  G5: G_PALETTE[4],  G8: G_PALETTE[7],  G12: G_PALETTE[11], G16: G_PALETTE[15], G17: G_PALETTE[16], G19: G_PALETTE[18]
 };
 
-// ==========================================
-// 严密矩阵构建函数 (基于空格分词，杜绝拆字 bug)
-// ==========================================
 function buildMatrix(rows, cmap) {
   return rows.map(r => {
     const tokens = r.trim().split(/\s+/);
@@ -347,14 +285,15 @@ function buildMatrix(rows, cmap) {
 }
 
 // ==========================================
-// 潮流精选图纸数据库 (100% 对应标准色卡)
+// 潮流精选 76 款完整图纸矩阵
 // ==========================================
 export const ALL_PATTERNS = [
+  // 1. 库洛米
   {
     id: 'kuromi-goth',
     title: '库洛米 (Kuromi 暗黑萌系)',
-    category: 'trending',
-    tag: '潮流顶流',
+    category: 'anime',
+    tag: '三丽鸥',
     difficulty: '★★★★★',
     desc: '三丽鸥顶流库洛米，经典暗夜小恶魔头套与粉色骷髅标志。',
     matrix: buildMatrix([
@@ -364,29 +303,83 @@ export const ALL_PATTERNS = [
       ". H7 D26 D24 . . . . . . . . D24 D26 H7 .",
       ". H7 D26 D24 . . . . . . . . D24 D26 H7 .",
       ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 . .",
-      ". H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7 .",
-      "H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7",
-      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7",
-      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7",
-      "H7 D24 D24 D24 E14 H7 E14 E14 H7 E14 D24 D24 D24 H7",
-      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7",
-      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7",
-      "H7 D24 D24 H1 H1 H1 H1 H1 H1 H1 H1 D24 D24 H7",
-      "H7 D24 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 D24 H7",
-      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 .",
-      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 .",
-      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
-      ". H7 H1 H1 H1 E14 E14 E14 E14 H1 H1 H1 H7 .",
-      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
-      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . .",
+      ". H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7 . .",
+      "H7 D26 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D24 D26 H7 .",
+      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7 . .",
+      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7 . .",
+      "H7 D24 D24 D24 E14 H7 E14 E14 H7 E14 D24 D24 D24 H7 . .",
+      "H7 D24 D24 D24 E14 E14 E14 E14 E14 E14 D24 D24 D24 H7 . .",
+      "H7 D24 D24 D24 D24 E14 E14 E14 E14 D24 D24 D24 D24 H7 . .",
+      "H7 D24 D24 H1 H1 H1 H1 H1 H1 H1 H1 D24 D24 H7 . . .",
+      "H7 D24 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 D24 H7 . . .",
+      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 . . . .",
+      ". H7 H1 H1 H7 H1 H1 H1 H1 H7 H1 H1 H7 . . . .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 . . . .",
+      ". H7 H1 H1 H1 E14 E14 E14 E14 H1 H1 H1 H7 . . . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . . . . .",
+      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . . . . .",
+      ". . . . . H7 H7 H7 H7 . . . . . . . ."
+    ], C_MAP)
+  },
+  // 2. 美乐蒂
+  {
+    id: 'my-melody',
+    title: '美乐蒂 (My Melody 甜美粉系)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★★☆',
+    desc: '软萌兔耳美乐蒂，头戴标志性小花与粉红兜帽。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 E4 E4 H7 . . . . H7 E4 E4 H7 .",
+      ". H7 E4 E4 H7 . . . . H7 E4 E4 H7 .",
+      ". H7 E4 E4 H7 . . . . H7 E4 E4 H7 .",
+      ". . H7 E4 E4 H7 H7 H7 H7 E4 E4 H7 . .",
+      ". H7 E4 E4 E4 E4 E4 E4 E4 E4 E4 E4 H7 .",
+      "H7 E4 E4 E4 E4 A4 E4 E4 E4 E4 E4 E4 H7",
+      "H7 E4 E4 E4 H1 A4 H1 E4 E4 E4 E4 E4 H7",
+      "H7 E4 E4 H1 H1 H1 H1 H1 H1 H1 E4 E4 H7",
+      "H7 E4 H1 H1 H1 H1 H1 H1 H1 H1 H1 E4 H7",
+      "H7 E4 H1 H7 H1 H1 H1 H1 H7 H1 H1 E4 H7",
+      ". H7 H1 H1 H1 H1 A4 H1 H1 H1 H1 H7 .",
+      ". H7 H1 E3 H1 H1 H1 H1 E3 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H1 H1 H1 H7 H7 . . .",
       ". . . . . H7 H7 H7 H7 . . . . ."
     ], C_MAP)
   },
+  // 3. 帕恰狗
+  {
+    id: 'pochacco',
+    title: '帕恰狗 (Pochacco 运动元气)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★★☆',
+    desc: '活力满满纯真帕恰狗，标志性黑色大垂耳与红马甲。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . . . H7 H7 .",
+      "H7 H7 H7 H7 . . . . . . . H7 H7 H7 H7",
+      "H7 H7 H7 H7 H7 . . . . . H7 H7 H7 H7 H7",
+      ". H7 H7 H7 . H7 H7 H7 H7 . H7 H7 H7 .",
+      ". . H7 . H7 H1 H1 H1 H1 H7 . H7 . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H7 . . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . H7 H1 H7 H1 H1 H1 H1 H7 H1 H7 . .",
+      ". . H7 H1 H1 H1 H7 H7 H1 H1 H1 H7 . .",
+      ". . H7 H1 E3 H1 H1 H1 H1 E3 H1 H7 . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H7 . . .",
+      ". . . . H7 F7 F7 F7 F7 H7 . . . .",
+      ". . . H7 F7 F7 F7 F7 F7 F7 H7 . . .",
+      ". . . H7 H1 F7 F7 F7 F7 H1 H7 . . .",
+      ". . . . H7 H7 . . H7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 4. 吉伊卡哇
   {
     id: 'chiikawa-happy',
     title: '吉伊卡哇 (Chiikawa 治愈萌系)',
-    category: 'trending',
-    tag: '潮流顶流',
+    category: 'anime',
+    tag: '吉伊卡哇',
     difficulty: '★★★★☆',
     desc: '全网爆火的软萌吉伊卡哇，圆滚滚小身材与粉嫩腮红。',
     matrix: buildMatrix([
@@ -408,11 +401,65 @@ export const ALL_PATTERNS = [
       ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
     ], C_MAP)
   },
+  // 5. 哈奇小八
+  {
+    id: 'hachiware',
+    title: '哈奇·小八 (Hachiware 乐观坚强)',
+    category: 'anime',
+    tag: '吉伊卡哇',
+    difficulty: '★★★★☆',
+    desc: '吉伊卡哇最好的伙伴小八，标志性蓝色八字刘海。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 C15 C15 C15 C15 C15 C15 C15 C15 H7 . .",
+      ". H7 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 H7 .",
+      "H7 C15 C15 H7 H7 C15 C15 C15 C15 H7 H7 C15 H7",
+      "H7 C15 H1 H1 H7 C15 C15 C15 C15 H7 H1 H1 C15 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H1 H1 H1 H7 H7 H7 H7 H1 H1 H1 H1 H7",
+      "H7 H1 E3 E4 E3 H1 H1 H1 H1 E3 E4 E3 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . .",
+      ". . . . H7 H1 H1 H1 H1 H7 . . . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H7 . . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 6. 乌萨奇
+  {
+    id: 'usagi-screaming',
+    title: '乌萨奇 (Usagi 狂暴尖叫兔)',
+    category: 'anime',
+    tag: '吉伊卡哇',
+    difficulty: '★★★★☆',
+    desc: '呀哈！乌萨奇尖叫兔，亮黄色身躯与标志性长兔耳。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 A4 A4 H7 . . . . H7 A4 A4 H7 .",
+      ". H7 A4 A4 H7 . . . . H7 A4 A4 H7 .",
+      ". H7 A4 A4 H7 . . . . H7 A4 A4 H7 .",
+      ". . H7 A4 A4 H7 H7 H7 H7 A4 A4 H7 . .",
+      ". H7 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 H7 .",
+      "H7 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 H7",
+      "H7 A4 A4 A4 H7 H7 A4 A4 H7 H7 A4 A4 H7",
+      "H7 A4 A4 H7 H7 H7 H7 H7 H7 H7 A4 A4 H7",
+      "H7 A4 A4 H7 H1 H7 A4 A4 H7 H1 H7 A4 H7",
+      "H7 A4 E3 A4 H7 H7 A4 A4 H7 H7 E3 A4 H7",
+      ". H7 A4 A4 A4 A4 A4 A4 A4 A4 A4 H7 .",
+      ". . H7 A4 A4 A4 A4 A4 A4 A4 A4 H7 . .",
+      ". . . H7 H7 A4 A4 A4 A4 H7 H7 . . .",
+      ". . . . . H7 H7 H7 H7 . . . . ."
+    ], C_MAP)
+  },
+  // 7. 大耳狗
   {
     id: 'cinnamoroll',
     title: '大耳狗·玉桂狗 (Cinnamoroll)',
-    category: 'trending',
-    tag: '潮流顶流',
+    category: 'anime',
+    tag: '三丽鸥',
     difficulty: '★★★★☆',
     desc: '三丽鸥人气王大耳狗，如云朵般轻盈的大耳朵与湛蓝眼睛。',
     matrix: buildMatrix([
@@ -430,6 +477,445 @@ export const ALL_PATTERNS = [
       ". . . . . . . H7 H7 H7 H7 H7 H7 H7 H7 . . . . . . ."
     ], C_MAP)
   },
+  // 8. 凯蒂猫
+  {
+    id: 'hello-kitty',
+    title: '凯蒂猫 (Hello Kitty 经典蝴蝶结)',
+    category: 'anime',
+    tag: '三丽鸥',
+    difficulty: '★★★☆☆',
+    desc: '经典红色大蝴蝶结与纯白猫咪面庞。',
+    matrix: buildMatrix([
+      ". . . . . H7 H7 . . . F7 F7 . F7 F7",
+      ". H7 H7 . H7 H1 H7 . F7 F7 F7 F7 F7 F7",
+      "H7 H1 H7 H7 H1 H1 H7 . F7 F7 F7 F7 .",
+      "H7 H1 H1 H1 H1 H1 H1 H7 . F7 F7 . .",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H7 H7 . . .",
+      "H7 H1 H7 H1 H1 H1 H7 H1 H1 H7 . . .",
+      "H7 H1 H7 H1 A4 H1 H7 H1 H1 H7 . . .",
+      ". H7 H1 H1 A4 A4 H1 H1 H7 . . . .",
+      ". . H7 H1 H1 H1 H1 H7 . . . . .",
+      ". . . H7 H7 H7 H7 H7 . . . . . ."
+    ], C_MAP)
+  },
+  // 9. 拉布布
+  {
+    id: 'labubu',
+    title: '拉布布 (Labubu 精灵潮玩)',
+    category: 'anime',
+    tag: '潮流盲盒',
+    difficulty: '★★★★★',
+    desc: '泡泡玛特当红顶流 Labubu，两只长耳朵与九颗尖尖小虎牙。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 G16 G16 H7 . . . . H7 G16 G16 H7 .",
+      ". H7 G16 G16 H7 . . . . H7 G16 G16 H7 .",
+      ". H7 G16 G16 H7 . . . . H7 G16 G16 H7 .",
+      ". . H7 G16 G16 H7 H7 H7 H7 G16 G16 H7 . .",
+      ". H7 G16 G16 G16 G16 G16 G16 G16 G16 G16 G16 H7 .",
+      "H7 G16 G16 G16 G16 G16 G16 G16 G16 G16 G16 G16 H7",
+      "H7 G16 G16 H7 H7 G16 G16 H7 H7 G16 G16 G16 H7",
+      "H7 G16 G16 H7 H1 H7 G16 H7 H1 H7 G16 G16 H7",
+      "H7 G16 G16 H7 H7 G16 G16 H7 H7 G16 G16 G16 H7",
+      "H7 G16 E3 G16 G16 G16 G16 G16 G16 E3 G16 G16 H7",
+      "H7 G16 H7 H1 H7 H1 H7 H1 H7 H1 H7 G16 H7",
+      ". H7 G16 H7 H7 H7 H7 H7 H7 H7 G16 H7 .",
+      ". . H7 G16 G16 G16 G16 G16 G16 G16 G16 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 10. 黄油小熊
+  {
+    id: 'butterbear',
+    title: '黄油小熊 (Butterbear 甜美烘焙)',
+    category: 'anime',
+    tag: '潮流顶流',
+    difficulty: '★★★★☆',
+    desc: '泰国爆火的可爱黄油小熊，金黄毛茸茸与粉红小裙子。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 A20 A20 H7 . . . . H7 A20 A20 H7 .",
+      ". H7 A20 A20 H7 H7 H7 H7 H7 A20 A20 H7 .",
+      "H7 A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 H7",
+      "H7 A20 A20 H7 H7 A20 A20 H7 H7 A20 A20 H7",
+      "H7 A20 A20 H7 H7 A20 A20 H7 H7 A20 A20 H7",
+      "H7 A20 A20 A20 A20 H7 A20 A20 A20 A20 H7",
+      "H7 A20 E4 A20 A20 H7 A20 A20 E4 A20 H7",
+      ". H7 A20 A20 A20 A20 A20 A20 A20 A20 H7 .",
+      ". . H7 E14 E14 E14 E14 E14 E14 H7 . .",
+      ". H7 E14 E14 E14 E14 E14 E14 E14 E14 H7 .",
+      ". H7 H1 H1 E14 E14 E14 E14 H1 H1 H7 .",
+      ". . H7 H7 . . . . H7 H7 . ."
+    ], C_MAP)
+  },
+  // 11. 皮卡丘
+  {
+    id: 'pikachu',
+    title: '皮卡丘 (Pikachu 元气电气鼠)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★★☆',
+    desc: '经典黑尖耳、元气红脸蛋与闪电黄色大头。',
+    matrix: buildMatrix([
+      "H7 . . . . . . . . . . . . . . H7",
+      "H7 H7 . . . . . . . . . . . . H7 H7",
+      "H7 A4 H7 . . . . . . . . . H7 A4 H7",
+      "H7 A4 A4 H7 . . . . . . . H7 A4 A4 H7",
+      ". H7 A4 A4 H7 H7 H7 H7 H7 H7 A4 A4 H7 .",
+      ". . H7 A4 A4 A4 A4 A4 A4 A4 A4 A4 H7 . .",
+      ". H7 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 H7 .",
+      ". H7 A4 H7 H7 A4 A4 A4 A4 H7 H7 A4 H7 .",
+      ". H7 A4 H7 H1 A4 A4 A4 A4 H7 H1 A4 H7 .",
+      ". H7 F7 A4 A4 A4 H7 H7 A4 A4 A4 F7 H7 .",
+      ". H7 F7 F7 A4 A4 A4 A4 A4 A4 F7 F7 H7 .",
+      ". . H7 A4 A4 A4 F7 F7 A4 A4 A4 H7 . .",
+      ". . . H7 A4 A4 A4 A4 A4 A4 H7 . . .",
+      ". . . . H7 H7 H7 H7 H7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 12. 耿鬼
+  {
+    id: 'gengar',
+    title: '耿鬼 (Gengar 坏笑幽灵)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★★★',
+    desc: '暗影宝可梦耿鬼，标志性大红眼与咧嘴坏笑。',
+    matrix: buildMatrix([
+      ". . H7 . . . . . . . . . . H7 . .",
+      ". H7 D26 H7 . . . . . . . H7 D26 H7 .",
+      "H7 D26 D26 D26 H7 H7 H7 H7 H7 D26 D26 D26 H7",
+      "H7 D26 D26 D26 D26 D26 D26 D26 D26 D26 D26 D26 H7",
+      "H7 D26 F7 F7 D26 D26 D26 D26 F7 F7 D26 D26 H7",
+      "H7 D26 F7 H1 D26 D26 D26 D26 F7 H1 D26 D26 H7",
+      "H7 D26 D26 D26 D26 D26 D26 D26 D26 D26 D26 D26 H7",
+      "H7 D26 H7 H7 H7 H7 H7 H7 H7 H7 H7 D26 H7",
+      "H7 D26 H7 H1 H7 H1 H7 H1 H7 H1 H7 D26 H7",
+      "H7 D26 H7 H1 H7 H1 H7 H1 H7 H1 H7 D26 H7",
+      ". H7 D26 H7 H7 H7 H7 H7 H7 H7 D26 H7 .",
+      ". . H7 D26 D26 D26 D26 D26 D26 D26 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 13. 小火龙
+  {
+    id: 'charmander',
+    title: '小火龙 (Charmander 萌火蜥蜴)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★★☆',
+    desc: '第一世代初代御三家小火龙，亮橙色身体与清澈蓝眼。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 . . . .",
+      ". . . H7 A10 A10 A10 A10 A10 H7 . . .",
+      ". . H7 A10 A10 A10 A10 A10 A10 H7 . .",
+      ". H7 A10 C3 H7 A10 A10 A10 A10 H7 .",
+      ". H7 A10 C3 H1 A10 A10 A10 A10 H7 .",
+      ". H7 A10 A10 A10 A10 A10 A10 A10 H7 .",
+      ". . H7 A10 A10 A10 A10 A10 H7 . .",
+      ". . . H7 A10 A10 A10 A10 H7 . . .",
+      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
+      ". H7 A10 A7 A7 A7 A7 A10 A10 H7 .",
+      "H7 A10 A10 A7 A7 A7 A10 A10 A10 H7",
+      ". H7 A10 A10 A10 A10 A10 A10 H7 F7",
+      ". . H7 H7 A10 A10 H7 H7 F7 A4",
+      ". . . . H7 H7 H7 . . F7 ."
+    ], C_MAP)
+  },
+  // 14. 杰尼龟
+  {
+    id: 'squirtle',
+    title: '杰尼龟 (Squirtle 墨镜憨憨)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★★☆',
+    desc: '水箭龟幼体杰尼龟，天蓝色圆脑袋与棕色小龟壳。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 . . . .",
+      ". . . H7 C3 C3 C3 C3 C3 H7 . . .",
+      ". . H7 C3 C3 C3 C3 C3 C3 H7 . .",
+      ". H7 C3 F7 H7 C3 C3 C3 C3 H7 .",
+      ". H7 C3 F7 H1 C3 C3 C3 C3 H7 .",
+      ". H7 C3 C3 C3 C3 C3 C3 C3 H7 .",
+      ". . H7 C3 C3 C3 C3 C3 H7 . .",
+      ". . . H7 A1 A1 A1 A1 H7 . . .",
+      ". . H7 A1 A1 A1 A1 A1 A1 H7 . .",
+      ". H7 C3 G16 G16 G16 G16 C3 C3 H7 .",
+      ". H7 C3 G16 G16 G16 G16 C3 C3 H7 .",
+      ". . H7 C3 C3 C3 C3 C3 C3 H7 . .",
+      ". . . H7 H7 . . H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 15. 精灵球
+  {
+    id: 'pokeball',
+    title: '精灵球 (Poké Ball 经典款)',
+    category: 'anime',
+    tag: '宝可梦',
+    difficulty: '★★★☆☆',
+    desc: '红白分明、金属按扣的经典大师捕捉精灵球。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 F7 F7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 F7 F7 H7 H7 H7 H7 F7 F7 F7 F7 H7",
+      "H7 H7 H7 H7 H7 H1 H1 H7 H7 H7 H7 H7 H7",
+      "H7 H1 H1 H1 H7 H1 H1 H7 H1 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H7 H7 H7 H7 H1 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . . H7 H7 H7 H7 H7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 16. 蜡笔小新
+  {
+    id: 'shinchan',
+    title: '蜡笔小新 (Shin-chan 标志浓眉)',
+    category: 'anime',
+    tag: '经典动漫',
+    difficulty: '★★★★☆',
+    desc: '春日部防卫队野原新之助，经典粗眉大眼。',
+    matrix: buildMatrix([
+      ". . . H7 H7 H7 H7 H7 H7 . . .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 H7 H7 H7 H7 H7 H7 H7 H7 .",
+      "H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7",
+      "H7 A7 A7 A7 A7 A7 A7 A7 A7 A7 H7",
+      "H7 H7 H7 A7 A7 H7 H7 H7 A7 A7 H7",
+      "H7 A7 A7 A7 A7 A7 A7 A7 A7 A7 H7",
+      "H7 A7 H7 H1 A7 A7 H7 H1 A7 A7 H7",
+      "H7 A7 H7 H7 A7 A7 H7 H7 A7 A7 H7",
+      ". H7 A7 A7 E4 E4 A7 A7 A7 H7 .",
+      ". . H7 A7 A7 A7 A7 A7 H7 . .",
+      ". . . H7 F7 F7 F7 F7 H7 . . .",
+      ". . H7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". . H7 A4 A4 A4 A4 A4 A4 H7 . .",
+      ". . . H7 H7 . . H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 17. 哆啦A梦
+  {
+    id: 'doraemon',
+    title: '哆啦A梦 (Doraemon 蓝胖子)',
+    category: 'anime',
+    tag: '经典动漫',
+    difficulty: '★★★★☆',
+    desc: '来自22世纪的机器猫，红鼻子与四次元口袋。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 C15 C15 C15 C15 C15 C15 C15 C15 H7 . .",
+      ". H7 C15 H7 H7 C15 C15 H7 H7 C15 C15 H7 .",
+      "H7 C15 H7 H1 H7 H7 H7 H1 H7 C15 C15 H7",
+      "H7 C15 H7 H7 H1 H1 H7 H7 H1 C15 C15 H7",
+      "H7 C15 C15 H1 H1 F7 H1 H1 C15 C15 C15 H7",
+      "H7 C15 H1 H1 H1 H7 H1 H1 H1 C15 C15 H7",
+      "H7 C15 H1 H1 H7 H7 H7 H1 H1 C15 C15 H7",
+      ". H7 C15 H1 H1 H1 H1 H1 H1 C15 C15 H7 .",
+      ". . H7 F7 F7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". . H7 F7 F7 A4 A4 F7 F7 F7 F7 H7 . .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". H7 H1 H1 H7 H7 H7 H7 H1 H1 H1 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 18. 阿尼亚
+  {
+    id: 'anya-smug',
+    title: '阿尼亚 (Anya 呵·优雅坏笑)',
+    category: 'anime',
+    tag: '间谍过家家',
+    difficulty: '★★★★★',
+    desc: '《间谍过家家》世界名画坏笑，粉发与标志发饰。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 E14 E14 H7 . . . . H7 E14 E14 H7 .",
+      "H7 E14 E14 E14 H7 H7 H7 H7 E14 E14 E14 H7",
+      "H7 E14 E14 E14 E14 E14 E14 E14 E14 E14 E14 H7",
+      "H7 E14 E14 A7 A7 A7 A7 A7 A7 E14 E14 H7",
+      "H7 E14 A7 H7 H7 A7 A7 H7 H7 A7 E14 H7",
+      "H7 E14 A7 B6 H7 A7 A7 B6 H7 A7 E14 H7",
+      "H7 E14 A7 A7 A7 A7 A7 A7 A7 A7 E14 H7",
+      "H7 E14 A7 E3 H7 H7 H7 E3 A7 A7 E14 H7",
+      ". H7 E14 A7 A7 A7 A7 A7 A7 E14 H7 .",
+      ". . H7 E14 E14 E14 E14 E14 E14 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 . . .",
+      ". . . H7 H5 H5 H5 H5 H5 H7 . . .",
+      ". . . H7 H5 A20 A20 H5 H5 H7 . . ."
+    ], C_MAP)
+  },
+  // 19. 龙猫
+  {
+    id: 'totoro',
+    title: '龙猫 (Totoro 森林守护神)',
+    category: 'anime',
+    tag: '宫崎骏',
+    difficulty: '★★★★☆',
+    desc: '吉卜力吉兆龙猫，灰色毛茸茸肚子与三道标志胡须。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 H3 H3 H7 . . . . H7 H3 H3 H7 .",
+      ". H7 H3 H3 H7 H7 H7 H7 H7 H3 H3 H7 .",
+      "H7 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H7",
+      "H7 H3 H3 H1 H1 H3 H3 H1 H1 H3 H3 H3 H7",
+      "H7 H3 H3 H7 H1 H3 H3 H7 H1 H3 H3 H3 H7",
+      "H7 H3 H3 H3 H3 H7 H7 H3 H3 H3 H3 H3 H7",
+      "H7 H3 H1 H1 H1 H1 H1 H1 H1 H1 H3 H3 H7",
+      "H7 H3 H1 H3 H1 H1 H1 H3 H1 H1 H3 H3 H7",
+      "H7 H3 H1 H1 H1 H3 H1 H1 H1 H1 H3 H3 H7",
+      ". H7 H3 H1 H1 H1 H1 H1 H1 H1 H3 H7 .",
+      ". . H7 H3 H3 H3 H3 H3 H3 H3 H3 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 20. 炭治郎
+  {
+    id: 'tanjiro',
+    title: '灶门炭治郎 (Tanjiro 绿黑市松纹)',
+    category: 'anime',
+    tag: '鬼灭之刃',
+    difficulty: '★★★★★',
+    desc: '鬼灭之刃男主，经典日轮耳饰、额头伤疤与绿黑羽织。',
+    matrix: buildMatrix([
+      ". . . H7 H7 H7 H7 H7 H7 . . .",
+      ". . H7 F8 F8 F8 F8 F8 F8 H7 . .",
+      ". H7 F8 F8 F8 F8 F8 F8 F8 F8 H7 .",
+      "H7 F8 F8 F7 A7 A7 A7 A7 F8 F8 H7",
+      "H7 F8 F7 A7 A7 A7 A7 A7 A7 F8 H7",
+      "H7 A7 A7 H7 H1 A7 A7 H7 H1 A7 H7",
+      "H7 A7 A7 F8 H7 A7 A7 F8 H7 A7 H7",
+      "H7 A7 A7 A7 A7 A7 A7 A7 A7 A7 H7",
+      ". H7 A7 A7 A7 H7 H7 A7 A7 H7 .",
+      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
+      ". H7 B6 B6 H7 H7 B6 B6 H7 H7 .",
+      ". H7 H7 H7 B6 B6 H7 H7 B6 B6 .",
+      ". H7 B6 B6 H7 H7 B6 B6 H7 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 21. 祢豆子
+  {
+    id: 'nezuko',
+    title: '灶门祢豆子 (Nezuko 咬竹筒萌妹)',
+    category: 'anime',
+    tag: '鬼灭之刃',
+    difficulty: '★★★★★',
+    desc: '粉红麻叶和服、粉眼眸与嘴衔绿竹筒的祢豆子。',
+    matrix: buildMatrix([
+      ". . . H7 H7 H7 H7 H7 H7 . . .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 H7 A10 A10 H7 H7 A10 A10 H7 .",
+      "H7 H7 H7 A7 A7 A7 A7 A7 A7 H7 H7",
+      "H7 H7 A7 E14 H1 A7 E14 H1 A7 H7 H7",
+      "H7 A7 A7 E14 H7 A7 E14 H7 A7 A7 H7",
+      "H7 A7 A7 A7 A7 A7 A7 A7 A7 A7 A7 H7",
+      "H7 A7 B4 B4 B4 B4 B4 B4 B4 B4 A7 H7",
+      ". H7 A7 B8 B8 B8 B8 B8 B8 A7 H7 .",
+      ". . H7 E4 E4 E4 E4 E4 E4 H7 . .",
+      ". H7 E4 E4 H7 H7 E4 E4 H7 H7 .",
+      ". H7 H7 H7 E4 E4 H7 H7 E4 E4 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 22. 路飞
+  {
+    id: 'luffy',
+    title: '草帽路飞 (Monkey D. Luffy)',
+    category: 'anime',
+    tag: '航海王',
+    difficulty: '★★★★★',
+    desc: '海贼王路飞，经典标志黄色草帽与红丝带。',
+    matrix: buildMatrix([
+      ". . . . . A20 A20 A20 A20 . . . . .",
+      ". . . A20 A20 A20 A20 A20 A20 A20 . . .",
+      ". . A20 A20 F7 F7 F7 F7 F7 A20 A20 . .",
+      ". A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 .",
+      "A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 A20",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 H7 A7 A7 A7 A7 A7 A7 H7 H7 .",
+      ". H7 A7 H7 H1 A7 A7 H7 H1 A7 H7 .",
+      ". H7 A7 H7 H7 A7 A7 H7 H7 A7 H7 .",
+      ". H7 A7 A7 A7 H7 A7 A7 A7 A7 H7 .",
+      ". . H7 A7 H7 H7 H7 H7 A7 H7 . .",
+      ". . . H7 A7 A7 A7 A7 H7 . . .",
+      ". . . . H7 F7 F7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 23. 乔巴
+  {
+    id: 'chopper',
+    title: '托尼托尼·乔巴 (Chopper 驯鹿医生)',
+    category: 'anime',
+    tag: '航海王',
+    difficulty: '★★★★★',
+    desc: '草帽海贼团船医乔巴，粉色大十字帽与蓝鼻子。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 E14 E14 H1 H1 E14 E14 H7 . .",
+      ". H7 E14 E14 H1 H1 H1 H1 E14 E14 H7 .",
+      "H7 G17 E14 H1 H1 H1 H1 E14 E14 G17 H7",
+      "H7 G17 G17 E14 E14 E14 E14 E14 G17 G17 H7",
+      ". H7 G17 G17 G17 G17 G17 G17 G17 G17 H7 .",
+      ". H7 G19 G19 G19 G19 G19 G19 G19 G19 H7 .",
+      ". H7 G19 H7 H1 G19 G19 H7 H1 G19 H7 .",
+      ". H7 G19 H7 H7 G19 G19 H7 H7 G19 H7 .",
+      ". H7 G19 G19 G19 C3 C3 G19 G19 G19 H7 .",
+      ". . H7 G19 G19 G19 G19 G19 G19 H7 . .",
+      ". . . H7 F7 F7 F7 F7 F7 F7 H7 . . ."
+    ], C_MAP)
+  },
+  // 24. 鸣人
+  {
+    id: 'naruto',
+    title: '漩涡鸣人 (Naruto 木叶护额)',
+    category: 'anime',
+    tag: '火影忍者',
+    difficulty: '★★★★★',
+    desc: '火影男主鸣人，金黄刺猬头、木叶护额与脸颊六道胡须。',
+    matrix: buildMatrix([
+      ". . . A4 . A4 A4 . A4 A4 . A4 . . .",
+      ". . A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 . .",
+      ". A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 H5 H5 H3 H3 H3 H3 H5 H5 H7 .",
+      ". H7 H5 H5 H3 H7 H7 H3 H5 H5 H7 .",
+      ". . H7 A7 A7 A7 A7 A7 A7 A7 A7 H7 .",
+      ". H7 A7 C3 H1 A7 A7 C3 H1 A7 H7 .",
+      ". H7 A7 H7 H7 A7 A7 H7 H7 A7 H7 .",
+      ". H7 H7 A7 A7 A7 A7 A7 A7 H7 H7 .",
+      ". . H7 A7 H7 H7 H7 H7 A7 H7 . .",
+      ". . . H7 A7 A7 A7 A7 H7 . . .",
+      ". . . H7 A10 A10 A10 A10 H7 . . ."
+    ], C_MAP)
+  },
+  // 25. 初音未来
+  {
+    id: 'miku',
+    title: '初音未来 (Hatsune Miku 双马尾)',
+    category: 'anime',
+    tag: '虚拟歌姬',
+    difficulty: '★★★★★',
+    desc: '世界第一公主殿下，经典青葱绿双马尾与发饰。',
+    matrix: buildMatrix([
+      ". . B28 . . . . . . . . . . B28 . .",
+      ". B28 B28 . . H7 H7 H7 H7 . . B28 B28 .",
+      "B28 B28 B28 . H7 B28 B28 B28 H7 . B28 B28 B28",
+      "B28 B28 . H7 B28 B28 B28 B28 B28 H7 . B28 B28",
+      "B28 . . H7 B28 A7 A7 A7 A7 B28 H7 . . B28",
+      ". . . H7 B28 A7 A7 A7 A7 B28 H7 . . .",
+      ". . . H7 A7 B28 H1 A7 B28 H1 A7 H7 . . .",
+      ". . . H7 A7 B28 H7 A7 B28 H7 A7 H7 . . .",
+      ". . . H7 A7 A7 A7 A7 A7 A7 A7 H7 . . .",
+      ". . . H7 A7 E3 H7 H7 E3 A7 H7 . . .",
+      ". . . . H7 A7 A7 A7 A7 H7 . . . .",
+      ". . . . H7 H4 H4 H4 H4 H7 . . . .",
+      ". . . H7 B28 H4 H4 H4 H4 B28 H7 . . ."
+    ], C_MAP)
+  },
+
+  // ================= 2. 热门游戏 / 像素硬核 (20个) =================
+  // 26. 黑神话悟空
   {
     id: 'wukong-head',
     title: '黑神话：悟空 (Black Myth Wukong)',
@@ -454,6 +940,473 @@ export const ALL_PATTERNS = [
       ". . . . . H7 H7 . . . ."
     ], C_MAP)
   },
+  // 27. 派蒙
+  {
+    id: 'paimon',
+    title: '派蒙 (Paimon 原神应急食品)',
+    category: 'games',
+    tag: '原神',
+    difficulty: '★★★★★',
+    desc: '原神向导派蒙，白色头发、金眸与深蓝星空发夹。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". H7 H1 H1 C18 C18 H1 H1 H1 H1 H1 H7 .",
+      "H7 H1 H1 C18 C18 C18 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 A7 A7 A7 A7 A7 A7 A7 A7 H1 H7",
+      "H7 H1 A7 A4 H1 A7 A7 A4 H1 A7 H1 H7",
+      "H7 H1 A7 A4 H7 A7 A7 A4 H7 A7 H1 H7",
+      "H7 H1 A7 E3 A7 A7 A7 A7 E3 A7 H1 H7",
+      ". H7 H1 A7 A7 F7 F7 A7 A7 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 C18 H1 H1 H1 H1 C18 H7 . . .",
+      ". . . H7 C18 A20 A20 C18 C18 H7 . . ."
+    ], C_MAP)
+  },
+  // 28. 胡桃
+  {
+    id: 'hu-tao',
+    title: '胡桃 (Hu Tao 往生堂主)',
+    category: 'games',
+    tag: '原神',
+    difficulty: '★★★★★',
+    desc: '往生堂七十七代堂主胡桃，标志梅花乾坤帽与梅花瞳。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 G17 G17 G17 G17 G17 G17 G17 G17 H7 . .",
+      ". H7 G17 G17 F7 G17 G17 G17 G17 G17 G17 H7 .",
+      "H7 G17 G17 F7 F7 G17 G17 G17 G17 G17 G17 H7",
+      "H7 G17 G17 G17 G17 G17 G17 G17 G17 G17 G17 H7",
+      "H7 G17 A7 A7 A7 A7 A7 A7 A7 A7 G17 H7",
+      "H7 G17 A7 F7 H1 A7 A7 F7 H1 A7 G17 H7",
+      "H7 G17 A7 F7 H7 A7 A7 F7 H7 A7 G17 H7",
+      "H7 G17 A7 A7 A7 A7 A7 A7 A7 A7 G17 H7",
+      ". H7 G17 A7 E3 F7 F7 E3 A7 G17 H7 .",
+      ". . H7 G17 A7 A7 A7 A7 G17 H7 . .",
+      ". . . H7 G17 G17 G17 G17 H7 . . .",
+      ". . . H7 H5 H5 H5 H5 H5 H7 . . ."
+    ], C_MAP)
+  },
+  // 29. 钟离
+  {
+    id: 'zhongli',
+    title: '钟离 (Zhongli 岩王帝君)',
+    category: 'games',
+    tag: '原神',
+    difficulty: '★★★★★',
+    desc: '尘世闲游钟离，金珀色眼眸与沉稳神态。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 G17 G17 G17 G17 G17 G17 G17 G17 H7 . .",
+      ". H7 G17 G17 G17 G17 G17 G17 G17 G17 G17 G17 H7 .",
+      "H7 G17 G17 A20 G17 G17 G17 A20 G17 G17 G17 H7",
+      "H7 G17 A7 A7 A7 A7 A7 A7 A7 A7 G17 H7",
+      "H7 G17 A7 A20 H1 A7 A7 A20 H1 A7 G17 H7",
+      "H7 G17 A7 A20 H7 A7 A7 A20 H7 A7 G17 H7",
+      "H7 G17 A7 A7 A7 A7 A7 A7 A7 A7 G17 H7",
+      ". H7 G17 A7 A7 H7 H7 A7 A7 G17 H7 .",
+      ". . H7 G17 A7 A7 A7 A7 G17 H7 . .",
+      ". . . H7 G17 G17 G17 G17 H7 . . .",
+      ". . . H7 G16 A20 A20 G16 H7 . . ."
+    ], C_MAP)
+  },
+  // 30. 雷电将军
+  {
+    id: 'raiden',
+    title: '雷电将军 (Raiden Shogun 鸣神雷痕)',
+    category: 'games',
+    tag: '原神',
+    difficulty: '★★★★★',
+    desc: '稻妻鸣神大社守护者，紫色长编发与尊贵发簪。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 D26 D26 D26 D26 D26 D26 D26 D26 H7 . .",
+      ". H7 D26 D26 D26 A20 D26 D26 D26 D26 D26 D26 H7 .",
+      "H7 D26 D26 D26 A20 A20 D26 D26 D26 D26 D26 H7",
+      "H7 D26 A7 A7 A7 A7 A7 A7 A7 A7 D26 H7",
+      "H7 D26 A7 D24 H1 A7 A7 D24 H1 A7 D26 H7",
+      "H7 D26 A7 D24 H7 A7 A7 D24 H7 A7 D26 H7",
+      "H7 D26 A7 A7 A7 A7 A7 A7 A7 A7 D26 H7",
+      ". H7 D26 A7 A7 H7 H7 A7 A7 D26 H7 .",
+      ". . H7 D26 A7 A7 A7 A7 D26 H7 . .",
+      ". . . H7 D26 D26 D26 D26 H7 . . .",
+      ". . . H7 D4 D4 D4 D4 H7 . . ."
+    ], C_MAP)
+  },
+  // 31. 钻石剑
+  {
+    id: 'diamond-sword',
+    title: '我的世界·钻石剑 (MC Diamond Sword)',
+    category: 'games',
+    tag: '我的世界',
+    difficulty: '★★★★☆',
+    desc: '沙盒神作《Minecraft》经典附魔钻石宝剑。',
+    matrix: buildMatrix([
+      ". . . . . . . . . . . . . H7 C24",
+      ". . . . . . . . . . . . H7 C24 C3 C24",
+      ". . . . . . . . . . . H7 C24 C3 C24 H7",
+      ". . . . . . . . . . H7 C24 C3 C24 H7 .",
+      ". . . . . . . . . H7 C24 C3 C24 H7 . .",
+      ". . . . . . . . H7 C24 C3 C24 H7 . . .",
+      ". . . . . . . H7 C24 C3 C24 H7 . . . .",
+      ". . . . . . H7 C24 C3 C24 H7 . . . . .",
+      ". . . . . H7 C24 C3 C24 H7 . . . . . .",
+      ". . . . H7 C24 C3 C24 H7 . . . . . . .",
+      ". . . H7 C24 C3 C24 H7 . . . . . . . .",
+      "H7 . H7 C24 C3 C24 H7 . H7 . . . . . .",
+      "H7 C24 H7 C24 C3 C24 H7 H7 C24 H7 . . . . .",
+      ". H7 C24 C3 C24 C3 C24 C3 C24 H7 . . . . .",
+      ". . H7 C24 C3 H7 G19 H7 C24 H7 . . . . . .",
+      ". . . H7 H7 . H7 G19 H7 . . . . . . . .",
+      ". . . . . . H7 G19 H7 . . . . . . . .",
+      ". . . . . . . H7 H7 . . . . . . . ."
+    ], C_MAP)
+  },
+  // 32. 钻石镐
+  {
+    id: 'diamond-pickaxe',
+    title: '我的世界·钻石镐 (MC Diamond Pickaxe)',
+    category: 'games',
+    tag: '我的世界',
+    difficulty: '★★★★☆',
+    desc: '矿工必备神级工具钻石镐。',
+    matrix: buildMatrix([
+      ". . . . . . . . . . H7 C24 C3 C24 H7 . .",
+      ". . . . . . . H7 C24 C3 C24 C3 C24 C3 C24 H7",
+      ". . . . . . H7 C24 C3 C24 H7 H7 C24 C3 C24 H7",
+      ". . . . . H7 C24 C3 H7 . . . H7 C24 C3 H7 .",
+      ". . . . H7 C24 H7 . . . . . . H7 C24 H7 .",
+      ". . . H7 H7 . . . . H7 G19 H7 . . H7 H7 .",
+      ". . . . . . . . H7 G19 H7 . . . . . . .",
+      ". . . . . . . H7 G19 H7 . . . . . . . .",
+      ". . . . . . H7 G19 H7 . . . . . . . . .",
+      ". . . . . H7 G19 H7 . . . . . . . . . .",
+      ". . . . H7 G19 H7 . . . . . . . . . . .",
+      ". . . H7 G19 H7 . . . . . . . . . . . .",
+      ". . H7 G19 H7 . . . . . . . . . . . . .",
+      ". H7 H7 . . . . . . . . . . . . . . ."
+    ], C_MAP)
+  },
+  // 33. 苦力怕
+  {
+    id: 'creeper',
+    title: '我的世界·苦力怕 (MC Creeper)',
+    category: 'games',
+    tag: '我的世界',
+    difficulty: '★★★★☆',
+    desc: 'SSSS...BOOM！经典绿色爆炸苦力怕头像。',
+    matrix: buildMatrix([
+      "B6 B6 B6 B6 B6 B6 B6 B6 B6 B6 B6 B6",
+      "B6 B4 B4 B6 B6 B4 B4 B6 B6 B4 B4 B6",
+      "B6 B4 H7 H7 B6 B6 B6 B6 H7 H7 B4 B6",
+      "B6 B6 H7 H7 B6 B6 B6 B6 H7 H7 B6 B6",
+      "B6 B6 B6 B6 H7 H7 H7 H7 B6 B6 B6 B6",
+      "B6 B6 B6 H7 H7 H7 H7 H7 H7 B6 B6 B6",
+      "B6 B6 B6 H7 H7 H7 H7 H7 H7 B6 B6 B6",
+      "B6 B6 B6 H7 H7 . . H7 H7 B6 B6 B6",
+      "B6 B6 B6 H7 H7 . . H7 H7 B6 B6 B6",
+      "B6 B4 B6 B6 B6 B6 B6 B6 B6 B6 B4 B6",
+      "B6 B4 B4 B6 B6 B4 B4 B6 B6 B4 B4 B6",
+      "B6 B6 B6 B6 B6 B6 B6 B6 B6 B6 B6 B6"
+    ], C_MAP)
+  },
+  // 34. TNT炸药
+  {
+    id: 'tnt-block',
+    title: '我的世界·TNT炸药 (MC TNT Block)',
+    category: 'games',
+    tag: '我的世界',
+    difficulty: '★★★★☆',
+    desc: '红白分明、破坏力惊人的 TNT 方块。',
+    matrix: buildMatrix([
+      "F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7",
+      "F7 F8 F7 F8 F7 F8 F7 F8 F7 F8 F7 F8",
+      "F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7",
+      "H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1",
+      "H1 H7 H7 H7 H1 H7 H1 H1 H7 H7 H7 H1",
+      "H1 H1 H7 H1 H1 H7 H7 H1 H1 H7 H1 H1",
+      "H1 H1 H7 H1 H1 H7 H1 H7 H1 H7 H1 H1",
+      "H1 H1 H7 H1 H1 H7 H1 H1 H7 H7 H1 H1",
+      "H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1",
+      "F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7",
+      "F7 F8 F7 F8 F7 F8 F7 F8 F7 F8 F7 F8",
+      "F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7"
+    ], C_MAP)
+  },
+  // 35. 史蒂夫
+  {
+    id: 'steve',
+    title: '我的世界·史蒂夫 (MC Steve 方块人)',
+    category: 'games',
+    tag: '我的世界',
+    difficulty: '★★★★☆',
+    desc: '沙盒元老史蒂夫，棕发方脸与青蓝战袍。',
+    matrix: buildMatrix([
+      "G17 G17 G17 G17 G17 G17 G17 G17",
+      "G17 G17 G17 G17 G17 G17 G17 G17",
+      "G17 A7 G17 G17 G17 G17 A7 G17",
+      "A7 A7 A7 A7 A7 A7 A7 A7",
+      "A7 H1 C15 A7 A7 C15 H1 A7",
+      "A7 A7 A7 G19 G19 A7 A7 A7",
+      "A7 A7 G19 G19 G19 G19 A7 A7",
+      "A7 A7 G19 G19 G19 G19 A7 A7",
+      ". C24 C24 C24 C24 C24 C24 .",
+      "C24 C24 C24 C24 C24 C24 C24 C24",
+      "C24 C24 C24 C24 C24 C24 C24 C24",
+      ". C18 C18 C18 C18 C18 C18 ."
+    ], C_MAP)
+  },
+  // 36. 超级马里奥
+  {
+    id: 'mario-classic',
+    title: '超级马里奥 (Super Mario 8-Bit)',
+    category: 'games',
+    tag: '任天堂',
+    difficulty: '★★★☆☆',
+    desc: '红白机经典 8-Bit 像素马里奥跑跳姿态。',
+    matrix: buildMatrix([
+      ". . . . F7 F7 F7 F7 F7 . . . .",
+      ". . . F7 F7 F7 F7 F7 F7 F7 F7 F7 .",
+      ". . . G17 G17 G17 A7 A7 G17 A7 . . .",
+      ". . G17 A7 G17 A7 A7 A7 G17 A7 A7 A7 .",
+      ". . G17 A7 G17 G17 A7 A7 A7 G17 A7 A7 A7",
+      ". . G17 G17 A7 A7 A7 A7 G17 G17 G17 G17 .",
+      ". . . . A7 A7 A7 A7 A7 A7 A7 . . .",
+      ". . . F7 F7 C15 F7 F7 F7 . . . .",
+      ". . F7 F7 F7 C15 F7 F7 C15 F7 F7 F7 .",
+      ". F7 F7 F7 F7 C15 C15 C15 C15 F7 F7 F7 F7",
+      ". A7 A7 F7 C15 A4 C15 C15 A4 C15 F7 A7 A7",
+      ". A7 A7 A7 C15 C15 C15 C15 C15 C15 A7 A7 A7",
+      ". . . C15 C15 C15 C15 C15 C15 C15 . . .",
+      ". . G17 G17 G17 . . . G17 G17 G17 . .",
+      ". G17 G17 G17 G17 . . G17 G17 G17 G17 ."
+    ], C_MAP)
+  },
+  // 37. 星之卡比
+  {
+    id: 'kirby',
+    title: '星之卡比 (Kirby 粉红大胃王)',
+    category: 'games',
+    tag: '任天堂',
+    difficulty: '★★★☆☆',
+    desc: '粉色圆滚滚卡比，大眼睛与红扑扑小脚丫。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 E4 E4 E4 E4 E4 E4 E4 E4 H7 . .",
+      ". H7 E4 E4 E4 E4 E4 E4 E4 E4 E4 E4 H7 .",
+      "H7 E4 E4 H7 H7 E4 E4 H7 H7 E4 E4 E4 H7",
+      "H7 E4 E4 H7 C15 E4 E4 H7 C15 E4 E4 E4 H7",
+      "H7 E4 E4 H7 H1 E4 E4 H7 H1 E4 E4 E4 H7",
+      "H7 E4 E14 E4 E4 E4 E4 E4 E4 E14 E4 E4 H7",
+      "H7 E4 E14 E4 E4 F7 F7 E4 E4 E14 E4 E4 H7",
+      ". H7 E4 E4 E4 E4 E4 E4 E4 E4 E4 E4 H7 .",
+      ". . H7 E4 E4 E4 E4 E4 E4 E4 E4 H7 . .",
+      ". H7 F7 F7 H7 . . . . H7 F7 F7 H7 .",
+      "H7 F7 F7 F7 F7 H7 . H7 F7 F7 F7 F7 H7",
+      ". H7 H7 H7 H7 . . . . H7 H7 H7 H7 ."
+    ], C_MAP)
+  },
+  // 38. 大师剑
+  {
+    id: 'zelda-sword',
+    title: '大师之剑 (Master Sword 退魔之剑)',
+    category: 'games',
+    tag: '塞尔达传说',
+    difficulty: '★★★★☆',
+    desc: '《塞尔达传说》系列灵魂退魔神剑。',
+    matrix: buildMatrix([
+      ". . . . . . H7 C3 H7 . . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . . H7 C3 C3 H7 . . . . .",
+      ". . . . H7 D24 C3 C3 D24 H7 . . . .",
+      ". H7 H7 D24 D24 A20 A20 D24 D24 H7 H7 .",
+      "H7 D24 D24 D24 H7 A20 H7 D24 D24 D24 H7",
+      ". H7 H7 H7 . H7 C15 H7 . H7 H7 H7 .",
+      ". . . . . H7 C15 H7 . . . . .",
+      ". . . . . H7 C15 H7 . . . . .",
+      ". . . . . H7 A20 H7 . . . . .",
+      ". . . . . . H7 H7 . . . . . ."
+    ], C_MAP)
+  },
+  // 39. 三角力量
+  {
+    id: 'triforce',
+    title: '三角力量 (Triforce 圣三角)',
+    category: 'games',
+    tag: '塞尔达传说',
+    difficulty: '★★★☆☆',
+    desc: '海拉鲁大陆力量、智慧与勇气的金色象征。',
+    matrix: buildMatrix([
+      ". . . . . . A20 A20 . . . . . .",
+      ". . . . . A20 A4 A4 A20 . . . . .",
+      ". . . . A20 A4 A4 A4 A4 A20 . . . .",
+      ". . . A20 A4 A4 A4 A4 A4 A4 A20 . . .",
+      ". . A20 A4 A4 A4 A4 A4 A4 A4 A4 A20 . .",
+      ". A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 .",
+      ". A20 A4 A20 . . . . . . A20 A4 A20 .",
+      "A20 A4 A4 A4 A20 . . . A20 A4 A4 A4 A20",
+      "A20 A4 A4 A4 A4 A20 . A20 A4 A4 A4 A4 A20",
+      "A20 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A20",
+      "A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 A20 A20"
+    ], C_MAP)
+  },
+  // 40. 太空狼人杀
+  {
+    id: 'among-us-red',
+    title: '太空狼人杀 (Among Us 红色内鬼)',
+    category: 'games',
+    tag: '热门游戏',
+    difficulty: '★★★☆☆',
+    desc: '经典太空船员造型，浅蓝面罩与氧气背包。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 . . .",
+      ". . . H7 F7 F7 F7 F7 F7 H7 . .",
+      ". . H7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". H7 F7 F7 C2 C2 C2 C2 C2 H7 .",
+      "H7 F7 F7 F7 C2 H1 C3 C3 C3 H7",
+      "H7 F7 F7 F7 C2 C3 C3 C3 C3 H7",
+      "H7 F7 F7 F7 H7 H7 H7 H7 H7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      ". . H7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". . H7 F7 F7 H7 H7 F7 F7 H7 . .",
+      ". . H7 F7 F7 H7 H7 F7 F7 H7 . .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 41. 吃豆人幽灵
+  {
+    id: 'pacman-ghost',
+    title: '吃豆人幽灵 (Pac-Man Red Ghost)',
+    category: 'games',
+    tag: '经典街机',
+    difficulty: '★★★☆☆',
+    desc: '街机黄金时代标志性小红幽灵。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 F7 F7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      "H7 F7 F7 H1 H1 F7 F7 H1 H1 F7 F7 F7 H7",
+      "H7 F7 H1 H1 C15 H7 H1 H1 C15 H7 F7 F7 H7",
+      "H7 F7 H1 H1 C15 H7 H1 H1 C15 H7 F7 F7 H7",
+      "H7 F7 F7 H1 H1 F7 F7 H1 H1 F7 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 H7 F7 F7 H7 H7 F7 F7 H7 F7 F7 H7",
+      "H7 H7 . H7 H7 . . H7 H7 . H7 H7 ."
+    ], C_MAP)
+  },
+  // 42. 星露谷蓝鸡
+  {
+    id: 'blue-chicken',
+    title: '星露谷·蓝鸡 (Stardew Blue Chicken)',
+    category: 'games',
+    tag: '星露谷物语',
+    difficulty: '★★★★☆',
+    desc: '玛妮农场与谢恩好感度专属奇迹蓝鸡。',
+    matrix: buildMatrix([
+      ". . . . . . H7 H7 H7 . . . .",
+      ". . . . . H7 C15 C15 C15 H7 . . .",
+      ". . . . H7 C15 C15 C15 C15 H7 . .",
+      ". . . H7 F7 C15 C15 C15 C15 H7 .",
+      ". . . H7 F7 F7 H7 H1 C15 C15 H7",
+      ". . . . H7 F7 A4 A4 C15 C15 H7",
+      ". . . H7 C15 C15 C15 C15 C15 C15 H7",
+      ". . H7 C15 C15 C15 C15 C15 C15 C15 H7",
+      ". H7 C15 C15 C15 C15 C15 C15 C15 C15 H7",
+      "H7 C15 C15 C15 C15 C15 C15 C15 C15 C15 H7",
+      "H7 C15 C15 C15 C15 C15 C15 C15 C15 C15 H7",
+      ". H7 H7 C15 C15 C15 C15 C15 C15 H7 .",
+      ". . . H7 A4 H7 . H7 A4 H7 . .",
+      ". . . H7 A4 H7 . H7 A4 H7 . ."
+    ], C_MAP)
+  },
+  // 43. 五彩碎片
+  {
+    id: 'prismatic-shard',
+    title: '五彩碎片 (Prismatic Shard)',
+    category: 'games',
+    tag: '星露谷物语',
+    difficulty: '★★★★★',
+    desc: '矿洞深处蕴含彩虹光芒的至尊五彩神石。',
+    matrix: buildMatrix([
+      ". . . . . . H7 H7 . . . . . .",
+      ". . . . . H7 F7 F7 H7 . . . . .",
+      ". . . . H7 F7 A10 A10 H7 . . . .",
+      ". . . H7 F7 A10 A4 A4 H7 . . .",
+      ". . H7 F7 A10 A4 B4 B4 H7 . .",
+      ". H7 F7 A10 A4 B4 C3 C3 H7 .",
+      "H7 F7 A10 A4 B4 C3 D24 D24 H7",
+      "H7 E14 A10 A4 B4 C3 D24 D26 H7",
+      ". H7 E14 A4 B4 C3 D24 D26 H7 .",
+      ". . H7 E14 B4 C3 D24 D26 H7 . .",
+      ". . . H7 E14 C3 D24 D26 H7 . . .",
+      ". . . . H7 E14 D24 D26 H7 . . . .",
+      ". . . . . H7 D24 D26 H7 . . . . .",
+      ". . . . . . H7 H7 . . . . . ."
+    ], C_MAP)
+  },
+  // 44. 空洞骑士
+  {
+    id: 'hollow-knight',
+    title: '空洞骑士 (Hollow Knight 小骑士)',
+    category: 'games',
+    tag: '独立游戏',
+    difficulty: '★★★★★',
+    desc: '圣巢救世主小骑士，白骨面具、纯黑眼窝与灰色披风。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . . . H7 H7 . .",
+      ". H7 H1 H1 H7 . . . . H7 H1 H1 H7 .",
+      ". H7 H1 H1 H1 H7 H7 H7 H7 H1 H1 H1 H7 .",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H7 H7 H7 H1 H1 H7 H7 H7 H1 H7",
+      "H7 H1 H7 H7 H7 H1 H1 H7 H7 H7 H1 H7",
+      "H7 H1 H7 H7 H7 H1 H1 H7 H7 H7 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H4 H4 H4 H4 H4 H7 . . .",
+      ". . H7 H4 H4 H4 H4 H4 H4 H4 H7 . .",
+      ". H7 H4 H4 H4 H4 H4 H4 H4 H4 H4 H7 .",
+      ". H7 H4 H4 H7 H7 H7 H7 H4 H4 H4 H7 ."
+    ], C_MAP)
+  },
+  // 45. 菈妮
+  {
+    id: 'ranni',
+    title: '月之公主菈妮 (Ranni the Witch)',
+    category: 'games',
+    tag: '艾尔登法环',
+    difficulty: '★★★★★',
+    desc: '《艾尔登法环》超人气月之公主，蓝色大巫师帽。',
+    matrix: buildMatrix([
+      ". . . . . . H7 C18 C18 H7 . . . . . .",
+      ". . . . . H7 C18 C18 C18 C18 H7 . . . . .",
+      ". . . . H7 C18 C18 C18 C18 C18 C18 H7 . . . .",
+      ". . . H7 C18 C18 C18 C18 C18 C18 C18 C18 H7 . . .",
+      ". . H7 C18 C18 C18 C18 C18 C18 C18 C18 C18 C18 H7 . .",
+      "H7 C18 C18 C18 C18 C18 C18 C18 C18 C18 C18 C18 C18 H7",
+      ". H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 .",
+      ". . H7 C2 C2 C2 C2 C2 C2 C2 C2 C2 C2 H7 . .",
+      ". H7 C2 C2 C2 C2 C2 C2 C2 C2 C2 C2 C2 C2 H7 .",
+      ". H7 C2 C2 H7 H1 C2 C2 C2 H7 H1 C2 C2 H7 .",
+      ". H7 C2 C2 H7 H7 C2 C2 C2 H7 H7 C2 C2 H7 .",
+      ". . H7 C2 C2 C2 C2 H7 H7 C2 C2 C2 H7 . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . . .",
+      ". . . H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 . . ."
+    ], C_MAP)
+  },
+
+  // ================= 3. 治愈萌宠 / 可爱动物 (15个) =================
+  // 46. 卡皮巴拉
   {
     id: 'capybara-orange',
     title: '卡皮巴拉·顶橘子 (Capybara)',
@@ -478,87 +1431,675 @@ export const ALL_PATTERNS = [
       ". H7 H7 H7 H7 H7 H7 H7 H7 H7 ."
     ], C_MAP)
   },
+  // 47. 柯基蜜桃臀
   {
-    id: 'messi-10',
-    title: '球王梅西 (Messi 经典10号)',
-    category: 'football',
-    tag: '世界杯球星',
+    id: 'corgi-butt',
+    title: '柯基蜜桃臀 (Corgi 摇尾柯基)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '圆滚滚大桃心柯基小屁股与粉红肉垫。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . H7 H7 .",
+      "H7 A9 A9 H7 . . . . . . H7 A9 A9 H7",
+      "H7 A9 A9 A9 H7 . . . . H7 A9 A9 A9 H7",
+      "H7 A9 A9 A9 A9 H7 H7 H7 H7 A9 A9 A9 A9 H7",
+      "H7 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 H7",
+      "H7 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 H7",
+      ". H7 A9 A9 A9 H1 H1 H1 H1 A9 A9 A9 H7 .",
+      ". H7 A9 A9 H1 H1 H1 H1 H1 H1 A9 A9 H7 .",
+      ". . H7 A9 H1 H1 H1 H1 H1 H1 A9 H7 . .",
+      ". . H7 E3 H1 H1 H1 H1 H1 H1 E3 H7 . .",
+      ". . H7 E3 E3 H1 H1 H1 H1 E3 E3 H7 . .",
+      ". . . H7 H7 H1 H1 H1 H1 H7 H7 . . .",
+      ". . . . . H7 H7 H7 H7 . . . . ."
+    ], C_MAP)
+  },
+  // 48. 柴犬微笑
+  {
+    id: 'shiba-inu',
+    title: '柴犬微笑 (Shiba Inu 赤柴大头)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '治愈系赤柴大笑脸，标志性白眉与翘耳朵。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . H7 H7 .",
+      "H7 A9 A9 H7 . . . . . . H7 A9 A9 H7",
+      "H7 A9 A9 A9 H7 H7 H7 H7 H7 A9 A9 A9 H7",
+      "H7 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 H7",
+      "H7 A9 H1 A9 A9 A9 A9 A9 A9 H1 A9 H7",
+      "H7 A9 A9 H7 H1 A9 A9 H7 H1 A9 A9 H7",
+      "H7 A9 A9 H7 H7 A9 A9 H7 H7 A9 A9 H7",
+      "H7 A9 H1 H1 H1 H7 H7 H1 H1 H1 A9 H7",
+      "H7 A9 H1 H1 H1 H7 H7 H1 H1 H1 A9 H7",
+      ". H7 H1 H1 H1 E4 E4 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 49. 英短蓝猫
+  {
+    id: 'british-shorthair',
+    title: '英国短毛猫 (Blue Cat 蓝猫圆脸)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '圆滚滚大腮帮英短蓝猫，金黄色铜钱大眼。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . H7 H7 .",
+      "H7 H3 H3 H7 . . . . . . H7 H3 H3 H7",
+      "H7 H3 H3 H3 H7 H7 H7 H7 H7 H3 H3 H3 H7",
+      "H7 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H7",
+      "H7 H3 H3 A4 H7 H3 H3 A4 H7 H3 H3 H3 H7",
+      "H7 H3 H3 A4 H1 H3 H3 A4 H1 H3 H3 H3 H7",
+      "H7 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H3 H7",
+      "H7 H3 H3 H3 H3 E4 E4 H3 H3 H3 H3 H3 H7",
+      ". H7 H3 H3 H3 H7 H7 H3 H3 H3 H3 H7 .",
+      ". . H7 H3 H3 H3 H3 H3 H3 H3 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 50. 三花猫
+  {
+    id: 'calico-cat',
+    title: '三花猫 (Calico Cat 招财三色猫)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '黑白黄三色拼接的招财三花猫。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . H7 H7 .",
+      "H7 H7 H7 H7 . . . . . . H7 A9 A9 H7",
+      "H7 H7 H7 H7 H7 H7 H7 H7 H7 A9 A9 A9 H7",
+      "H7 H7 H7 H1 H1 H1 H1 H1 A9 A9 A9 A9 H7",
+      "H7 H7 H1 H7 H1 H1 H1 H1 H7 H1 A9 A9 H7",
+      "H7 H1 H1 H7 H7 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 H1 H1 H1 E4 E4 H1 H1 H1 H1 H7",
+      ". H7 H1 H1 H1 H7 H7 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 51. 小熊猫
+  {
+    id: 'red-panda',
+    title: '小熊猫 (Red Panda 环尾小熊猫)',
+    category: 'pets',
+    tag: '治愈萌宠',
     difficulty: '★★★★☆',
-    desc: '蓝白阿根廷战袍，双手聆听欢呼的经典名场面。',
+    desc: '软萌干脆面小熊猫，白耳朵、红棕毛与黑眼圈。',
+    matrix: buildMatrix([
+      ". H7 H1 . . . . . . . . H1 H7 .",
+      "H7 H1 H1 H7 . . . . . . H7 H1 H1 H7",
+      "H7 A9 A9 A9 H7 H7 H7 H7 H7 A9 A9 A9 H7",
+      "H7 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 H7",
+      "H7 A9 H1 H1 A9 A9 A9 A9 H1 H1 A9 H7",
+      "H7 H7 H7 H1 H7 A9 A9 H7 H1 H7 H7 H7",
+      "H7 H7 H7 H7 H7 A9 A9 H7 H7 H7 H7 H7",
+      "H7 A9 H1 H1 H1 H7 H7 H1 H1 H1 A9 H7",
+      ". H7 H5 H5 H5 H5 H5 H5 H5 H5 H7 .",
+      ". . H7 H5 H5 H5 H5 H5 H5 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 52. 拿刀鸭鸭
+  {
+    id: 'knife-duck',
+    title: '拿刀鸭鸭 (Duck with Knife 战神鸭)',
+    category: 'pets',
+    tag: '网红搞笑',
+    difficulty: '★★★☆☆',
+    desc: '全网爆火表情包：看似无辜其实手握菜刀的呆萌小黄鸭。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 . . . . . .",
+      ". . . H7 A4 A4 A4 A4 H7 . . . . .",
+      ". . H7 A4 A4 A4 A4 A4 A4 H7 . . . .",
+      ". . H7 A4 H7 A4 A4 A4 A4 H7 . . . .",
+      ". H7 A10 A10 A10 A10 A4 A4 H7 . . . .",
+      ". H7 A10 A10 A10 A10 A4 A4 H7 . . H7 H7",
+      ". . H7 A4 A4 A4 A4 A4 A4 H7 H7 H3 H3 H7",
+      ". H7 A4 A4 A4 A4 A4 A4 A4 H7 H3 H3 H7 .",
+      "H7 A4 A4 A4 A4 A4 A4 A4 A4 H7 H7 H7 . .",
+      "H7 A4 A4 A4 A4 A4 A4 A4 A4 H7 . . . .",
+      ". H7 A4 A4 A4 A4 A4 A4 H7 . . . . .",
+      ". . H7 A10 H7 . H7 A10 H7 . . . . ."
+    ], C_MAP)
+  },
+  // 53. 企鹅宝宝
+  {
+    id: 'baby-penguin',
+    title: '企鹅宝宝 (Baby Penguin 呆萌企鹅)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '圆滚滚小企鹅，黑白分明与嫩黄小嘴。',
     matrix: buildMatrix([
       ". . . . H7 H7 H7 H7 . . . .",
-      ". . . H7 G19 G19 G19 G19 H7 . . .",
-      ". . H7 G19 G19 G19 G19 G19 H7 . .",
-      ". H7 A7 A7 A7 A7 A7 A7 A7 H7 .",
-      ". H7 A7 H7 A7 A7 H7 A7 A7 H7 .",
-      ". H7 A7 G19 A7 A7 G19 A7 A7 H7 .",
-      ". H7 A7 G19 G19 G19 G19 A7 A7 H7 .",
-      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
-      ". . H7 C3 H1 C3 H1 C3 H1 C3 H7 . .",
-      ". H7 H7 C3 H1 C3 H1 C3 H1 C3 H7 H7 .",
-      "H7 A7 C3 H1 C15 C15 H1 C3 A7 H7",
-      "H7 A7 C3 H1 C15 H7 H1 C3 A7 H7",
-      ". H7 H7 C3 H1 C15 C15 H1 C3 H7 H7 .",
+      ". . . H7 H5 H5 H5 H5 H7 . . .",
+      ". . H7 H5 H5 H5 H5 H5 H5 H7 . .",
+      ". H7 H5 H1 H5 H5 H1 H5 H5 H7 .",
+      ". H7 H5 H7 H1 H1 H7 H5 H5 H7 .",
+      ". H7 H5 H1 A4 A4 H1 H5 H5 H7 .",
+      ". H7 H5 H1 H1 H1 H1 H5 H5 H7 .",
+      "H7 H5 H5 H1 H1 H1 H1 H5 H5 H7",
+      "H7 H5 H5 H1 H1 H1 H1 H5 H5 H7",
+      ". H7 H5 H5 H1 H1 H5 H5 H7 .",
+      ". . H7 A4 H7 . H7 A4 H7 . .",
+      ". . H7 H7 H7 . H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 54. 仓鼠
+  {
+    id: 'hamster',
+    title: '吃瓜子仓鼠 (Cheeky Hamster)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '鼓起大腮帮吃瓜子的小仓鼠。',
+    matrix: buildMatrix([
+      ". . H7 H7 . . . . H7 H7 . .",
+      ". H7 E3 E3 H7 . . H7 E3 E3 H7 .",
+      ". H7 G12 G12 H7 H7 H7 G12 G12 H7 .",
+      "H7 G12 G12 G12 G12 G12 G12 G12 G12 H7",
+      "H7 G12 H7 H1 G12 G12 H7 H1 G12 H7",
+      "H7 G12 H7 H7 G12 G12 H7 H7 G12 H7",
+      "H7 E3 G12 G12 G17 G17 G12 G12 E3 H7",
+      ". H7 H1 H1 H7 G8 G8 H7 H1 H7 .",
+      ". H7 H1 H1 H7 G8 G8 H7 H1 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 55. 垂耳兔
+  {
+    id: 'lop-bunny',
+    title: '垂耳兔 (Holland Lop 奶白兔)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '两只长耳朵耷拉下来的软萌垂耳兔。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 . . . .",
       ". . . H7 H1 H1 H1 H1 H7 . . .",
-      ". . . H7 C15 C15 C15 C15 H7 . . .",
-      ". . . H7 C15 . . C15 H7 . . .",
-      ". . . H7 A7 . . A7 H7 . . .",
-      ". . . H7 H7 . . H7 H7 . . ."
+      ". H7 H7 H1 H1 H1 H1 H7 H7 .",
+      "H7 E3 H1 H1 H1 H1 H1 H1 E3 H7",
+      "H7 E3 H1 H7 H1 H1 H7 H1 E3 H7",
+      "H7 H1 H1 H7 H1 H1 H7 H1 H1 H7",
+      "H7 H1 H1 H1 E4 E4 H1 H1 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 H7 H7 H7 H7 . . ."
     ], C_MAP)
   },
+  // 56. 悲伤蛙
   {
-    id: 'cr7-siu',
-    title: 'C罗 (CR7 胜利狂欢)',
-    category: 'football',
-    tag: '世界杯球星',
+    id: 'pepe-frog',
+    title: '悲伤蛙·佩佩 (Pepe the Frog)',
+    category: 'pets',
+    tag: '网红搞笑',
     difficulty: '★★★★☆',
-    desc: '葡萄牙标志性 7 号战袍，经典挥拳庆祝动作。',
+    desc: '网络知名神态佩佩蛙，大厚嘴唇与忧郁眼神。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 B4 B4 B4 B4 B4 B4 B4 B4 H7 . .",
+      ". H7 B4 H1 H1 B4 B4 H1 H1 B4 B4 H7 .",
+      "H7 B4 H1 H7 H1 B4 H1 H7 H1 B4 B4 H7",
+      "H7 B4 H1 H7 H1 B4 H1 H7 H1 B4 B4 H7",
+      "H7 B4 B4 H1 H1 B4 B4 H1 H1 B4 B4 H7",
+      "H7 B4 B4 B4 B4 B4 B4 B4 B4 B4 B4 H7",
+      ". H7 B6 B6 B6 B6 B6 B6 B6 B6 H7 .",
+      ". H7 B6 F5 F5 F5 F5 F5 F5 B6 H7 .",
+      "H7 B6 F5 F5 F5 F5 F5 F5 F5 F5 B6 H7",
+      ". H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 ."
+    ], C_MAP)
+  },
+  // 57. 美西螈
+  {
+    id: 'axolotl',
+    title: '六角恐龙·美西螈 (Pink Axolotl)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★★☆',
+    desc: '粉色美西螈蝾螈，六朵标志性红色小角鳃。',
+    matrix: buildMatrix([
+      "F7 . . . H7 H7 H7 H7 . . . F7",
+      "F7 F7 . H7 E3 E3 E3 E3 H7 . F7 F7",
+      ". F7 H7 E3 E3 E3 E3 E3 E3 H7 F7 .",
+      "F7 F7 H7 E3 H7 H1 E3 H7 H1 E3 H7 F7 F7",
+      "F7 . H7 E3 H7 H7 E3 H7 H7 E3 H7 . F7",
+      ". . H7 E3 E3 E3 E3 E3 E3 E3 H7 . .",
+      ". . H7 E3 E14 E3 E3 E14 E3 E3 H7 . .",
+      ". . . H7 E3 E3 F5 E3 E3 H7 . . .",
+      ". . . . H7 E3 E3 E3 E3 H7 . . . .",
+      ". . . . . H7 H7 H7 H7 . . . . ."
+    ], C_MAP)
+  },
+  // 58. 熊猫
+  {
+    id: 'panda',
+    title: '国宝大熊猫 (Giant Panda 啃竹子)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★☆☆',
+    desc: '圆滚滚大熊猫，黑眼圈与嫩绿小竹子。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . H7 H7 .",
+      "H7 H7 H7 H7 . . . . H7 H7 H7 H7",
+      "H7 H7 H7 H1 H1 H1 H1 H1 H7 H7 H7",
+      ". H7 H1 H7 H7 H1 H7 H7 H1 H7 .",
+      ". H7 H1 H7 H1 H1 H7 H1 H1 H7 .",
+      ". H7 H1 H1 H1 H7 H1 H1 H1 H7 .",
+      ". H7 H1 H1 H7 H7 H7 H1 B4 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 B4 H7 .",
+      ". H7 H7 H5 H5 H5 H5 H5 B4 H7 .",
+      ". H7 H5 H5 H5 H5 H5 H5 B4 H7 .",
+      ". . H7 H7 . . . . H7 H7 ."
+    ], C_MAP)
+  },
+  // 59. 水獭
+  {
+    id: 'otter',
+    title: '仰泳水獭 (Cute Sea Otter)',
+    category: 'pets',
+    tag: '治愈萌宠',
+    difficulty: '★★★★☆',
+    desc: '漂浮在水面、双手抱胸的可爱小水獭。',
     matrix: buildMatrix([
       ". . . . H7 H7 H7 H7 . . . .",
-      ". . . H7 G19 G19 G19 G19 H7 . . .",
-      ". . H7 G19 G19 G19 G19 G19 H7 . .",
-      ". H7 A7 A7 A7 A7 A7 A7 A7 H7 .",
-      ". H7 A7 H7 A7 A7 H7 A7 A7 H7 .",
-      ". H7 A7 G19 G19 G19 G19 A7 A7 H7 .",
-      ". . H7 A7 A7 A7 A7 A7 A7 H7 . .",
-      "H7 . H7 G19 G19 G19 G19 H7 . H7",
-      "H7 A7 H7 F7 F7 F7 F7 H7 A7 H7",
-      "H7 A7 H7 F7 B8 B8 F7 H7 A7 H7",
-      ". H7 H7 F7 B8 H1 B8 F7 H7 H7 .",
-      ". . H7 F7 F7 F7 F7 F7 H7 . .",
-      ". . H7 B8 B8 B8 B8 B8 H7 . .",
-      ". . H7 B8 . . B8 H7 . .",
-      ". . H7 A7 . . A7 H7 . .",
-      ". . H7 F7 . . F7 H7 . .",
-      ". . H7 H7 . . H7 H7 . ."
+      ". . . H7 G16 G16 G16 G16 H7 . . .",
+      ". . H7 G16 G16 G16 G16 G16 G16 H7 . .",
+      ". H7 G16 H7 H1 G16 G16 H7 H1 G16 H7 .",
+      ". H7 G16 H7 H7 G16 G16 H7 H7 G16 H7 .",
+      ". H7 G16 G12 G12 G17 G12 G12 G16 H7 .",
+      ". . H7 G12 G12 G12 G12 G12 G12 H7 . .",
+      ". H7 G16 G16 G16 G16 G16 G16 G16 G16 H7 .",
+      "H7 G16 G16 G16 G12 G12 G16 G16 G16 H7",
+      ". H7 G16 G16 G16 G16 G16 G16 G16 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . ."
     ], C_MAP)
   },
+  // 60. 小狐狸
   {
-    id: 'diamond-sword',
-    title: '我的世界·钻石剑 (MC Diamond Sword)',
-    category: 'games',
-    tag: '经典游戏',
+    id: 'red-fox',
+    title: '小狐狸 (Cute Red Fox 蓬松大尾巴)',
+    category: 'pets',
+    tag: '治愈萌宠',
     difficulty: '★★★★☆',
-    desc: '沙盒神作《Minecraft》经典附魔钻石宝剑。',
+    desc: '橙红毛皮、纯白围脖与大耳朵的小狐狸。',
     matrix: buildMatrix([
-      ". . . . . . . . . . . . . H7 C24",
-      ". . . . . . . . . . . . H7 C24 C3 C24",
-      ". . . . . . . . . . . H7 C24 C3 C24 H7",
-      ". . . . . . . . . . H7 C24 C3 C24 H7 .",
-      ". . . . . . . . . H7 C24 C3 C24 H7 . .",
-      ". . . . . . . . H7 C24 C3 C24 H7 . . .",
-      ". . . . . . . H7 C24 C3 C24 H7 . . . .",
-      ". . . . . . H7 C24 C3 C24 H7 . . . . .",
-      ". . . . . H7 C24 C3 C24 H7 . . . . . .",
-      ". . . . H7 C24 C3 C24 H7 . . . . . . .",
-      ". . . H7 C24 C3 C24 H7 . . . . . . . .",
-      "H7 . H7 C24 C3 C24 H7 . H7 . . . . . .",
-      "H7 C24 H7 C24 C3 C24 H7 H7 C24 H7 . . . . .",
-      ". H7 C24 C3 C24 C3 C24 C3 C24 H7 . . . . .",
-      ". . H7 C24 C3 H7 G19 H7 C24 H7 . . . . . .",
-      ". . . H7 H7 . H7 G19 H7 . . . . . . . .",
-      ". . . . . . H7 G19 H7 . . . . . . . .",
-      ". . . . . . . H7 H7 . . . . . . . ."
+      "H7 H7 . . . . . . . . H7 H7",
+      "H7 F15 H7 . . . . . . H7 F15 H7",
+      "H7 F15 F15 H7 H7 H7 H7 H7 F15 F15 H7",
+      "H7 F15 F15 F15 F15 F15 F15 F15 F15 F15 F15 H7",
+      "H7 F15 F15 H7 H1 F15 F15 H7 H1 F15 F15 H7",
+      "H7 F15 H1 H7 H7 H1 H1 H7 H7 H1 F15 H7",
+      ". H7 H1 H1 H1 H7 H7 H1 H1 H1 H7 .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". . . H7 F15 F15 F15 F15 H7 . . .",
+      ". . H7 F15 F15 F15 F15 H1 H1 H7 .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+
+  // ================= 4. 美食甜品 / 快乐水 (10个) =================
+  // 61. 汉堡
+  {
+    id: 'double-burger',
+    title: '双层芝士牛肉汉堡 (Burger)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '松软芝麻面包、香煎多汁肉饼、融化芝士与新鲜生菜。',
+    matrix: buildMatrix([
+      ". . . . A9 A9 A9 A9 A9 A9 . . . .",
+      ". . A9 A9 A4 A9 A4 A9 A4 A9 A9 . .",
+      ". A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 A9 .",
+      ". B4 B4 B4 B4 B4 B4 B4 B4 B4 B4 B4 .",
+      ". F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 .",
+      ". A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 .",
+      ". G17 G17 G17 G17 G17 G17 G17 G17 G17 G17 G17 .",
+      ". . A9 A9 A9 A9 A9 A9 A9 A9 A9 . .",
+      ". . . A9 A9 A9 A9 A9 A9 A9 . . ."
+    ], C_MAP)
+  },
+  // 62. 薯条
+  {
+    id: 'french-fries',
+    title: '香脆薯条 (French Fries)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '金黄诱人炸薯条与红色包装盒。',
+    matrix: buildMatrix([
+      ". . A4 . A4 . A4 . A4 . .",
+      ". A4 A4 A4 A4 A4 A4 A4 A4 A4 .",
+      ". A4 A4 A4 A4 A4 A4 A4 A4 A4 .",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 F7 F7 A4 A4 F7 F7 F7 F7 H7",
+      "H7 F7 F7 A4 A4 A4 A4 F7 F7 F7 H7",
+      "H7 F7 F7 A4 A4 A4 A4 F7 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 63. 披萨
+  {
+    id: 'pizza-slice',
+    title: '拉丝披萨 (Pepperoni Pizza)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '浓郁芝士、意式萨拉米香肠与金黄酥脆饼底。',
+    matrix: buildMatrix([
+      ". . . . . . G16 G16 G16 G16 .",
+      ". . . . . G16 A9 A9 A9 A9 G16",
+      ". . . . A9 A4 A4 F7 F7 A4 A9",
+      ". . . A9 A4 A4 F7 F7 A4 A4 .",
+      ". . A9 A4 F7 F7 A4 A4 A4 . .",
+      ". A9 A4 F7 F7 A4 A4 . . . .",
+      "A9 A4 A4 A4 A4 . . . . . .",
+      "A9 A4 A4 . . . . . . . . .",
+      "A9 . . . . . . . . . . . ."
+    ], C_MAP)
+  },
+  // 64. 珍珠奶茶
+  {
+    id: 'boba-tea',
+    title: '黑糖珍珠奶茶 (Boba Milk Tea)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★☆☆☆',
+    desc: '夏日解暑黑糖波霸奶茶，附带条纹吸管。',
+    matrix: buildMatrix([
+      ". . . . . . F7 F7 . . . . .",
+      ". . . . . F7 H1 . . . . . .",
+      ". . . . F7 F7 . . . . . . .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". H7 G12 G12 G12 G12 G12 G12 G12 G12 H7 .",
+      ". H7 G12 G12 G12 G12 G12 G12 G12 G12 H7 .",
+      ". H7 G12 G12 G12 G12 G12 G12 G12 G12 H7 .",
+      ". H7 G12 H7 G12 G12 H7 G12 H7 G12 H7 .",
+      ". H7 H7 G12 H7 H7 G12 H7 H7 G12 H7 .",
+      ". H7 G12 H7 G12 G12 H7 G12 H7 G12 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 65. 草莓蛋糕
+  {
+    id: 'strawberry-cake',
+    title: '草莓奶油蛋糕 (Strawberry Cake)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '新鲜多汁大草莓配上层层雪白松软奶油蛋糕。',
+    matrix: buildMatrix([
+      ". . . . . F7 F7 . . . . .",
+      ". . . . F7 F7 F7 F7 . . . .",
+      ". . . F7 A4 F7 A4 F7 . . .",
+      ". . H7 H1 H1 H1 H1 H1 H1 H7 . .",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      "H7 E3 E3 E3 E3 E3 E3 E3 E3 E3 E3 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 G16 G16 G16 G16 G16 G16 G16 G16 G16 G16 H7",
+      ". H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 ."
+    ], C_MAP)
+  },
+  // 66. 甜甜圈
+  {
+    id: 'sprinkle-donut',
+    title: '彩针甜甜圈 (Sprinkle Donut)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '粉色糖霜与彩色糖针的经典松软甜甜圈。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 E14 E14 E14 E14 E14 E14 E14 E14 H7 . .",
+      ". H7 E14 A4 E14 E14 C3 E14 E14 F7 E14 H7 .",
+      "H7 E14 E14 E14 H7 H7 H7 H7 E14 E14 B4 E14 H7",
+      "H7 E14 B4 E14 H7 G12 G12 H7 E14 E14 E14 E14 H7",
+      "H7 E14 E14 E14 H7 G12 G12 H7 E14 A4 E14 E14 H7",
+      "H7 E14 C3 E14 H7 H7 H7 H7 E14 E14 E14 E14 H7",
+      ". H7 G16 G16 G16 G16 G16 G16 G16 G16 E14 H7 .",
+      ". . H7 G16 G16 G16 G16 G16 G16 G16 G16 H7 . .",
+      ". . . . H7 H7 H7 H7 H7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 67. 甜筒
+  {
+    id: 'soft-ice-cream',
+    title: '双色甜筒 (Soft Ice Cream)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★☆☆',
+    desc: '草莓香草双色旋涡冰淇淋与华夫脆筒。',
+    matrix: buildMatrix([
+      ". . . . H7 E4 E4 H7 . . . .",
+      ". . . H7 E4 H1 H1 E4 H7 . . .",
+      ". . H7 E4 H1 H1 E4 H1 E4 H7 . .",
+      ". . H7 E4 H1 H1 E4 H1 E4 H7 . .",
+      ". H7 E4 H1 E4 H1 E4 H1 E4 H1 H7 .",
+      ". H7 E4 E4 E4 E4 E4 E4 E4 E4 H7 .",
+      ". . H7 G16 G16 G16 G16 G16 H7 . .",
+      ". . . H7 G16 A20 G16 G16 H7 . . .",
+      ". . . H7 G16 G16 A20 G16 H7 . . .",
+      ". . . . H7 G16 G16 G16 H7 . . . .",
+      ". . . . . H7 G16 H7 . . . . .",
+      ". . . . . . H7 H7 . . . . . ."
+    ], C_MAP)
+  },
+  // 68. 日式拉面
+  {
+    id: 'ramen-bowl',
+    title: '日式拉面 (Tonkotsu Ramen)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★★★☆',
+    desc: '浓郁骨汤、溏心蛋、鸣门卷与红色大面碗。',
+    matrix: buildMatrix([
+      ". . . . . . . . . G16 G16 G16 G16",
+      ". . . H7 H7 H7 H7 H7 G16 . . .",
+      ". . H7 A4 A4 H1 F7 A4 A4 H7 . .",
+      ". H7 A4 A4 A4 H1 F7 A4 A4 A4 H7 .",
+      ". H7 A4 A4 A4 A4 A4 A4 A4 A4 H7 .",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      "H7 F7 H1 H1 F7 F7 F7 H1 H1 F7 F7 H7",
+      "H7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 H7",
+      ". H7 F7 F7 F7 F7 F7 F7 F7 H7 .",
+      ". . H7 F7 F7 F7 F7 F7 F7 F7 H7 . .",
+      ". . . H7 H7 H7 H7 H7 H7 H7 . . ."
+    ], C_MAP)
+  },
+  // 69. 牛油果
+  {
+    id: 'avocado',
+    title: '牛油果 (Avocado 森林奶油)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★☆☆☆',
+    desc: '对半切开的青绿牛油果与圆润大果核。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 . . . .",
+      ". . . H7 B8 B8 B8 B8 H7 . . .",
+      ". . H7 B8 B4 B4 B4 B4 B8 H7 . .",
+      ". H7 B8 B4 B2 B2 B2 B2 B4 B8 H7 .",
+      ". H7 B8 B4 B2 G17 G17 B2 B4 B8 H7 .",
+      "H7 B8 B4 B2 G17 G19 G17 B2 B4 B8 H7",
+      "H7 B8 B4 B2 G17 G19 G17 B2 B4 B8 H7",
+      ". H7 B8 B4 B2 G17 G17 B2 B4 B8 H7 .",
+      ". H7 B8 B4 B2 B2 B2 B2 B4 B8 H7 .",
+      ". . H7 B8 B4 B4 B4 B4 B8 H7 . .",
+      ". . . H7 B8 B8 B8 B8 H7 . . .",
+      ". . . . H7 H7 H7 H7 . . . ."
+    ], C_MAP)
+  },
+  // 70. 三文鱼寿司
+  {
+    id: 'sushi-salmon',
+    title: '三文鱼寿司 (Salmon Sushi)',
+    category: 'food',
+    tag: '美食甜品',
+    difficulty: '★★☆☆☆',
+    desc: '鲜美橙红三文鱼刺身与软糯醋饭团。',
+    matrix: buildMatrix([
+      ". . . . H7 H7 H7 H7 H7 H7 H7 H7 . . . .",
+      ". . H7 A10 A10 H1 H1 A10 A10 H1 H1 A10 H7 . .",
+      ". H7 A10 A10 H1 H1 A10 A10 H1 H1 A10 A10 H7 .",
+      "H7 A10 A10 A10 A10 A10 A10 A10 A10 A10 A10 A10 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      ". H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+
+  // ================= 5. 名胜古建 / 节日东方 (6个) =================
+  // 71. 2026 祥瑞金马
+  {
+    id: 'horse-2026',
+    title: '2026 祥瑞金马 (马年特辑)',
+    category: 'culture',
+    tag: '2026马年',
+    difficulty: '★★★★★',
+    desc: '2026马年吉祥物，昂首奔腾的祥瑞赤金小骏马。',
+    matrix: buildMatrix([
+      ". . . . . . H7 H7 H7 H7 . . . . . . . .",
+      ". . . . H7 H7 A20 A4 A20 A4 H7 H7 . . . . . .",
+      ". . . H7 A20 A4 A4 A4 A20 A4 A20 A4 H7 . . . .",
+      ". . H7 A20 A4 A4 A4 A20 A4 A20 A4 A4 H7 . . .",
+      ". H7 A20 A4 A4 H7 H7 A20 A4 A20 A4 A4 H7 . . .",
+      ". H7 A20 A4 A4 H7 H7 A20 A4 A20 A4 H7 . . . .",
+      ". H7 A20 A4 A4 A4 A4 A4 A4 A20 A4 H7 . . . .",
+      ". H7 A20 A4 A4 A7 A7 A7 A7 A4 A4 H7 . . . .",
+      ". . H7 A20 A4 A4 A4 A4 A4 A4 H7 H7 H7 H7 H7 H7",
+      ". . . H7 A20 A4 A4 A4 A4 A4 A4 A4 A4 A4 A4 A20 H7",
+      ". . . H7 A20 A4 A4 A20 A4 A20 A4 A4 A4 A4 A4 A20 H7",
+      ". . . . H7 A20 A4 A20 A4 A20 A4 A4 A4 A4 A4 A20 H7",
+      ". . . . H7 A20 A4 A20 A4 A20 A4 A4 F7 F7 A4 A20 H7",
+      ". . . . H7 A20 A4 A4 A4 A20 A4 F7 H1 H1 A4 F7 A20 H7",
+      ". . . . H7 A20 A4 A20 A4 A20 A4 A4 F7 F7 A4 A20 H7",
+      ". . . . H7 A20 A4 H7 H7 A20 A4 H7 H7 A4 A4 A20 H7",
+      ". . . . H7 A20 A4 H7 . H7 A20 A4 H7 . H7 A20 H7",
+      ". . . . H7 A20 A4 H7 . H7 A20 A4 H7 . H7 A20 H7",
+      ". . . . H7 H7 H7 H7 . H7 H7 H7 H7 . H7 H7 H7"
+    ], C_MAP)
+  },
+  // 72. 严岛鸟居
+  {
+    id: 'torii-gate',
+    title: '严岛水上鸟居 (东方美学)',
+    category: 'culture',
+    tag: '名胜古建',
+    difficulty: '★★★☆☆',
+    desc: '东方美学经典神木朱红大鸟居，静立于碧海之上。',
+    matrix: buildMatrix([
+      ". F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 .",
+      ". F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 .",
+      ". . . . F7 F7 . . . . . . F7 F7 . . . .",
+      ". . . . F8 F8 . . . . . . F8 F8 . . . .",
+      ". F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 F7 .",
+      ". . . . F7 F7 . . . . . . F7 F7 . . . .",
+      ". . . . F7 F7 . . . . . . F7 F7 . . . .",
+      ". . . . F7 F7 . . . . . . F7 F7 . . . .",
+      ". . . . F7 F7 . . . . . . F7 F7 . . . .",
+      ". . . . H7 H7 . . . . . . H7 H7 . . . .",
+      "C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3",
+      "C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15 C15"
+    ], C_MAP)
+  },
+  // 73. 富士山
+  {
+    id: 'fuji-mountain',
+    title: '富士山 (Mount Fuji 雪顶红日)',
+    category: 'culture',
+    tag: '名胜古建',
+    difficulty: '★★★☆☆',
+    desc: '雪顶富士山配以东方朱红初升旭日。',
+    matrix: buildMatrix([
+      ". . . . . . . F7 F7 F7 F7 . . . . . . .",
+      ". . . . . . F7 F7 F7 F7 F7 F7 . . . . . .",
+      ". . . . . . F7 F7 F7 F7 F7 F7 . . . . . .",
+      ". . . . . . . F7 F7 F7 F7 . . . . . . .",
+      ". . . . . . H1 H1 H1 H1 . . . . . . .",
+      ". . . . . H1 H1 H1 H1 H1 H1 . . . . .",
+      ". . . . H1 H1 H1 H1 H1 H1 H1 H1 . . . .",
+      ". . . H1 H1 C3 H1 H1 H1 H1 C3 H1 H1 . . .",
+      ". . C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 . .",
+      ". C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 .",
+      "C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3 C3"
+    ], C_MAP)
+  },
+  // 74. 醒狮头
+  {
+    id: 'lion-dance',
+    title: '传统醒狮头 (Southern Lion Dance)',
+    category: 'culture',
+    tag: '国潮非遗',
+    difficulty: '★★★★★',
+    desc: '非遗国潮南狮醒狮头，威武霸气生龙活虎。',
+    matrix: buildMatrix([
+      ". . . . . F7 F7 F7 F7 F7 F7 . . . . .",
+      ". . . F7 F7 A4 A4 A4 A4 F7 F7 . . .",
+      ". . F7 F7 A20 A20 A20 A20 A20 A20 F7 F7 . .",
+      ". F7 F7 H1 H1 H7 H7 H7 H7 H1 H1 F7 F7 .",
+      ". F7 F7 H1 H7 H1 H1 H1 H1 H7 H1 F7 F7 .",
+      "F7 F7 F7 H1 H7 H1 H1 H1 H1 H7 H1 F7 F7 F7",
+      "F7 A4 F7 H1 H1 H7 H7 H7 H7 H1 H1 F7 A4 F7",
+      "F7 A4 F7 F7 F7 A4 A4 A4 A4 F7 F7 F7 A4 F7",
+      ". F7 F7 F7 H1 H1 H1 H1 H1 H1 F7 F7 F7 .",
+      ". . F7 F7 H1 H7 H1 H1 H7 H1 F7 F7 . .",
+      ". . . F7 F7 H1 H1 H1 H1 F7 F7 . . ."
+    ], C_MAP)
+  },
+  // 75. 招财猫
+  {
+    id: 'lucky-cat',
+    title: '招财猫 (Maneki Neko 举手招财)',
+    category: 'culture',
+    tag: '东方吉祥',
+    difficulty: '★★★★☆',
+    desc: '举起右手招财纳福的日本招财猫，红项圈与金铃铛。',
+    matrix: buildMatrix([
+      ". H7 H7 . . . . . . . . H7 H7",
+      "H7 F7 F7 H7 . . . . . . H7 F7 F7 H7",
+      "H7 F7 F7 F7 H7 H7 H7 H7 H7 F7 F7 F7 H7",
+      "H7 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H1 H7",
+      "H7 H1 H7 H1 H1 H1 H1 H1 H1 H7 H1 H1 H7",
+      "H7 H1 H7 H7 H1 H1 H1 H1 H1 H7 H7 H1 H7",
+      "H7 H1 E4 E4 H1 H1 H1 H1 H1 E4 E4 H1 H7",
+      ". H7 H1 H1 H1 F7 F7 F7 F7 H1 H1 H1 H7",
+      "H7 H1 H1 H1 F7 F7 A4 A4 F7 F7 H1 H1 H7",
+      "H7 H1 H1 H1 H1 F7 F7 F7 F7 H1 H1 H1 H7",
+      ". H7 H1 H1 H1 A20 A20 A20 A20 H1 H1 H7 .",
+      ". . H7 H7 H7 H7 H7 H7 H7 H7 H7 H7 . ."
+    ], C_MAP)
+  },
+  // 76. 锦鲤戏水
+  {
+    id: 'lucky-koi',
+    title: '锦鲤戏水 (Lucky Koi 鸿运当头)',
+    category: 'culture',
+    tag: '东方吉祥',
+    difficulty: '★★★★☆',
+    desc: '赤金红白相间的鸿运锦鲤，灵动摇尾。',
+    matrix: buildMatrix([
+      ". . . . . . . . . . H7 F7 H7",
+      ". . . . . . . . . H7 F7 F7 H7",
+      ". . . . . . . . H7 F7 F7 F7 H7",
+      ". . . . . . . H7 F7 F7 F7 H7",
+      ". . . . . . H7 A10 A10 F7 H7 .",
+      ". . . . . H7 A10 A10 H1 H7 . .",
+      ". . . . H7 A10 H1 H1 H7 . . .",
+      ". . . H7 F7 H1 H1 H7 . . . .",
+      ". . H7 F7 F7 H7 H7 . . . . .",
+      ". H7 F7 F7 H7 H7 F7 H7 . . .",
+      "H7 F7 H7 H7 . . H7 F7 H7 . .",
+      "H7 H7 . . . . . . H7 H7 . ."
     ], C_MAP)
   }
 ];
