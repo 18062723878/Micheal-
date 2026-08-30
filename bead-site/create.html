@@ -6,6 +6,8 @@
   <title>创作工坊 · Micheal 的拼豆网</title>
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
+  <!-- 引入高稳定性二维码引擎 -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
     .create-container {
       max-width: 1380px;
@@ -92,7 +94,6 @@
       border-left: 3px solid var(--accent);
     }
 
-    /* 抠图控制组件 */
     .bg-cutout-group {
       display: flex;
       align-items: center;
@@ -278,7 +279,7 @@
           </div>
         </div>
 
-        <!-- 智能连通域泛洪抠图控制组 -->
+        <!-- 智能连通域泛洪抠图 -->
         <div class="bg-cutout-group">
           <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 600; font-size: 13px;">
             <input id="bg-toggle" type="checkbox" checked /> 智能抠除背景
@@ -290,7 +291,6 @@
           </div>
         </div>
 
-        <!-- 规范色板选择 -->
         <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           选色板：
           <select id="palette-select" class="form-select">
@@ -348,7 +348,7 @@
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
-          <span class="canvas-label">🔢 色号对照拼装图纸（底部附带网站水印与主页二维码）</span>
+          <span class="canvas-label">🔢 色号对照拼装图纸（底部附专属扫码横幅）</span>
           <canvas id="schematic-canvas" class="schematic-canvas"></canvas>
         </div>
       </div>
@@ -356,10 +356,10 @@
       <!-- 用色明细展示 -->
       <div id="stats"></div>
 
-      <!-- 导出选项 -->
+      <!-- 纯净导出选项（文案干净，无多余字） -->
       <div style="display: flex; gap: 14px; margin-top: 24px;">
-        <button id="export-png" class="btn btn-primary" type="button">✨ 导出超清色号图纸 (含底部水印与二维码)</button>
-        <button id="export-csv" class="btn" type="button">🗺️ 导出图纸网格矩阵 (CSV 色号对应位置)</button>
+        <button id="export-png" class="btn btn-primary" type="button">导出图纸 (PNG)</button>
+        <button id="export-csv" class="btn" type="button">导出矩阵 (CSV)</button>
       </div>
     </section>
 
@@ -389,7 +389,7 @@
         </div>
         <div class="guide-item">
           <span class="guide-num">05</span>
-          <p class="guide-text"><strong>小图 PNG 用于真实像素尺寸；大图 PNG 用于分享预览、网格参考或逐格重建。</strong></p>
+          <p class="guide-text"><strong>底部附带扫码直达横幅。</strong> 导出的图纸底部自动附带品牌横幅与清晰二维码，随时扫码复现与再创作。</p>
         </div>
       </div>
     </section>
@@ -409,209 +409,6 @@
     import { ALL_PATTERNS, PALETTES } from './assets/js/patterns-data.js';
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
-
-    // ==========================================
-    // 轻量级、零依赖纯 JS 二维码生成引擎 (QR Engine)
-    // ==========================================
-    function generateQRMatrix(text) {
-      const bytes = [];
-      for (let i = 0; i < text.length; i++) {
-        const code = text.charCodeAt(i);
-        if (code < 0x80) bytes.push(code);
-        else if (code < 0x800) { bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f)); }
-        else { bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f)); }
-      }
-      const len = bytes.length;
-      let version = 1, totalCW = 26, ecCW = 10, numBlocks = 1;
-      if (len <= 14) { version = 1; totalCW = 26; ecCW = 10; numBlocks = 1; }
-      else if (len <= 26) { version = 2; totalCW = 44; ecCW = 16; numBlocks = 1; }
-      else if (len <= 42) { version = 3; totalCW = 70; ecCW = 26; numBlocks = 1; }
-      else { version = 4; totalCW = 100; ecCW = 36; numBlocks = 2; }
-
-      const size = version * 4 + 17;
-      const bits = [];
-      function addBits(val, count) {
-        for (let i = count - 1; i >= 0; i--) bits.push((val >> i) & 1);
-      }
-
-      addBits(4, 4);
-      addBits(len, 8);
-      for (let b of bytes) addBits(b, 8);
-
-      const maxDataBits = (totalCW - ecCW) * 8;
-      const termLen = Math.min(4, maxDataBits - bits.length);
-      addBits(0, termLen);
-      while (bits.length % 8 !== 0) bits.push(0);
-
-      const padBytes = [0xEC, 0x11];
-      let pIdx = 0;
-      while (bits.length < maxDataBits) {
-        addBits(padBytes[pIdx % 2], 8);
-        pIdx++;
-      }
-
-      const dataCodewords = [];
-      for (let i = 0; i < bits.length; i += 8) {
-        let byte = 0;
-        for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
-        dataCodewords.push(byte);
-      }
-
-      const EXP = new Array(512);
-      const LOG = new Array(256);
-      let x = 1;
-      for (let i = 0; i < 255; i++) {
-        EXP[i] = x; EXP[i + 255] = x; LOG[x] = i;
-        x = (x << 1) ^ (x & 128 ? 285 : 0);
-      }
-
-      function gfMul(a, b) {
-        if (a === 0 || b === 0) return 0;
-        return EXP[LOG[a] + LOG[b]];
-      }
-
-      function rsPoly(n) {
-        let p = [1];
-        for (let i = 0; i < n; i++) {
-          const root = EXP[i];
-          const p2 = new Array(p.length + 1).fill(0);
-          for (let j = 0; j < p.length; j++) {
-            p2[j] ^= p[j];
-            p2[j + 1] ^= gfMul(p[j], root);
-          }
-          p = p2;
-        }
-        return p;
-      }
-
-      function rsEncode(data, numEc) {
-        const poly = rsPoly(numEc);
-        const msg = data.concat(new Array(numEc).fill(0));
-        for (let i = 0; i < data.length; i++) {
-          const coef = msg[i];
-          if (coef !== 0) {
-            for (let j = 0; j < poly.length; j++) {
-              msg[i + j] ^= gfMul(poly[j], coef);
-            }
-          }
-        }
-        return msg.slice(data.length);
-      }
-
-      const ecPerBlock = Math.floor(ecCW / numBlocks);
-      const dataPerBlock = Math.floor(dataCodewords.length / numBlocks);
-      const blocksData = [], blocksEc = [];
-      for (let b = 0; b < numBlocks; b++) {
-        const bData = dataCodewords.slice(b * dataPerBlock, (b + 1) * dataPerBlock);
-        blocksData.push(bData);
-        blocksEc.push(rsEncode(bData, ecPerBlock));
-      }
-
-      const finalCodewords = [];
-      for (let i = 0; i < dataPerBlock; i++) {
-        for (let b = 0; b < numBlocks; b++) finalCodewords.push(blocksData[b][i]);
-      }
-      for (let i = 0; i < ecPerBlock; i++) {
-        for (let b = 0; b < numBlocks; b++) finalCodewords.push(blocksEc[b][i]);
-      }
-
-      const finalBits = [];
-      for (let cw of finalCodewords) {
-        for (let i = 7; i >= 0; i--) finalBits.push((cw >> i) & 1);
-      }
-
-      const matrix = Array.from({ length: size }, () => new Array(size).fill(null));
-      const reserved = Array.from({ length: size }, () => new Array(size).fill(false));
-
-      function placeFinder(r, c) {
-        for (let dr = 0; dr < 7; dr++) {
-          for (let dc = 0; dc < 7; dc++) {
-            const isBlack = (dr === 0 || dr === 6 || dc === 0 || dc === 6 || (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4));
-            matrix[r + dr][c + dc] = isBlack ? 1 : 0;
-            reserved[r + dr][c + dc] = true;
-          }
-        }
-        for (let dr = -1; dr <= 7; dr++) {
-          for (let dc = -1; dc <= 7; dc++) {
-            const nr = r + dr, nc = c + dc;
-            if (nr >= 0 && nr < size && nc >= 0 && nc < size && !reserved[nr][nc]) {
-              matrix[nr][nc] = 0;
-              reserved[nr][nc] = true;
-            }
-          }
-        }
-      }
-
-      placeFinder(0, 0);
-      placeFinder(0, size - 7);
-      placeFinder(size - 7, 0);
-
-      const alignPos = { 2: [6, 18], 3: [6, 22], 4: [6, 26] };
-      if (alignPos[version]) {
-        const coords = alignPos[version];
-        for (let ar of coords) {
-          for (let ac of coords) {
-            if ((ar <= 8 && ac <= 8) || (ar <= 8 && ac >= size - 8) || (ar >= size - 8 && ac <= 8)) continue;
-            for (let dr = -2; dr <= 2; dr++) {
-              for (let dc = -2; dc <= 2; dc++) {
-                const isBlack = (Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0));
-                matrix[ar + dr][ac + dc] = isBlack ? 1 : 0;
-                reserved[ar + dr][ac + dc] = true;
-              }
-            }
-          }
-        }
-      }
-
-      for (let i = 0; i < size; i++) {
-        if (!reserved[6][i]) { matrix[6][i] = i % 2 === 0 ? 1 : 0; reserved[6][i] = true; }
-        if (!reserved[i][6]) { matrix[i][6] = i % 2 === 0 ? 1 : 0; reserved[i][6] = true; }
-      }
-
-      matrix[4 * version + 9][8] = 1;
-      reserved[4 * version + 9][8] = true;
-
-      for (let i = 0; i < 9; i++) { reserved[8][i] = true; reserved[i][8] = true; }
-      for (let i = 0; i < 8; i++) { reserved[8][size - 1 - i] = true; reserved[size - 1 - i][8] = true; }
-
-      let bitIdx = 0;
-      let right = size - 1;
-      while (right > 0) {
-        if (right === 6) right -= 1;
-        for (let vert = 0; vert < size; vert++) {
-          for (let j = 0; j < 2; j++) {
-            const c = right - j;
-            const upwards = ((right + 1) >> 1) % 2 === 1;
-            const r = upwards ? (size - 1 - vert) : vert;
-            if (!reserved[r][c]) {
-              matrix[r][c] = bitIdx < finalBits.length ? finalBits[bitIdx] : 0;
-              bitIdx++;
-            }
-          }
-        }
-        right -= 2;
-      }
-
-      const FORMAT_INFO = [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0];
-      for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-          if (!reserved[r][c]) {
-            if ((r + c) % 2 === 0) matrix[r][c] ^= 1;
-          }
-        }
-      }
-
-      for (let i = 0; i < 6; i++) matrix[8][i] = FORMAT_INFO[i];
-      matrix[8][7] = FORMAT_INFO[6];
-      matrix[8][8] = FORMAT_INFO[7];
-      matrix[7][8] = FORMAT_INFO[8];
-      for (let i = 0; i < 6; i++) matrix[5 - i][8] = FORMAT_INFO[9 + i];
-
-      for (let i = 0; i < 7; i++) matrix[8][size - 1 - i] = FORMAT_INFO[i];
-      for (let i = 0; i < 8; i++) matrix[size - 8 + i][8] = FORMAT_INFO[7 + i];
-
-      return matrix;
-    }
 
     let currentImg = null;
     let gridData = [];
@@ -776,7 +573,6 @@
       return matched;
     }
 
-    // 泛洪连通域抠图算法
     function computeBackgroundMask(imgData, width, height, autoBg, tolerance) {
       const isBg = new Uint8Array(width * height);
       const queue = [];
@@ -803,13 +599,17 @@
           const sg = imgData[pIdx + 1];
           const sb = imgData[pIdx + 2];
           const exists = seedColors.some(s => colorDist(sr, sg, sb, s.r, s.g, s.b) < 18);
-          if (!exists) seedColors.push({ r: sr, g: sg, b: sb });
+          if (!exists) {
+            seedColors.push({ r: sr, g: sg, b: sb });
+          }
         }
       }
 
       function isColorMatchSeed(r, g, b, tol) {
         for (const s of seedColors) {
-          if (colorDist(r, g, b, s.r, s.g, s.b) <= tol) return true;
+          if (colorDist(r, g, b, s.r, s.g, s.b) <= tol) {
+            return true;
+          }
         }
         return false;
       }
@@ -817,42 +617,51 @@
       for (let x = 0; x < width; x++) {
         let idx = 0 * width + x;
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
-          isBg[idx] = 1; queue.push([x, 0]);
+          isBg[idx] = 1;
+          queue.push([x, 0]);
         }
         idx = (height - 1) * width + x;
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
-          isBg[idx] = 1; queue.push([x, height - 1]);
+          isBg[idx] = 1;
+          queue.push([x, height - 1]);
         }
       }
 
       for (let y = 0; y < height; y++) {
         let idx = y * width + 0;
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
-          isBg[idx] = 1; queue.push([0, y]);
+          isBg[idx] = 1;
+          queue.push([0, y]);
         }
         idx = y * width + (width - 1);
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
-          isBg[idx] = 1; queue.push([width - 1, y]);
+          isBg[idx] = 1;
+          queue.push([width - 1, y]);
         }
       }
 
       let head = 0;
       while (head < queue.length) {
         const [cx, cy] = queue[head++];
-        const neighbors = [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]];
+        const neighbors = [
+          [cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]
+        ];
+
         for (const [nx, ny] of neighbors) {
           if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
             const nIdx = ny * width + nx;
             if (!isBg[nIdx]) {
               const na = imgData[nIdx * 4 + 3];
               if (na < 40) {
-                isBg[nIdx] = 1; queue.push([nx, ny]);
+                isBg[nIdx] = 1;
+                queue.push([nx, ny]);
               } else {
                 const nr = imgData[nIdx * 4];
                 const ng = imgData[nIdx * 4 + 1];
                 const nb = imgData[nIdx * 4 + 2];
                 if (isColorMatchSeed(nr, ng, nb, tolerance)) {
-                  isBg[nIdx] = 1; queue.push([nx, ny]);
+                  isBg[nIdx] = 1;
+                  queue.push([nx, ny]);
                 }
               }
             }
@@ -861,6 +670,48 @@
       }
 
       return isBg;
+    }
+
+    // =========================================================================
+    // 纯前端二维码生成引擎 (精准绑定拼豆主页 https://pindouwang.pages.dev)
+    // =========================================================================
+    function drawQRCodeOnCanvas(ctx, text, x, y, size) {
+      try {
+        let qr;
+        if (typeof qrcode === 'function') {
+          qr = qrcode(0, 'M');
+          qr.addData(text);
+          qr.make();
+        } else {
+          throw new Error('Fallback needed');
+        }
+
+        const count = qr.getModuleCount();
+        const cellSize = size / count;
+
+        // 绘制白色背景保护区 (Quiet Zone)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(x - 8, y - 8, size + 16, size + 16);
+
+        // 绘制纯黑二维码像素块
+        ctx.fillStyle = '#000000';
+        for (let r = 0; r < count; r++) {
+          for (let c = 0; c < count; c++) {
+            if (qr.isDark(r, c)) {
+              ctx.fillRect(x + c * cellSize, y + r * cellSize, Math.ceil(cellSize), Math.ceil(cellSize));
+            }
+          }
+        }
+      } catch (err) {
+        // 离线备用绘制
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(x - 8, y - 8, size + 16, size + 16);
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeRect(x, y, size, size);
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Micheal', x + size / 2, y + size / 2);
+      }
     }
 
     function processImage() {
@@ -915,12 +766,12 @@
         gridData.push(row);
       }
 
-      renderCanvases();
+      renderCanvases(statsMap);
       renderStats(statsMap);
       statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色规范色板)`;
     }
 
-    function renderCanvases() {
+    function renderCanvases(statsMap = {}) {
       if (gridData.length === 0) return;
       const height = gridData.length;
       const width = gridData[0].length;
@@ -931,7 +782,7 @@
 
       const cellSize = 30;
 
-      // 1. 左侧纯色实体拼豆
+      // 1. 左侧纯色实体拼豆画板
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -964,18 +815,24 @@
         }
       }
 
-      // 2. 右侧色号对照图纸（包含标尺与底部横幅二维码）
+      // =======================================================================
+      // 2. 右侧色号对照图纸（包含标尺坐标 + 底部大气扫码横幅）
+      // =======================================================================
       const ruler = 28;
-      const gridAreaWidth = width * cellSize + ruler;
-      const gridAreaHeight = height * cellSize + ruler;
-      const bannerHeight = 88; // 底部横幅高度
+      const patternWidth = width * cellSize + ruler;
+      const patternHeight = height * cellSize + ruler;
 
-      schematicCanvas.width = gridAreaWidth;
-      schematicCanvas.height = gridAreaHeight + bannerHeight;
+      // 底部横幅尺寸自适应（保证大图小图比例协调）
+      const bannerHeight = Math.max(140, Math.round(patternWidth * 0.15));
+      schematicCanvas.width = patternWidth;
+      schematicCanvas.height = patternHeight + bannerHeight;
       const sCtx = schematicCanvas.getContext('2d');
-      sCtx.fillStyle = canvasBg;
-      sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
 
+      // 绘制图纸主体底色
+      sCtx.fillStyle = canvasBg;
+      sCtx.fillRect(0, 0, patternWidth, patternHeight);
+
+      // 标尺文字
       sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       sCtx.font = 'bold 11px monospace';
       sCtx.textAlign = 'center';
@@ -988,6 +845,7 @@
         sCtx.fillText((y + 1).toString(), ruler / 2, ruler + y * cellSize + cellSize / 2);
       }
 
+      // 绘制网格与色号圆点
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const cx = ruler + x * cellSize;
@@ -1020,74 +878,61 @@
         }
       }
 
-      // ====================================================
-      // 绘制底部横幅与主页二维码 (不写文本网址，仅留扫码入口)
-      // ====================================================
-      const bannerY = gridAreaHeight;
-      sCtx.fillStyle = isDark ? '#080c16' : '#f8fafc';
-      sCtx.fillRect(0, bannerY, gridAreaWidth, bannerHeight);
+      // -----------------------------------------------------------------------
+      // 绘制底部专属大横幅 (Banner)
+      // -----------------------------------------------------------------------
+      const bannerY = patternHeight;
+      
+      // 横幅深色高级质感底色
+      sCtx.fillStyle = '#0f172a';
+      sCtx.fillRect(0, bannerY, patternWidth, bannerHeight);
 
-      // 横幅顶部分隔线
-      sCtx.strokeStyle = isDark ? '#1e293b' : '#e2e8f0';
-      sCtx.lineWidth = 1;
+      // 顶部发光分隔线
+      sCtx.strokeStyle = '#2563eb';
+      sCtx.lineWidth = 3;
       sCtx.beginPath();
       sCtx.moveTo(0, bannerY);
-      sCtx.lineTo(gridAreaWidth, bannerY);
+      sCtx.lineTo(patternWidth, bannerY);
       sCtx.stroke();
 
-      // 左侧文字介绍
+      // 右侧二维码尺寸与定位
+      const qrSize = Math.max(92, Math.min(130, bannerHeight - 36));
+      const qrX = patternWidth - qrSize - 32;
+      const qrY = bannerY + (bannerHeight - qrSize) / 2;
+
+      // 在右侧绘制高精度、带白底保护的纯黑二维码（链接固定为用户网站主页）
+      const homeUrl = 'https://pindouwang.pages.dev';
+      drawQRCodeOnCanvas(sCtx, homeUrl, qrX, qrY, qrSize);
+
+      // 左侧品牌文案排版（大字号清晰易读）
+      const leftPad = 28;
+      const titleY = bannerY + bannerHeight * 0.32;
+      const subY = bannerY + bannerHeight * 0.58;
+      const tagY = bannerY + bannerHeight * 0.82;
+
+      // 1. 主标题
       sCtx.textAlign = 'left';
-      sCtx.textBaseline = 'top';
-
-      sCtx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
-      sCtx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      sCtx.fillText('🔵 Micheal 的拼豆网 · 在线拼豆设计工坊', 20, bannerY + 22);
-
-      sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      sCtx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      sCtx.fillText('本图纸由系统自动生成 · 扫右侧二维码即刻在线制作专属图纸', 20, bannerY + 48);
-
-      // 右侧生成并绘制真实二维码 (指向网站主页 https://pindouwang.pages.dev)
-      const qrMatrix = generateQRMatrix('https://pindouwang.pages.dev');
-      const qrModCount = qrMatrix.length;
-      const qrBoxSize = 64;
-      const qrX = gridAreaWidth - qrBoxSize - 20;
-      const qrY = bannerY + Math.round((bannerHeight - qrBoxSize) / 2);
-
-      // 二维码纯白背景卡片底色
-      sCtx.fillStyle = '#ffffff';
-      sCtx.fillRect(qrX, qrY, qrBoxSize, qrBoxSize);
-      sCtx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
-      sCtx.strokeRect(qrX, qrY, qrBoxSize, qrBoxSize);
-
-      // 绘制二维码黑白模块
-      const qrPadding = 4;
-      const qrDrawSize = qrBoxSize - qrPadding * 2;
-      const modSize = qrDrawSize / qrModCount;
-
-      sCtx.fillStyle = '#000000';
-      for (let r = 0; r < qrModCount; r++) {
-        for (let c = 0; c < qrModCount; c++) {
-          if (qrMatrix[r][c] === 1) {
-            sCtx.fillRect(
-              qrX + qrPadding + c * modSize,
-              qrY + qrPadding + r * modSize,
-              Math.ceil(modSize),
-              Math.ceil(modSize)
-            );
-          }
-        }
-      }
-
-      // 二维码旁提示小标
-      sCtx.textAlign = 'right';
       sCtx.textBaseline = 'middle';
-      sCtx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      sCtx.fillStyle = '#2563eb';
-      sCtx.fillText('📱 扫码直达 →', qrX - 8, bannerY + bannerHeight / 2);
+      sCtx.font = 'bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      sCtx.fillStyle = '#ffffff';
+      sCtx.fillText('🔵 Micheal 的拼豆网 · 在线设计工坊', leftPad, titleY);
+
+      // 2. 说明副标
+      sCtx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      sCtx.fillStyle = '#94a3b8';
+      sCtx.fillText('本图纸由 Micheal 的拼豆网生成 · 支持图片转图纸、色号对照与白板创作', leftPad, subY);
+
+      // 3. 统计信息与扫码引导
+      const totalBeads = Object.values(statsMap).reduce((acc, cur) => acc + (cur.count || 0), 0);
+      const colorKindCount = Object.keys(statsMap).length;
+      sCtx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      sCtx.fillStyle = '#38bdf8';
+      sCtx.fillText(`【网格：${width}×${height}】 【共 ${colorKindCount} 色 / ${totalBeads} 颗】   👉 扫右侧二维码即刻在线创作`, leftPad, tagY);
     }
 
-    const observer = new MutationObserver(() => renderCanvases());
+    const observer = new MutationObserver(() => {
+      if (gridData.length > 0) processImage();
+    });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     function renderStats(statsMap) {
@@ -1117,6 +962,7 @@
       statsContainer.innerHTML = html;
     }
 
+    // 纯净导出 PNG（带底部清晰横幅与二维码）
     exportPngBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const link = document.createElement('a');
@@ -1125,6 +971,7 @@
       link.click();
     });
 
+    // 导出 CSV 网格色号矩阵
     exportCsvBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const height = gridData.length;
