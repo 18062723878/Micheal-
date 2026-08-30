@@ -92,6 +92,17 @@
       border-left: 3px solid var(--accent);
     }
 
+    /* 抠图控制组件 */
+    .bg-cutout-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-secondary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
     .filter-controls-panel {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -243,7 +254,7 @@
     <section class="panel-card">
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
 
-      <!-- 控制条 -->
+      <!-- 顶部控制条 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
           📁 上传本地图片
@@ -251,7 +262,7 @@
         </label>
         
         <div class="url-input-wrap">
-          <input id="url-input" class="form-input" type="url" placeholder="粘贴网络图片直链..." style="width: 200px;" />
+          <input id="url-input" class="form-input" type="url" placeholder="粘贴网络图片直链..." style="width: 190px;" />
           <button id="btn-import-url" class="btn" type="button">🔗 导入网络图</button>
           <button id="btn-url-help" class="help-icon-btn" type="button" title="点击查看使用说明">❓ 怎么填？</button>
           
@@ -267,11 +278,19 @@
           </div>
         </div>
 
-        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
-          <input id="bg-toggle" type="checkbox" /> 智能抠除背景色
-        </label>
+        <!-- 智能连通域泛洪抠图控制组 -->
+        <div class="bg-cutout-group">
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 600; font-size: 13px;">
+            <input id="bg-toggle" type="checkbox" checked /> 智能抠除背景
+          </label>
+          <div id="tolerance-control" style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted);">
+            <span>容差:</span>
+            <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" style="width: 80px;" />
+            <span id="bg-tolerance-val" style="font-weight: 700; color: var(--primary); font-family: monospace;">38</span>
+          </div>
+        </div>
 
-        <!-- 标准国内拼豆色号板 -->
+        <!-- 规范色板选择 -->
         <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main);">
           选色板：
           <select id="palette-select" class="form-select">
@@ -285,7 +304,7 @@
         <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
       </div>
 
-      <!-- 参数微调面板 -->
+      <!-- 参数调节面板 -->
       <div class="filter-controls-panel">
         <div class="slider-item">
           <div class="slider-header">
@@ -366,7 +385,7 @@
         </div>
         <div class="guide-item">
           <span class="guide-num">04</span>
-          <p class="guide-text"><strong>只有在需要受限色彩风格时才开启套用调色板。</strong> 原图色预览、快速草稿或准备手动重绘的图片，可以先保持关闭。</p>
+          <p class="guide-text"><strong>智能抠图保护内部颜色。</strong> 抠除背景采用了边界泛洪算法，人物内部的白色脸庞和眼白会被轮廓完好保护。</p>
         </div>
         <div class="guide-item">
           <span class="guide-num">05</span>
@@ -401,6 +420,8 @@
     const urlHelpPopover = document.getElementById('url-help-popover');
 
     const bgToggle = document.getElementById('bg-toggle');
+    const bgTolerance = document.getElementById('bg-tolerance');
+    const bgToleranceVal = document.getElementById('bg-tolerance-val');
     const paletteSelect = document.getElementById('palette-select');
     const statusText = document.getElementById('convert-status');
     const boardCanvas = document.getElementById('board-canvas');
@@ -500,6 +521,11 @@
       if (currentImg) processImage();
     });
 
+    bgTolerance.addEventListener('input', (e) => {
+      bgToleranceVal.textContent = e.target.value;
+      if (currentImg) processImage();
+    });
+
     brightnessRange.addEventListener('input', (e) => {
       brightnessVal.textContent = e.target.value;
       if (currentImg) processImage();
@@ -519,21 +545,27 @@
       brightnessRange.value = 0; brightnessVal.textContent = '0';
       contrastRange.value = 0; contrastVal.textContent = '0';
       saturateRange.value = 0; saturateVal.textContent = '0';
+      bgTolerance.value = 38; bgToleranceVal.textContent = '38';
       if (currentImg) processImage();
     });
 
     bgToggle.addEventListener('change', () => { if (currentImg) processImage(); });
     paletteSelect.addEventListener('change', () => { if (currentImg) processImage(); });
 
+    // 人眼感知色差计算 (Redmean 算法)
+    function colorDist(r1, g1, b1, r2, g2, b2) {
+      const rmean = (r1 + r2) / 2;
+      const dr = r1 - r2;
+      const dg = g1 - g2;
+      const db = b1 - b2;
+      return Math.sqrt((2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db);
+    }
+
     function findNearestColor(r, g, b, palette) {
       let minDist = Infinity;
       let matched = palette[0];
       for (const item of palette) {
-        const rmean = (r + item.r) / 2;
-        const dr = r - item.r;
-        const dg = g - item.g;
-        const db = b - item.b;
-        const dist = (2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db;
+        const dist = colorDist(r, g, b, item.r, item.g, item.b);
         if (dist < minDist) {
           minDist = dist;
           matched = item;
@@ -542,6 +574,119 @@
       return matched;
     }
 
+    // =========================================================================
+    // 核心重构：边界连通域泛洪算法 (BFS Flood Fill) 抠除背景
+    // 逻辑：只从图片最外周边界寻找连通的背景扩散，绝不破坏人物内部的白脸/眼白等闭合区域！
+    // =========================================================================
+    function computeBackgroundMask(imgData, width, height, autoBg, tolerance) {
+      const isBg = new Uint8Array(width * height);
+      
+      // 1. 先将本身为透明通道的像素标记为背景
+      const queue = [];
+      for (let i = 0; i < width * height; i++) {
+        if (imgData[i * 4 + 3] < 40) {
+          isBg[i] = 1;
+          queue.push([i % width, Math.floor(i / width)]);
+        }
+      }
+
+      if (!autoBg) return isBg;
+
+      // 2. 采样外围四周关键边界点获取背景参考基色
+      const samplePoints = [
+        [0, 0], [width - 1, 0], [0, height - 1], [width - 1, height - 1],
+        [Math.floor(width / 2), 0], [Math.floor(width / 2), height - 1],
+        [0, Math.floor(height / 2)], [width - 1, Math.floor(height / 2)]
+      ];
+
+      const seedColors = [];
+      for (const [sx, sy] of samplePoints) {
+        const pIdx = (sy * width + sx) * 4;
+        if (imgData[pIdx + 3] >= 40) {
+          const sr = imgData[pIdx];
+          const sg = imgData[pIdx + 1];
+          const sb = imgData[pIdx + 2];
+          const exists = seedColors.some(s => colorDist(sr, sg, sb, s.r, s.g, s.b) < 18);
+          if (!exists) {
+            seedColors.push({ r: sr, g: sg, b: sb });
+          }
+        }
+      }
+
+      function isColorMatchSeed(r, g, b, tol) {
+        for (const s of seedColors) {
+          if (colorDist(r, g, b, s.r, s.g, s.b) <= tol) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // 3. 将图片 4 个边缘符合背景色的像素加入泛洪种子队列
+      for (let x = 0; x < width; x++) {
+        // 上边界
+        let idx = 0 * width + x;
+        if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
+          isBg[idx] = 1;
+          queue.push([x, 0]);
+        }
+        // 下边界
+        idx = (height - 1) * width + x;
+        if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
+          isBg[idx] = 1;
+          queue.push([x, height - 1]);
+        }
+      }
+
+      for (let y = 0; y < height; y++) {
+        // 左边界
+        let idx = y * width + 0;
+        if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
+          isBg[idx] = 1;
+          queue.push([0, y]);
+        }
+        // 右边界
+        idx = y * width + (width - 1);
+        if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
+          isBg[idx] = 1;
+          queue.push([width - 1, y]);
+        }
+      }
+
+      // 4. BFS 向内蔓延泛洪（遇到主体边缘轮廓则自动停止，保证内部安全）
+      let head = 0;
+      while (head < queue.length) {
+        const [cx, cy] = queue[head++];
+        const neighbors = [
+          [cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]
+        ];
+
+        for (const [nx, ny] of neighbors) {
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const nIdx = ny * width + nx;
+            if (!isBg[nIdx]) {
+              const na = imgData[nIdx * 4 + 3];
+              if (na < 40) {
+                isBg[nIdx] = 1;
+                queue.push([nx, ny]);
+              } else {
+                const nr = imgData[nIdx * 4];
+                const ng = imgData[nIdx * 4 + 1];
+                const nb = imgData[nIdx * 4 + 2];
+                if (isColorMatchSeed(nr, ng, nb, tolerance)) {
+                  isBg[nIdx] = 1;
+                  queue.push([nx, ny]);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return isBg;
+    }
+
+    // 核心处理管线
     function processImage() {
       if (!currentImg) return;
       statusText.textContent = '正在实时渲染拼豆图纸...';
@@ -565,9 +710,11 @@
 
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
       const autoBg = bgToggle.checked;
+      const tolerance = parseInt(bgTolerance.value, 10);
       const activePalette = PALETTES[paletteSelect.value] || PALETTES.standard72;
 
-      const cornerR = imgData[0], cornerG = imgData[1], cornerB = imgData[2], cornerA = imgData[3];
+      // 执行泛洪抠图
+      const bgMask = computeBackgroundMask(imgData, targetWidth, targetHeight, autoBg, tolerance);
 
       gridData = [];
       const statsMap = {};
@@ -575,23 +722,15 @@
       for (let y = 0; y < targetHeight; y++) {
         const row = [];
         for (let x = 0; x < targetWidth; x++) {
-          const idx = (y * targetWidth + x) * 4;
-          const r = imgData[idx];
-          const g = imgData[idx + 1];
-          const b = imgData[idx + 2];
-          const a = imgData[idx + 3];
+          const idx = y * targetWidth + x;
+          const p4 = idx * 4;
 
-          let isBg = false;
-          if (a < 50) isBg = true;
-          else if (autoBg && r > 230 && g > 230 && b > 230) isBg = true;
-          else if (autoBg && cornerA > 200) {
-            const dist = Math.hypot(r - cornerR, g - cornerG, b - cornerB);
-            if (dist < 32) isBg = true;
-          }
-
-          if (isBg) {
+          if (bgMask[idx] === 1) {
             row.push(null);
           } else {
+            const r = imgData[p4];
+            const g = imgData[p4 + 1];
+            const b = imgData[p4 + 2];
             const bead = findNearestColor(r, g, b, activePalette);
             row.push(bead);
             statsMap[bead.code] = statsMap[bead.code] || { ...bead, count: 0 };
