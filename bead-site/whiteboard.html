@@ -146,6 +146,36 @@
       background: var(--canvas-bg);
     }
 
+    /* 画板缩放控件：悬浮在视口右上角 */
+    .wb-zoom-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 5;
+    }
+    .wb-zoom-controls .btn {
+      min-width: 34px;
+      padding: 5px 9px;
+      font-size: 14px;
+      line-height: 1;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .wb-zoom-level {
+      min-width: 44px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 5px 4px;
+    }
+
     /* 侧边常驻工具栏与调色盘 */
     .draw-sidebar {
       width: 220px;
@@ -386,6 +416,15 @@
       .board-workbench.is-fullscreen .color-swatches-scroll {
         max-height: 84px;
       }
+      /* 缩放按钮在手机上要够大才好点 */
+      .board-workbench.is-fullscreen .wb-zoom-controls { top: 8px; right: 8px; gap: 5px; }
+      .board-workbench.is-fullscreen .wb-zoom-controls .btn {
+        min-width: 38px;
+        min-height: 34px;
+        font-size: 15px;
+      }
+      /* 侧边栏里的板型下拉框 */
+      .board-workbench.is-fullscreen #wb-board-size-select { padding: 7px 8px; font-size: 12px; }
       .board-workbench.is-fullscreen #wb-canvas,
       .board-workbench.is-fullscreen #wb-schematic {
         max-width: 100%;
@@ -504,6 +543,26 @@
                 </div>
               </div>
 
+              <!-- 板型选择：原来只有一个滑块放在页面上方的筛选栏里，
+                   全屏后那块区域被覆盖层挡住，导致全屏时改不了板型。
+                   这里在侧边栏里加一份，两边实时同步。 -->
+              <div data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
+                <div class="sidebar-section-title" data-page-node-id="hm9BCDlXJKWjlCC0VwNWmt">
+                  <span data-page-node-id="X8h0uAJ6wciSi9ND5UHUUZ">板型（格数）</span>
+                </div>
+                <select id="wb-board-size-select" class="wb-select" style="width: 100%; padding: 6px 8px; font-size: 12px;">
+                  <option value="10">10×10 迷你</option>
+                  <option value="16">16×16 小板</option>
+                  <option value="20">20×20</option>
+                  <option value="24">24×24</option>
+                  <option value="29" selected>29×29 标准板（5mm）</option>
+                  <option value="38">38×38 大板</option>
+                  <option value="46">46×46</option>
+                  <option value="52">52×52 大板（2.6mm）</option>
+                  <option value="60">60×60 超大</option>
+                </select>
+              </div>
+
               <div data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
                 <div class="sidebar-section-title" data-page-node-id="hm9BCDlXJKWjlCC0VwNWmt">
                   <span data-page-node-id="X8h0uAJ6wciSi9ND5UHUUZ">当前画笔色</span>
@@ -532,6 +591,14 @@
             <!-- 绘制视口 -->
             <div class="viewport-box" data-page-node-id="cyhoXk9B9Ve7EFR7MqmqMU">
               <canvas id="wb-canvas" data-page-node-id="K3NsCJ1wXAEi9IfqGpc4D9"></canvas>
+              <!-- 缩放控制：手机上双指捏合也能缩放，双指拖动平移；
+                   这组按钮是给不习惯手势的人准备的，也是鼠标端的快捷方式 -->
+              <div class="wb-zoom-controls">
+                <button id="wb-zoom-out" class="btn" type="button" title="缩小" aria-label="缩小画板">－</button>
+                <span id="wb-zoom-level" class="wb-zoom-level">100%</span>
+                <button id="wb-zoom-in" class="btn" type="button" title="放大" aria-label="放大画板">＋</button>
+                <button id="wb-zoom-reset" class="btn" type="button" title="还原到适合屏幕" aria-label="还原缩放">还原</button>
+              </div>
             </div>
           </div>
         </div>
@@ -727,18 +794,41 @@
       applyFiltersAndRender();
     });
 
+    const boardSizeSelect = document.getElementById('wb-board-size-select');
+
+    // 统一的改板型入口：上方滑块和侧边栏下拉框都走这里
+    function resetBoardTo(size) {
+      boardSize = size;
+      baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+      grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+      historyStack = [];
+      setBoardZoom(1, true);
+      applyFiltersAndRender();
+    }
+
     wbSizeSlider.addEventListener('input', (e) => {
       const newSize = parseInt(e.target.value, 10);
       boardSizeVal.textContent = `${newSize}px`;
       if (confirm(`调整尺寸为 ${newSize}×${newSize} 将重置画板，是否继续？`)) {
-        boardSize = newSize;
-        baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-        grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-        historyStack = [];
-        applyFiltersAndRender();
+        resetBoardTo(newSize);
+        boardSizeSelect.value = String(newSize);
       } else {
         e.target.value = boardSize;
         boardSizeVal.textContent = `${boardSize}px`;
+      }
+    });
+
+    // 全屏时上方的筛选栏被覆盖层挡住了，改不了板型。
+    // 所以在侧边栏里也放一份下拉框，两边改任意一个，另一个自动同步。
+    boardSizeSelect.addEventListener('change', (e) => {
+      const newSize = parseInt(e.target.value, 10);
+      if (newSize === boardSize) return;
+      if (confirm(`切换为 ${newSize}×${newSize} 将清空当前画板，是否继续？`)) {
+        resetBoardTo(newSize);
+        wbSizeSlider.value = String(newSize);
+        boardSizeVal.textContent = `${newSize}px`;
+      } else {
+        e.target.value = String(boardSize);
       }
     });
 
@@ -990,6 +1080,7 @@
         enterImmersive();
       } else if (!isFs) {
         exitImmersive();
+        setBoardZoom(1, true);   // 退出全屏时把画板缩放还原，避免界面卡在放大状态
       }
       renderBoard();
     }
@@ -1103,19 +1194,106 @@
       }
     }
 
-    canvas.addEventListener('pointerdown', (e) => {
-      isDrawing = true;
-      pushHistory();
-      handleDrawAt(e.clientX, e.clientY);
-    });
+    /* ===== 画板缩放与平移 =====
+       手机上 29×29 的板子每格只有十来个像素，根本画不准细节，
+       所以必须能放大。手势规则：
+       · 双指捏合 = 缩放，双指拖动 = 平移（放大后挪到想画的位置）
+       · 单指永远是画画，不会和手势打架
+       · 右上角按钮 = 鼠标端 / 不习惯手势的人用 */
+    let boardZoom = 1;
+    let boardPanX = 0;
+    let boardPanY = 0;
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 8;
+    const activePointers = new Map();
+    let pinchStartDist = 0;
+    let pinchStartZoom = 1;
+    let panStartPos = null;
+    const zoomLevelText2 = document.getElementById('wb-zoom-level');
 
-    window.addEventListener('pointermove', (e) => {
-      if (isDrawing && (currentTool === 'pen' || currentTool === 'eraser')) {
+    function applyBoardTransform(instant) {
+      if (instant) canvas.style.transition = 'none';
+      canvas.style.transform = `translate(${boardPanX}px, ${boardPanY}px) scale(${boardZoom})`;
+      if (instant) {
+        requestAnimationFrame(() => { canvas.style.transition = ''; });
+      }
+      if (zoomLevelText2) zoomLevelText2.textContent = `${Math.round(boardZoom * 100)}%`;
+    }
+
+    function clampBoardPan() {
+      // 放大后允许平移的距离要有上限，否则画布会被拖出视野
+      const maxPan = (canvas.offsetWidth * (boardZoom - 1)) / 2;
+      boardPanX = Math.max(-maxPan, Math.min(maxPan, boardPanX));
+      boardPanY = Math.max(-maxPan, Math.min(maxPan, boardPanY));
+    }
+
+    function setBoardZoom(z, instant) {
+      boardZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+      if (boardZoom <= MIN_ZOOM) { boardPanX = 0; boardPanY = 0; }
+      clampBoardPan();
+      applyBoardTransform(instant);
+    }
+
+    document.getElementById('wb-zoom-in').addEventListener('click', () => setBoardZoom(boardZoom * 1.4));
+    document.getElementById('wb-zoom-out').addEventListener('click', () => setBoardZoom(boardZoom / 1.4));
+    document.getElementById('wb-zoom-reset').addEventListener('click', () => setBoardZoom(1));
+
+    function endBoardGesture() {
+      pinchStartDist = 0;
+      panStartPos = null;
+      canvas.style.transition = '';
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (activePointers.size === 2) {
+        // 第二根手指落下：立刻取消绘画，进入捏合/平移手势
+        isDrawing = false;
+        const [p1, p2] = [...activePointers.values()];
+        pinchStartDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        pinchStartZoom = boardZoom;
+        panStartPos = {
+          mx: (p1.x + p2.x) / 2,
+          my: (p1.y + p2.y) / 2,
+          px: boardPanX,
+          py: boardPanY
+        };
+        canvas.style.transition = 'none';
+      } else if (activePointers.size === 1) {
+        isDrawing = true;
+        pushHistory();
         handleDrawAt(e.clientX, e.clientY);
       }
     });
 
-    window.addEventListener('pointerup', () => { isDrawing = false; });
+    window.addEventListener('pointermove', (e) => {
+      if (activePointers.has(e.pointerId)) {
+        activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      }
+      if (activePointers.size >= 2) {
+        const [p1, p2] = [...activePointers.values()];
+        const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        if (pinchStartDist > 0) {
+          setBoardZoom(pinchStartZoom * (dist / pinchStartDist), true);
+        }
+        if (panStartPos) {
+          boardPanX = panStartPos.px + ((p1.x + p2.x) / 2 - panStartPos.mx);
+          boardPanY = panStartPos.py + ((p1.y + p2.y) / 2 - panStartPos.my);
+          clampBoardPan();
+          applyBoardTransform(true);
+        }
+      } else if (isDrawing && (currentTool === 'pen' || currentTool === 'eraser')) {
+        handleDrawAt(e.clientX, e.clientY);
+      }
+    });
+
+    function handlePointerEnd(e) {
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) endBoardGesture();
+      if (activePointers.size === 0) isDrawing = false;
+    }
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
 
     document.getElementById('btn-undo').addEventListener('click', () => {
       if (historyStack.length === 0) return;
