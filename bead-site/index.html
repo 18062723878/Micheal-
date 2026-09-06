@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<html lang="zh-CN" data-page-node-id="nzWzR8zY8ypYmEaQ21Sbzg">
+<head data-page-node-id="ypzqn4Yb12JdNDO5d4EMRw">
+  <meta charset="UTF-8" data-page-node-id="b5zTrDRMhXYyeKBUK3mytT" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="tkjpRFWC2XP1B4KUwNUIJl" />
   <title>Micheal 的拼豆网 · 在线拼豆图纸生成器</title>
-  <link rel="stylesheet" href="assets/css/theme.css" />
-  <link rel="stylesheet" href="assets/css/layout.css" />
+
+  <!-- ===== 搜索 + 分享卡片 =====
+       没写这些，把链接发到微信 / QQ / 小红书时，预览就是一块白板。 -->
+  <meta name="description" content="上传任意图片，自动转成拼豆图纸，支持一键导出 PNG / PDF / CSV 与色号矩阵清单，免费在线使用，无需注册。" data-page-node-id="dUSyQLp5hOJwYTJpttp0Xc" />
+  <meta name="keywords" content="拼豆,拼豆图纸,拼豆图纸生成器,拼豆色号,Artkal,咪小窝,perler beads,像素画,手工DIY" data-page-node-id="yDaKb1UXZsOeq2B6FNDL1q" />
+  <meta name="theme-color" content="#2563eb" data-page-node-id="d6pTCiHEuTfYo2FVGD7C5M" />
+  <meta property="og:type" content="website" data-page-node-id="ZaVY9KCkEFlNzBjn7SbSvp" />
+  <meta property="og:title" content="Micheal 的拼豆网 · 在线拼豆图纸生成器" data-page-node-id="oMSYTbEWAJ08ymgTMYzOgT" />
+  <meta property="og:description" content="上传任意图片，自动转成拼豆图纸，一键导出 PNG / PDF / CSV。" data-page-node-id="KRBVsCH3B6BtlCa14RLvIL" />
+  <!-- TODO：做一张 1200x630 的网站截图，放到 assets/og-cover.png，分享时才会显示配图 -->
+  <meta property="og:image" content="assets/og-cover.png" data-page-node-id="4KkBCv6HIkPU1BhfetlCbm" />
+  <meta name="twitter:card" content="summary_large_image" data-page-node-id="X8emOJ2iJfGBeZBM6P44lK" />
+
+  <!-- 浏览器标签页小图标（用 emoji 顶上，不用额外传图片文件） -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' data-page-node-id="LCRehTXQF11r1wfKECYqG2"><text y='.9em' font-size='90' data-page-node-id="Mk2YskbDOiz6VvlfNSujP4">🔵</text></svg>" />
+
+  <link rel="stylesheet" href="assets/css/theme.css" data-page-node-id="NaYogJ7ZzLVPK4uEmYSPBR" />
+  <link rel="stylesheet" href="assets/css/layout.css" data-page-node-id="TQGbPjxC12AeASHSohXTbu" />
   <style>
     .hero-section {
       text-align: center;
@@ -114,37 +130,52 @@
       text-align: center;
       text-decoration: none;
     }
+
+    /* ===== 手机端适配 =====
+       注意这个 @media 必须写在 <style> 里，
+       因为它要覆盖上面同样写在 <style> 里的 .hero-section 等规则。 */
+    @media (max-width: 720px) {
+      .hero-section { padding: 32px 16px 16px; }
+      .hero-title { font-size: 28px; }
+      .hero-subtitle { font-size: 15px; margin-bottom: 22px; }
+      .hero-buttons { gap: 10px; }
+      .hero-buttons .btn { flex: 1 1 100%; }
+      .home-showcase { padding: 0 16px; margin: 24px auto 40px; }
+      .home-showcase-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .home-showcase-header h2 { font-size: 20px; }
+      .featured-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    }
   </style>
 </head>
-<body>
-  <div id="site-header"></div>
+<body data-page-node-id="k2GyXFM8RwimPo2Sq4sfDj">
+  <div id="site-header" data-page-node-id="GhoVkQebOKA9bdJotnwmyq"></div>
 
-  <main>
-    <section class="hero-section">
-      <h1 class="hero-title">将喜爱的图片<br>变成清晰可拼的拼豆图纸</h1>
-      <p class="hero-subtitle">智能色号匹配 · 规范国内色卡 · 一键导出 4K 超清带标尺图纸与矩阵清单。</p>
-      <div class="hero-buttons">
-        <a href="create.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 15px; text-decoration: none; font-weight: 700;">🎨 开始自由创作</a>
-        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;">✨ 浏览精选图纸大全</a>
-        <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: var(--primary); color: var(--primary); font-weight: 700;">📖 拼豆详细教程</a>
+  <main data-page-node-id="hmopH3QiHuJSh5jq2tk73C">
+    <section class="hero-section" data-page-node-id="60sF7BjrpYDaOf9abUFrZP">
+      <h1 class="hero-title" data-page-node-id="2arQYLfxF7rWTcP31ye1yy">将喜爱的图片<br data-page-node-id="Ri7CBZRhwFY9PdKREwPuqA">变成清晰可拼的拼豆图纸</h1>
+      <p class="hero-subtitle" data-page-node-id="9HLFNSpJ0YOC8SDHRvPMfN">智能色号匹配 · 规范国内色卡 · 一键导出 4K 超清带标尺图纸与矩阵清单。</p>
+      <div class="hero-buttons" data-page-node-id="cI7Af75WaltoDRdlcoYRr4">
+        <a href="create.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 15px; text-decoration: none; font-weight: 700;" data-page-node-id="VRb9GpGH1GVpQh4URgFAMn">🎨 开始自由创作</a>
+        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;" data-page-node-id="BO9zPEc0V43hUO7z97dEY1">✨ 浏览精选图纸大全</a>
+        <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: var(--primary); color: var(--primary); font-weight: 700;" data-page-node-id="26A2leh689U4PHGOevsJ3U">📖 拼豆详细教程</a>
       </div>
     </section>
 
     <!-- 精选推荐展区 -->
-    <section class="home-showcase">
-      <div class="home-showcase-header">
-        <div>
-          <h2>🔥 热门精选图纸 (网络爆款精选)</h2>
-          <p>点击任意图纸即可直接载入创作工坊进行无级缩放微调与导出。</p>
+    <section class="home-showcase" data-page-node-id="Tdia12uSgB76aBGjmT2AJ3">
+      <div class="home-showcase-header" data-page-node-id="OgAqLHepS5Xn8drHR4CYrS">
+        <div data-page-node-id="faUTASJBYIw2RMnip9R8gM">
+          <h2 data-page-node-id="DbJB3T8stNQKaQFHW4tq74">🔥 热门精选图纸 (网络爆款精选)</h2>
+          <p data-page-node-id="Yk7rayhLTTGECaQzKzgKcP">点击任意图纸即可直接载入创作工坊进行无级缩放微调与导出。</p>
         </div>
-        <a href="inspiration.html" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 14px;">查看全部图纸 →</a>
+        <a href="inspiration.html" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 14px;" data-page-node-id="oNogtQ0HL3HohEH7GjASYw">查看全部图纸 →</a>
       </div>
 
-      <div class="featured-grid" id="featured-grid"></div>
+      <div class="featured-grid" id="featured-grid" data-page-node-id="eJMdoj62FCZCoIvruiuItY"></div>
     </section>
   </main>
 
-  <div id="site-footer"></div>
+  <div id="site-footer" data-page-node-id="mdjVcTsr0iHwbHfZBEerc5"></div>
 
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
@@ -199,6 +230,16 @@
       `;
       grid.appendChild(card);
       drawCardCanvas(card.querySelector(`#home-cv-${p.id}`), p.matrix);
+    });
+
+    // 切换明暗主题后重画缩略图。
+    // 缩略图是 canvas，背景色在「画的那一刻」就定死了，
+    // 不重画的话，切到暗色模式后这 8 张图还是白底，很刺眼。
+    window.addEventListener('site:themechange', () => {
+      featuredList.forEach(p => {
+        const cv = document.getElementById(`home-cv-${p.id}`);
+        if (cv) drawCardCanvas(cv, p.matrix);
+      });
     });
   </script>
 </body>
