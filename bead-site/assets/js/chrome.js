@@ -1,20 +1,10 @@
-// 主题自动检测与切换逻辑
+// 主题控制
 export function initTheme() {
   const savedTheme = localStorage.getItem('site-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  } else {
-    document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  }
-
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (!localStorage.getItem('site-theme')) {
-      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
-      updateThemeButton();
-    }
-  });
+  const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', initialTheme);
+  updateThemeButton();
 }
 
 export function toggleTheme() {
@@ -23,86 +13,76 @@ export function toggleTheme() {
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('site-theme', target);
   updateThemeButton();
+  window.dispatchEvent(new Event('site:themechange'));
 }
 
 function updateThemeButton() {
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    btn.innerHTML = isDark ? '🌙 暗色' : '☀️ 亮色';
-  }
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const label = isDark ? '亮色模式' : '暗色模式';
+  document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+    btn.textContent = label;
+  });
 }
 
-// 注入赞助弹窗 DOM 与交互逻辑
+// 赞助弹窗
 function injectSponsorModal() {
   if (document.getElementById('sponsor-modal')) return;
 
   const modalHtml = `
     <div id="sponsor-modal" class="sponsor-backdrop">
       <div class="sponsor-dialog">
-        <button id="sponsor-close-btn" class="sponsor-close">&times;</button>
+        <button id="sponsor-close-btn" class="sponsor-close" type="button">&times;</button>
         
-        <!-- 阶段 1：扫码赞助界面 -->
         <div id="sponsor-step-pay">
           <div style="text-align: center; margin-bottom: 16px;">
-            <div style="font-size: 32px; margin-bottom: 4px;">☕</div>
-            <h3 style="margin: 0; color: var(--text-main); font-size: 20px;">请 Micheal 喝杯热咖啡</h3>
+            <h3 style="margin: 0; color: var(--text-main); font-size: 20px;">赞助支持</h3>
             <p style="color: var(--text-muted); font-size: 13px; margin: 8px auto 0; max-width: 380px; line-height: 1.6;">
-              如果这个拼豆工具为你的创作带来了便利与灵感，欢迎赞助支持！你的鼓励是网站持续更新的最大动力～
+              如果拼豆工具为你的创作提供了帮助，欢迎赞助支持服务器维护与功能开发。
             </p>
-            <div class="sponsor-amount-badge">推荐赞助：<strong>¥ 5.00</strong> 元</div>
+            <div class="sponsor-amount-badge">赞助金额：<strong>¥ 5.00</strong></div>
           </div>
 
-          <!-- 支付方式切换 -->
           <div class="sponsor-tabs">
-            <button id="tab-wechat" class="sponsor-tab active" type="button">💚 微信支付</button>
-            <button id="tab-alipay" class="sponsor-tab" type="button">💙 支付宝</button>
+            <button id="tab-wechat" class="sponsor-tab active" type="button">微信支付</button>
+            <button id="tab-alipay" class="sponsor-tab" type="button">支付宝</button>
           </div>
 
-          <!-- 二维码图片展示区域 -->
           <div class="sponsor-qr-box">
             <div id="qr-wechat" class="qr-panel active" style="text-align: center;">
-              <img src="assets/images/wechat-pay.png" alt="微信收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>📱 请将微信收款码放置于<br><code>assets/images/wechat-pay.png</code></div>'" style="width: 190px; height: 190px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); background: #ffffff; padding: 6px;" />
-              <p style="margin: 8px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 700;">打开微信 [扫一扫] 赞助 ¥5</p>
+              <img src="assets/images/wechat-pay.png" alt="微信收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>请将微信收款码放置于<br><code>assets/images/wechat-pay.png</code></div>'" style="width: 180px; height: 180px; object-fit: contain; border-radius: 8px; background: #ffffff; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #16a34a; font-weight: 600;">微信扫码赞助</p>
             </div>
             
             <div id="qr-alipay" class="qr-panel" style="text-align: center;">
-              <img src="assets/images/alipay.png" alt="支付宝收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>⚡ 请将支付宝收款码放置于<br><code>assets/images/alipay.png</code></div>'" style="width: 190px; height: 190px; object-fit: contain; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.15); background: #ffffff; padding: 6px;" />
-              <p style="margin: 8px 0 0 0; font-size: 12px; color: #2563eb; font-weight: 700;">打开支付宝 [扫一扫] 赞助 ¥5</p>
+              <img src="assets/images/alipay.png" alt="支付宝收款码" onerror="this.parentElement.innerHTML='<div style=\\'padding:30px 10px; color:var(--text-muted); font-size:13px;\\'>请将支付宝收款码放置于<br><code>assets/images/alipay.png</code></div>'" style="width: 180px; height: 180px; object-fit: contain; border-radius: 8px; background: #ffffff; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+              <p style="margin: 8px 0 0 0; font-size: 12px; color: #2563eb; font-weight: 600;">支付宝扫码赞助</p>
             </div>
           </div>
 
           <div style="margin-top: 18px; text-align: center;">
-            <button id="btn-confirm-sponsored" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">
-              ✨ 我已完成赞助
+            <button id="btn-confirm-sponsored" class="btn btn-primary" type="button" style="width: 100%; padding: 11px; font-weight: 600;">
+              已完成赞助
             </button>
           </div>
         </div>
 
-        <!-- 阶段 2：赞助感谢回馈界面 -->
-        <div id="sponsor-step-thanks" style="display: none; text-align: center; padding: 20px 10px;">
-          <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
-          <h3 style="color: var(--text-main); font-size: 22px; margin: 0 0 10px 0;">非常感谢你的温暖赞助！</h3>
+        <div id="sponsor-step-thanks" style="display: none; text-align: center; padding: 18px 10px;">
+          <h3 style="color: var(--text-main); font-size: 20px; margin: 0 0 10px 0;">感谢支持</h3>
           <div class="sponsor-thanks-card">
-            <p style="margin: 0 0 10px 0; font-size: 14px; line-height: 1.7; color: var(--text-main);">
-              “已经收到你的咖啡支持啦！因为有你的认可，每一行代码都变得更加有温度。我会继续努力优化设计工坊与图纸系统！”
-            </p>
-            <p style="margin: 0; font-size: 13px; font-weight: 700; color: var(--primary);">
-              — Micheal 敬上 ❤️ 祝你拼出独一无二的精美作品！
+            <p style="margin: 0; font-size: 14px; line-height: 1.7; color: var(--text-main);">
+              已收到你的赞助，感谢对本站的支持，祝你拼豆创作愉快。
             </p>
           </div>
-          <button id="btn-close-thanks" class="btn btn-primary" style="margin-top: 22px; padding: 10px 28px;">
-            开心收下，继续创作 ✨
+          <button id="btn-close-thanks" class="btn btn-primary" type="button" style="margin-top: 20px; padding: 9px 24px;">
+            关闭
           </button>
         </div>
-
       </div>
     </div>
   `;
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-  // 绑定弹窗切换与感谢逻辑
   const modal = document.getElementById('sponsor-modal');
   const closeBtn = document.getElementById('sponsor-close-btn');
   const tabWechat = document.getElementById('tab-wechat');
@@ -114,78 +94,286 @@ function injectSponsorModal() {
   const stepThanks = document.getElementById('sponsor-step-thanks');
   const btnCloseThanks = document.getElementById('btn-close-thanks');
 
-  closeBtn.addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+  closeBtn?.addEventListener('click', () => modal.classList.remove('open'));
+  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-  tabWechat.addEventListener('click', () => {
+  tabWechat?.addEventListener('click', () => {
     tabWechat.classList.add('active');
     tabAlipay.classList.remove('active');
     qrWechat.classList.add('active');
     qrAlipay.classList.remove('active');
   });
 
-  tabAlipay.addEventListener('click', () => {
+  tabAlipay?.addEventListener('click', () => {
     tabAlipay.classList.add('active');
     tabWechat.classList.remove('active');
     qrAlipay.classList.add('active');
     qrWechat.classList.remove('active');
   });
 
-  btnConfirm.addEventListener('click', () => {
+  btnConfirm?.addEventListener('click', () => {
     stepPay.style.display = 'none';
     stepThanks.style.display = 'block';
   });
 
-  btnCloseThanks.addEventListener('click', () => {
+  btnCloseThanks?.addEventListener('click', () => {
     modal.classList.remove('open');
     setTimeout(() => {
       stepPay.style.display = 'block';
       stepThanks.style.display = 'none';
-    }, 300);
+    }, 250);
   });
 }
 
-// 注入全站统一顶栏与底栏
+// 注入统一的导航栏样式
+function injectHeaderStyles() {
+  if (document.getElementById('unified-header-style')) return;
+
+  const style = document.createElement('style');
+  style.id = 'unified-header-style';
+  style.textContent = `
+    .site-nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .nav-brand {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nav-desktop-menu {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .sponsor-btn-compact {
+      background: var(--primary);
+      color: #ffffff !important;
+      border: 1px solid var(--primary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+    .sponsor-btn-compact:hover {
+      background: var(--primary-hover);
+    }
+    .theme-toggle-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--bg-page);
+    }
+
+    /* 移动端三条杠按钮 */
+    .nav-hamburger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .nav-hamburger-btn span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background-color: var(--text-main);
+      border-radius: 2px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .nav-hamburger-btn.active span:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .nav-hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-hamburger-btn.active span:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* 下拉抽屉 */
+    .nav-mobile-dropdown {
+      display: none;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 8px 16px 14px;
+    }
+    .nav-mobile-dropdown.open {
+      display: block;
+      animation: navSlideDown 0.2s ease-out;
+    }
+    @keyframes navSlideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .nav-mobile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-mobile-link {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .nav-mobile-link:hover, .nav-mobile-link.active {
+      background: var(--bg-secondary);
+      color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+      .nav-desktop-menu { display: none !important; }
+      .nav-hamburger-btn { display: flex !important; }
+      .nav-brand { font-size: 16px; }
+      .sponsor-btn-compact { display: none; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// 注入统一顶栏与底栏
 export function injectChrome(activePage = 'home') {
   initTheme();
+  injectHeaderStyles();
 
   const header = document.getElementById('site-header');
   if (header) {
     header.innerHTML = `
-      <header style="background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow);">
-        <a href="index.html" style="font-size: 18px; font-weight: 800; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 8px;">
-          <span>🔵</span> Micheal 的拼豆网
-        </a>
-        <nav style="display: flex; align-items: center; gap: 16px;">
-          <a href="index.html" style="color: ${activePage === 'home' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'home' ? '700' : '500'}; font-size: 14px;">首页</a>
-          <a href="create.html" style="color: ${activePage === 'create' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'create' ? '700' : '500'}; font-size: 14px;">创作</a>
-          <a href="inspiration.html" style="color: ${activePage === 'inspiration' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'inspiration' ? '700' : '500'}; font-size: 14px;">灵感</a>
-          <a href="tutorial.html" style="color: ${activePage === 'tutorial' ? 'var(--primary)' : 'var(--text-muted)'}; text-decoration: none; font-weight: ${activePage === 'tutorial' ? '700' : '500'}; font-size: 14px;">教程</a>
-          
-          <button id="btn-open-sponsor" class="sponsor-nav-btn" type="button">
-            ☕ 请喝咖啡
-          </button>
+      <header class="site-nav-header">
+        <div class="nav-container">
+          <a href="index.html" class="nav-brand">Micheal 的拼豆网</a>
 
-          <button id="theme-toggle-btn" class="theme-toggle-btn" type="button"></button>
-        </nav>
+          <nav class="nav-desktop-menu">
+            <a href="index.html" class="nav-link ${activePage === 'home' ? 'active' : ''}">首页</a>
+            <a href="create.html" class="nav-link ${activePage === 'create' ? 'active' : ''}">创作工坊</a>
+            <a href="inspiration.html" class="nav-link ${activePage === 'inspiration' ? 'active' : ''}">灵感图库</a>
+            <a href="tutorial.html" class="nav-link ${activePage === 'tutorial' ? 'active' : ''}">制作教程</a>
+          </nav>
+
+          <div class="nav-actions">
+            <button class="sponsor-btn-compact" id="btn-open-sponsor" type="button">赞助支持</button>
+            <button class="theme-toggle-btn" id="theme-toggle-btn" type="button">暗色模式</button>
+            <button class="nav-hamburger-btn" id="nav-hamburger-btn" type="button" aria-label="切换菜单">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-mobile-dropdown" id="nav-mobile-dropdown">
+          <ul class="nav-mobile-list">
+            <li><a href="index.html" class="nav-mobile-link ${activePage === 'home' ? 'active' : ''}">首页</a></li>
+            <li><a href="create.html" class="nav-mobile-link ${activePage === 'create' ? 'active' : ''}">创作工坊</a></li>
+            <li><a href="inspiration.html" class="nav-mobile-link ${activePage === 'inspiration' ? 'active' : ''}">灵感图库</a></li>
+            <li><a href="tutorial.html" class="nav-mobile-link ${activePage === 'tutorial' ? 'active' : ''}">制作教程</a></li>
+            <li><a href="javascript:void(0)" class="nav-mobile-link" id="mobile-sponsor-btn">赞助支持</a></li>
+          </ul>
+        </div>
       </header>
     `;
 
+    // 绑定主题切换事件
     document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
     updateThemeButton();
 
+    // 绑定汉堡菜单事件
+    const hamburgerBtn = document.getElementById('nav-hamburger-btn');
+    const mobileDropdown = document.getElementById('nav-mobile-dropdown');
+
+    hamburgerBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = mobileDropdown.classList.toggle('open');
+      hamburgerBtn.classList.toggle('active', isOpen);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (mobileDropdown && !mobileDropdown.contains(e.target) && e.target !== hamburgerBtn) {
+        mobileDropdown.classList.remove('open');
+        hamburgerBtn?.classList.remove('active');
+      }
+    });
+
+    // 绑定赞助弹窗
     injectSponsorModal();
-    document.getElementById('btn-open-sponsor')?.addEventListener('click', () => {
-      document.getElementById('sponsor-modal')?.classList.add('open');
+    const openSponsor = () => document.getElementById('sponsor-modal')?.classList.add('open');
+    document.getElementById('btn-open-sponsor')?.addEventListener('click', openSponsor);
+    document.getElementById('mobile-sponsor-btn')?.addEventListener('click', () => {
+      mobileDropdown?.classList.remove('open');
+      hamburgerBtn?.classList.remove('active');
+      openSponsor();
     });
   }
 
   const footer = document.getElementById('site-footer');
   if (footer) {
     footer.innerHTML = `
-      <footer style="text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-color); margin-top: 40px;">
-        <p style="margin-bottom: 6px;">Micheal 的拼豆网 · 把每张图片变成可拼的高清图纸</p>
-        <p style="margin: 0; font-weight: 600;">— Micheal —</p>
+      <footer style="text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-color); margin-top: 48px;">
+        <p style="margin: 0 0 6px 0;">Micheal 的拼豆网 · 在线拼豆设计工具</p>
+        <p style="margin: 0;">2026 Micheal</p>
       </footer>
     `;
   }
