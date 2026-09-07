@@ -160,7 +160,7 @@ function injectHeaderStyles() {
     .nav-desktop-menu {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
     }
     .nav-link {
       font-size: 14px;
@@ -210,7 +210,7 @@ function injectHeaderStyles() {
       background: var(--bg-page);
     }
 
-    /* 移动端汉堡菜单 (三条杠) */
+    /* 移动端汉堡菜单 */
     .nav-hamburger-btn {
       display: none;
       flex-direction: column;
@@ -293,23 +293,18 @@ function injectHeaderStyles() {
   document.head.appendChild(style);
 }
 
-// 页面导航注入函数 (带 URL 智能自适应纠错)
 export function injectChrome(activePage = '') {
   initTheme();
   injectHeaderStyles();
 
-  // 根据当前实际网址路径进行智能判断，确保高亮百分之百准确
+  // 路径识别兜底
   const path = (window.location.pathname || '').toLowerCase();
-  if (path.includes('whiteboard')) {
-    activePage = 'whiteboard';
-  } else if (path.includes('create')) {
-    activePage = 'create';
-  } else if (path.includes('inspiration')) {
-    activePage = 'inspiration';
-  } else if (path.includes('tutorial')) {
-    activePage = 'tutorial';
-  } else if (!activePage || path.endsWith('/') || path.includes('index')) {
-    activePage = 'home';
+  if (!activePage) {
+    if (path.includes('whiteboard')) activePage = 'whiteboard';
+    else if (path.includes('create')) activePage = 'create';
+    else if (path.includes('inspiration')) activePage = 'inspiration';
+    else if (path.includes('tutorial')) activePage = 'tutorial';
+    else activePage = 'home';
   }
 
   const header = document.getElementById('site-header');
