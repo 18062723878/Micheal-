@@ -1,32 +1,164 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-page-node-id="nzWzR8zY8ypYmEaQ21Sbzg">
-<head data-page-node-id="ypzqn4Yb12JdNDO5d4EMRw">
-  <meta charset="UTF-8" data-page-node-id="b5zTrDRMhXYyeKBUK3mytT" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="tkjpRFWC2XP1B4KUwNUIJl" />
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Micheal 的拼豆网 · 在线拼豆图纸生成器</title>
 
-  <!-- ===== 搜索 + 分享卡片 =====
-       没写这些，把链接发到微信 / QQ / 小红书时，预览就是一块白板。 -->
-  <meta name="description" content="上传任意图片，自动转成拼豆图纸，支持一键导出 PNG / PDF / CSV 与色号矩阵清单，免费在线使用，无需注册。" data-page-node-id="dUSyQLp5hOJwYTJpttp0Xc" />
-  <meta name="keywords" content="拼豆,拼豆图纸,拼豆图纸生成器,拼豆色号,Artkal,咪小窝,perler beads,像素画,手工DIY" data-page-node-id="yDaKb1UXZsOeq2B6FNDL1q" />
-  <meta name="theme-color" content="#2563eb" data-page-node-id="d6pTCiHEuTfYo2FVGD7C5M" />
-  <meta property="og:type" content="website" data-page-node-id="ZaVY9KCkEFlNzBjn7SbSvp" />
-  <meta property="og:title" content="Micheal 的拼豆网 · 在线拼豆图纸生成器" data-page-node-id="oMSYTbEWAJ08ymgTMYzOgT" />
-  <meta property="og:description" content="上传任意图片，自动转成拼豆图纸，一键导出 PNG / PDF / CSV。" data-page-node-id="KRBVsCH3B6BtlCa14RLvIL" />
-  <!-- TODO：做一张 1200x630 的网站截图，放到 assets/og-cover.png，分享时才会显示配图 -->
-  <meta property="og:image" content="assets/og-cover.png" data-page-node-id="4KkBCv6HIkPU1BhfetlCbm" />
-  <meta name="twitter:card" content="summary_large_image" data-page-node-id="X8emOJ2iJfGBeZBM6P44lK" />
+  <meta name="description" content="上传任意图片，自动转成拼豆图纸，支持一键导出 PNG / PDF / CSV 与色号矩阵清单，免费在线使用，无需注册。" />
+  <meta name="keywords" content="拼豆,拼豆图纸,拼豆图纸生成器,拼豆色号,Artkal,像素画,手工DIY" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Micheal 的拼豆网 · 在线拼豆图纸生成器" />
+  <meta property="og:description" content="上传任意图片，自动转成拼豆图纸，一键导出 PNG / PDF / CSV。" />
+  <meta property="og:image" content="assets/og-cover.png" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-  <!-- 浏览器标签页小图标（用 emoji 顶上，不用额外传图片文件） -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' data-page-node-id="LCRehTXQF11r1wfKECYqG2"><text y='.9em' font-size='90' data-page-node-id="Mk2YskbDOiz6VvlfNSujP4">🔵</text></svg>" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
 
-  <link rel="stylesheet" href="assets/css/theme.css" data-page-node-id="NaYogJ7ZzLVPK4uEmYSPBR" />
-  <link rel="stylesheet" href="assets/css/layout.css" data-page-node-id="TQGbPjxC12AeASHSohXTbu" />
   <style>
+    /* 全局导航栏 */
+    .site-nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .nav-desktop-menu {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--primary);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .theme-toggle-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.15s ease;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--bg-page);
+    }
+
+    /* 移动端汉堡菜单按钮 (三条杠) */
+    .nav-hamburger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      width: 36px;
+      height: 36px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.15s ease;
+    }
+    .nav-hamburger-btn:hover {
+      background: var(--bg-page);
+    }
+    .nav-hamburger-btn span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background-color: var(--text-main);
+      border-radius: 2px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .nav-hamburger-btn.active span:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .nav-hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .nav-hamburger-btn.active span:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* 移动端下拉抽屉 */
+    .nav-mobile-dropdown {
+      display: none;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 10px 16px 16px;
+    }
+    .nav-mobile-dropdown.open {
+      display: block;
+      animation: slideDown 0.2s ease-out;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .nav-mobile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .nav-mobile-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .nav-mobile-link:hover, .nav-mobile-link.active {
+      background: var(--bg-secondary);
+      color: var(--primary);
+    }
+
+    /* 主体内容样式 */
     .hero-section {
       text-align: center;
-      padding: 48px 20px 24px;
-      max-width: 900px;
+      padding: 56px 20px 32px;
+      max-width: 860px;
       margin: 0 auto;
     }
     .hero-title {
@@ -34,12 +166,13 @@
       font-weight: 800;
       color: var(--text-main);
       line-height: 1.3;
-      margin-bottom: 16px;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.02em;
     }
     .hero-subtitle {
       font-size: 16px;
       color: var(--text-muted);
-      margin-bottom: 28px;
+      margin: 0 0 32px 0;
       line-height: 1.6;
     }
     .hero-buttons {
@@ -48,9 +181,40 @@
       gap: 14px;
       flex-wrap: wrap;
     }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border: 1px solid var(--primary);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+    .btn-outline {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+    .btn-outline:hover {
+      border-color: var(--text-muted);
+    }
+
+    /* 精选展区 */
     .home-showcase {
       max-width: 1280px;
-      margin: 36px auto 60px;
+      margin: 40px auto 64px;
       padding: 0 20px;
     }
     .home-showcase-header {
@@ -62,179 +226,332 @@
       border-bottom: 1px solid var(--border-color);
     }
     .home-showcase-header h2 {
-      font-size: 24px;
+      font-size: 22px;
+      font-weight: 700;
       color: var(--text-main);
-      margin: 0;
+      margin: 0 0 4px 0;
     }
     .home-showcase-header p {
       color: var(--text-muted);
       font-size: 14px;
-      margin: 6px 0 0 0;
+      margin: 0;
     }
+    .header-more-link {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .header-more-link:hover {
+      text-decoration: underline;
+    }
+
+    /* 规则卡片网格：保证每张卡片长宽比例与尺寸绝对一致 */
     .featured-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 22px;
+      gap: 20px;
     }
     .featured-card {
       background: var(--bg-card);
-      border-radius: 16px;
+      border-radius: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow);
       padding: 16px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .featured-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: var(--primary);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
     .featured-preview {
       width: 100%;
       aspect-ratio: 1 / 1;
       background: var(--bg-secondary);
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 14px;
+      overflow: hidden;
     }
     .featured-preview canvas {
-      max-width: 90%;
-      max-height: 90%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+    }
+    .featured-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
     .featured-title {
       color: var(--text-main);
       font-size: 15px;
       font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .featured-tag {
       font-size: 11px;
-      padding: 2px 8px;
-      background: rgba(37, 99, 235, 0.12);
-      color: var(--primary);
-      border-radius: 6px;
-      font-weight: 600;
+      padding: 2px 7px;
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
     }
     .featured-btn {
       width: 100%;
-      margin-top: 12px;
-      padding: 9px 0;
-      font-size: 14px;
+      padding: 8px 0;
+      font-size: 13px;
       font-weight: 600;
       text-align: center;
+      border-radius: 6px;
       text-decoration: none;
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      transition: all 0.15s ease;
+    }
+    .featured-btn:hover {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
     }
 
-    /* ===== 手机端适配 =====
-       注意这个 @media 必须写在 <style> 里，
-       因为它要覆盖上面同样写在 <style> 里的 .hero-section 等规则。 */
-    @media (max-width: 720px) {
-      .hero-section { padding: 32px 16px 16px; }
+    /* 移动端响应式断点 */
+    @media (max-width: 768px) {
+      .nav-desktop-menu { display: none; }
+      .nav-hamburger-btn { display: flex; }
+      .hero-section { padding: 40px 16px 20px; }
       .hero-title { font-size: 28px; }
-      .hero-subtitle { font-size: 15px; margin-bottom: 22px; }
-      .hero-buttons { gap: 10px; }
-      .hero-buttons .btn { flex: 1 1 100%; }
-      .home-showcase { padding: 0 16px; margin: 24px auto 40px; }
+      .hero-subtitle { font-size: 14px; margin-bottom: 24px; }
+      .hero-buttons .btn { width: 100%; }
+      .home-showcase { padding: 0 16px; margin: 24px auto 44px; }
       .home-showcase-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .home-showcase-header h2 { font-size: 20px; }
-      .featured-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+      .featured-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .featured-card { padding: 12px; }
+      .featured-title { font-size: 13px; }
+    }
+    @media (max-width: 480px) {
+      .featured-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body data-page-node-id="k2GyXFM8RwimPo2Sq4sfDj">
-  <div id="site-header" data-page-node-id="GhoVkQebOKA9bdJotnwmyq"></div>
+<body>
 
-  <main data-page-node-id="hmopH3QiHuJSh5jq2tk73C">
-    <section class="hero-section" data-page-node-id="60sF7BjrpYDaOf9abUFrZP">
-      <h1 class="hero-title" data-page-node-id="2arQYLfxF7rWTcP31ye1yy">将喜爱的图片<br data-page-node-id="Ri7CBZRhwFY9PdKREwPuqA">变成清晰可拼的拼豆图纸</h1>
-      <p class="hero-subtitle" data-page-node-id="9HLFNSpJ0YOC8SDHRvPMfN">智能色号匹配 · 规范国内色卡 · 一键导出 4K 超清带标尺图纸与矩阵清单。</p>
-      <div class="hero-buttons" data-page-node-id="cI7Af75WaltoDRdlcoYRr4">
-        <a href="create.html" class="btn btn-primary" style="padding: 12px 26px; font-size: 15px; text-decoration: none; font-weight: 700;" data-page-node-id="VRb9GpGH1GVpQh4URgFAMn">🎨 开始自由创作</a>
-        <a href="inspiration.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none;" data-page-node-id="BO9zPEc0V43hUO7z97dEY1">✨ 浏览精选图纸大全</a>
-        <a href="tutorial.html" class="btn" style="padding: 12px 26px; font-size: 15px; text-decoration: none; border-color: var(--primary); color: var(--primary); font-weight: 700;" data-page-node-id="26A2leh689U4PHGOevsJ3U">📖 拼豆详细教程</a>
+  <!-- 顶部主导航 (支持桌面横向与手机端三条杠折叠) -->
+  <header class="site-nav-header">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">Micheal 的拼豆网</a>
+
+      <!-- 桌面端菜单 (>=769px) -->
+      <nav class="nav-desktop-menu">
+        <a href="index.html" class="nav-link active">首页</a>
+        <a href="create.html" class="nav-link">创作工坊</a>
+        <a href="inspiration.html" class="nav-link">灵感图库</a>
+        <a href="tutorial.html" class="nav-link">制作教程</a>
+      </nav>
+
+      <!-- 右侧控制区 -->
+      <div class="nav-actions">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" type="button">暗色模式</button>
+        <!-- 移动端三条杠图标 -->
+        <button id="nav-hamburger-btn" class="nav-hamburger-btn" type="button" aria-label="切换菜单">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 手机端折叠下拉抽屉 -->
+    <div id="nav-mobile-dropdown" class="nav-mobile-dropdown">
+      <ul class="nav-mobile-list">
+        <li><a href="index.html" class="nav-mobile-link active">首页</a></li>
+        <li><a href="create.html" class="nav-mobile-link">创作工坊</a></li>
+        <li><a href="inspiration.html" class="nav-mobile-link">灵感图库</a></li>
+        <li><a href="tutorial.html" class="nav-mobile-link">制作教程</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <h1 class="hero-title">将喜爱的图片<br>转换为清晰的拼豆图纸</h1>
+      <p class="hero-subtitle">智能匹配标准色卡，实时生成带标尺图纸与色号用量矩阵。</p>
+      <div class="hero-buttons">
+        <a href="create.html" class="btn btn-primary">开始自由创作</a>
+        <a href="inspiration.html" class="btn btn-outline">浏览精选图库</a>
+        <a href="tutorial.html" class="btn btn-outline">查看制作教程</a>
       </div>
     </section>
 
-    <!-- 精选推荐展区 -->
-    <section class="home-showcase" data-page-node-id="Tdia12uSgB76aBGjmT2AJ3">
-      <div class="home-showcase-header" data-page-node-id="OgAqLHepS5Xn8drHR4CYrS">
-        <div data-page-node-id="faUTASJBYIw2RMnip9R8gM">
-          <h2 data-page-node-id="DbJB3T8stNQKaQFHW4tq74">🔥 热门精选图纸 (网络爆款精选)</h2>
-          <p data-page-node-id="Yk7rayhLTTGECaQzKzgKcP">点击任意图纸即可直接载入创作工坊进行无级缩放微调与导出。</p>
+    <!-- 精选展区 -->
+    <section class="home-showcase">
+      <div class="home-showcase-header">
+        <div>
+          <h2>热门精选图纸</h2>
+          <p>精选标准尺寸图案，支持载入工坊自由微调与导出。</p>
         </div>
-        <a href="inspiration.html" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 14px;" data-page-node-id="oNogtQ0HL3HohEH7GjASYw">查看全部图纸 →</a>
+        <a href="inspiration.html" class="header-more-link">查看全部图库 →</a>
       </div>
 
-      <div class="featured-grid" id="featured-grid" data-page-node-id="eJMdoj62FCZCoIvruiuItY"></div>
+      <div class="featured-grid" id="featured-grid"></div>
     </section>
   </main>
 
-  <div id="site-footer" data-page-node-id="mdjVcTsr0iHwbHfZBEerc5"></div>
+  <footer style="text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-color);">
+    <p style="margin: 0 0 6px 0;">Micheal 的拼豆网 · 在线拼豆设计工具</p>
+    <p style="margin: 0;">2026 Micheal</p>
+  </footer>
 
   <script type="module">
-    import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS } from './assets/js/patterns-data.js';
 
-    try { injectChrome('home'); } catch (e) { console.warn(e); }
+    // -------------------------------------------------------------
+    // 主题切换控制
+    // -------------------------------------------------------------
+    function updateThemeUI() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.textContent = isDark ? '亮色模式' : '暗色模式';
+      }
+    }
 
+    const savedTheme = localStorage.getItem('site-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    updateThemeUI();
+
+    document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('site-theme', target);
+      updateThemeUI();
+      window.dispatchEvent(new Event('site:themechange'));
+    });
+
+    // -------------------------------------------------------------
+    // 移动端汉堡包菜单折叠控制 (三条杠展开/收起)
+    // -------------------------------------------------------------
+    const hamburgerBtn = document.getElementById('nav-hamburger-btn');
+    const mobileDropdown = document.getElementById('nav-mobile-dropdown');
+
+    hamburgerBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = mobileDropdown.classList.toggle('open');
+      hamburgerBtn.classList.toggle('active', isOpen);
+    });
+
+    // 点击页面任意外部区域收起下拉菜单
+    document.addEventListener('click', (e) => {
+      if (mobileDropdown && !mobileDropdown.contains(e.target) && e.target !== hamburgerBtn) {
+        mobileDropdown.classList.remove('open');
+        hamburgerBtn?.classList.remove('active');
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 精准 1:1 纯净画幅渲染引擎（固定 240x240 统一坐标，绝无一大一小）
+    // -------------------------------------------------------------
     function drawCardCanvas(canvas, matrix) {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const canvasBg = isDark ? '#0b1120' : '#ffffff';
+      const gridDot = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)';
+
       const h = matrix.length;
       const w = matrix[0].length;
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const canvasBg = isDark ? '#0f172a' : '#ffffff';
-      const cellSize = 16;
 
-      canvas.width = w * cellSize;
-      canvas.height = h * cellSize;
+      // 统一标准 240x240 视口分辨率
+      const size = 240;
+      canvas.width = size;
+      canvas.height = size;
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = canvasBg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // 背景色填充满整个 1:1 画布
+      ctx.fillStyle = canvasBg;
+      ctx.fillRect(0, 0, size, size);
+
+      // 计算均等单元格并居中摆放
+      const maxDim = Math.max(w, h, 20);
+      const cellSize = Math.floor((size - 24) / maxDim);
+      const offsetX = Math.floor((size - w * cellSize) / 2);
+      const offsetY = Math.floor((size - h * cellSize) / 2);
+
+      // 渲染底板点阵与拼豆颗粒
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
+          const cx = offsetX + x * cellSize;
+          const cy = offsetY + y * cellSize;
+
+          ctx.strokeStyle = gridDot;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx, cy, cellSize, cellSize);
+
           const bead = matrix[y][x];
           if (!bead) continue;
-          const cx = x * cellSize + cellSize / 2;
-          const cy = y * cellSize + cellSize / 2;
+
+          const centerX = cx + cellSize / 2;
+          const centerY = cy + cellSize / 2;
+          const radius = cellSize * 0.44;
+
+          // 实体圆点
           ctx.beginPath();
-          ctx.arc(cx, cy, cellSize * 0.44, 0, Math.PI * 2);
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
           ctx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
           ctx.fill();
+
+          // 细腻质感边缘
+          ctx.lineWidth = 0.8;
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+          ctx.stroke();
         }
       }
     }
 
+    // -------------------------------------------------------------
+    // 渲染 8 款规整精选图案
+    // -------------------------------------------------------------
     const grid = document.getElementById('featured-grid');
     const featuredList = ALL_PATTERNS.slice(0, 8);
 
-    featuredList.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'featured-card';
-      card.innerHTML = `
-        <div class="featured-preview">
-          <canvas id="home-cv-${p.id}"></canvas>
-        </div>
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-          <span class="featured-title">${p.title}</span>
-          <span class="featured-tag">${p.tag}</span>
-        </div>
-        <a href="create.html?patternId=${encodeURIComponent(p.id)}" class="btn btn-primary featured-btn">
-          用这张图创作 →
-        </a>
-      `;
-      grid.appendChild(card);
-      drawCardCanvas(card.querySelector(`#home-cv-${p.id}`), p.matrix);
-    });
+    function renderFeaturedCards() {
+      grid.innerHTML = '';
+      featuredList.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'featured-card';
+        card.innerHTML = `
+          <div class="featured-preview">
+            <canvas id="home-cv-${p.id}"></canvas>
+          </div>
+          <div class="featured-meta-row">
+            <span class="featured-title">${p.title}</span>
+            <span class="featured-tag">${p.matrix[0].length}×${p.matrix.length}</span>
+          </div>
+          <a href="create.html?patternId=${encodeURIComponent(p.id)}" class="featured-btn">
+            载入设计工坊
+          </a>
+        `;
+        grid.appendChild(card);
+        drawCardCanvas(card.querySelector(`#home-cv-${p.id}`), p.matrix);
+      });
+    }
 
-    // 切换明暗主题后重画缩略图。
-    // 缩略图是 canvas，背景色在「画的那一刻」就定死了，
-    // 不重画的话，切到暗色模式后这 8 张图还是白底，很刺眼。
+    renderFeaturedCards();
+
+    // 监听明暗主题切换，重绘 Canvas 背景
     window.addEventListener('site:themechange', () => {
       featuredList.forEach(p => {
         const cv = document.getElementById(`home-cv-${p.id}`);
