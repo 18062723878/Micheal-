@@ -160,7 +160,7 @@ function injectHeaderStyles() {
     .nav-desktop-menu {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
     }
     .nav-link {
       font-size: 14px;
@@ -293,18 +293,23 @@ function injectHeaderStyles() {
   document.head.appendChild(style);
 }
 
+// 核心修复：以浏览器实际 URL 为最高准则，彻底防止页面传参错误导致的高亮漂移
 export function injectChrome(activePage = '') {
   initTheme();
   injectHeaderStyles();
 
-  // 路径识别兜底
-  const path = (window.location.pathname || '').toLowerCase();
-  if (!activePage) {
-    if (path.includes('whiteboard')) activePage = 'whiteboard';
-    else if (path.includes('create')) activePage = 'create';
-    else if (path.includes('inspiration')) activePage = 'inspiration';
-    else if (path.includes('tutorial')) activePage = 'tutorial';
-    else activePage = 'home';
+  const currentHref = (window.location.href || window.location.pathname || '').toLowerCase();
+  
+  if (currentHref.includes('whiteboard')) {
+    activePage = 'whiteboard';
+  } else if (currentHref.includes('create')) {
+    activePage = 'create';
+  } else if (currentHref.includes('inspiration')) {
+    activePage = 'inspiration';
+  } else if (currentHref.includes('tutorial')) {
+    activePage = 'tutorial';
+  } else if (currentHref.endsWith('/') || currentHref.includes('index')) {
+    activePage = 'home';
   }
 
   const header = document.getElementById('site-header');
