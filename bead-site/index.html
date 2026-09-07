@@ -18,143 +18,6 @@
   <link rel="stylesheet" href="assets/css/layout.css" />
 
   <style>
-    /* 全局导航栏 */
-    .site-nav-header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border-color);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
-    .nav-container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 20px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-brand {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text-main);
-      text-decoration: none;
-      letter-spacing: -0.01em;
-    }
-    .nav-desktop-menu {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-    .nav-link {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-    .nav-link:hover, .nav-link.active {
-      color: var(--primary);
-    }
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .theme-toggle-btn {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.15s ease;
-    }
-    .theme-toggle-btn:hover {
-      background: var(--bg-page);
-    }
-
-    /* 移动端汉堡菜单按钮 (三条杠) */
-    .nav-hamburger-btn {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      width: 36px;
-      height: 36px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
-      padding: 0;
-      transition: background 0.15s ease;
-    }
-    .nav-hamburger-btn:hover {
-      background: var(--bg-page);
-    }
-    .nav-hamburger-btn span {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background-color: var(--text-main);
-      border-radius: 2px;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-    .nav-hamburger-btn.active span:nth-child(1) {
-      transform: translateY(6px) rotate(45deg);
-    }
-    .nav-hamburger-btn.active span:nth-child(2) {
-      opacity: 0;
-    }
-    .nav-hamburger-btn.active span:nth-child(3) {
-      transform: translateY(-6px) rotate(-45deg);
-    }
-
-    /* 移动端下拉抽屉 */
-    .nav-mobile-dropdown {
-      display: none;
-      background: var(--bg-card);
-      border-top: 1px solid var(--border-color);
-      padding: 10px 16px 16px;
-    }
-    .nav-mobile-dropdown.open {
-      display: block;
-      animation: slideDown 0.2s ease-out;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .nav-mobile-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    .nav-mobile-link {
-      display: flex;
-      align-items: center;
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text-main);
-      text-decoration: none;
-      transition: background 0.15s ease, color 0.15s ease;
-    }
-    .nav-mobile-link:hover, .nav-mobile-link.active {
-      background: var(--bg-secondary);
-      color: var(--primary);
-    }
-
-    /* 主体内容样式 */
     .hero-section {
       text-align: center;
       padding: 56px 20px 32px;
@@ -211,7 +74,6 @@
       border-color: var(--text-muted);
     }
 
-    /* 精选展区 */
     .home-showcase {
       max-width: 1280px;
       margin: 40px auto 64px;
@@ -246,7 +108,6 @@
       text-decoration: underline;
     }
 
-    /* 规则卡片网格：保证每张卡片长宽比例与尺寸绝对一致 */
     .featured-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -327,10 +188,7 @@
       border-color: var(--primary);
     }
 
-    /* 移动端响应式断点 */
     @media (max-width: 768px) {
-      .nav-desktop-menu { display: none; }
-      .nav-hamburger-btn { display: flex; }
       .hero-section { padding: 40px 16px 20px; }
       .hero-title { font-size: 28px; }
       .hero-subtitle { font-size: 14px; margin-bottom: 24px; }
@@ -347,42 +205,7 @@
   </style>
 </head>
 <body>
-
-  <!-- 顶部主导航 (支持桌面横向与手机端三条杠折叠) -->
-  <header class="site-nav-header">
-    <div class="nav-container">
-      <a href="index.html" class="nav-brand">Micheal 的拼豆网</a>
-
-      <!-- 桌面端菜单 (>=769px) -->
-      <nav class="nav-desktop-menu">
-        <a href="index.html" class="nav-link active">首页</a>
-        <a href="create.html" class="nav-link">创作工坊</a>
-        <a href="inspiration.html" class="nav-link">灵感图库</a>
-        <a href="tutorial.html" class="nav-link">制作教程</a>
-      </nav>
-
-      <!-- 右侧控制区 -->
-      <div class="nav-actions">
-        <button id="theme-toggle-btn" class="theme-toggle-btn" type="button">暗色模式</button>
-        <!-- 移动端三条杠图标 -->
-        <button id="nav-hamburger-btn" class="nav-hamburger-btn" type="button" aria-label="切换菜单">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 手机端折叠下拉抽屉 -->
-    <div id="nav-mobile-dropdown" class="nav-mobile-dropdown">
-      <ul class="nav-mobile-list">
-        <li><a href="index.html" class="nav-mobile-link active">首页</a></li>
-        <li><a href="create.html" class="nav-mobile-link">创作工坊</a></li>
-        <li><a href="inspiration.html" class="nav-mobile-link">灵感图库</a></li>
-        <li><a href="tutorial.html" class="nav-mobile-link">制作教程</a></li>
-      </ul>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <main>
     <section class="hero-section">
@@ -390,82 +213,33 @@
       <p class="hero-subtitle">智能匹配标准色卡，实时生成带标尺图纸与色号用量矩阵。</p>
       <div class="hero-buttons">
         <a href="create.html" class="btn btn-primary">开始自由创作</a>
+        <a href="whiteboard.html" class="btn btn-outline">白板自由画板</a>
         <a href="inspiration.html" class="btn btn-outline">浏览精选图库</a>
         <a href="tutorial.html" class="btn btn-outline">查看制作教程</a>
       </div>
     </section>
 
-    <!-- 精选展区 -->
     <section class="home-showcase">
       <div class="home-showcase-header">
         <div>
           <h2>热门精选图纸</h2>
           <p>精选标准尺寸图案，支持载入工坊自由微调与导出。</p>
         </div>
-        <a href="inspiration.html" class="header-more-link">查看全部图库 →</a>
+        <a href="inspiration.html" class="header-more-link">查看全部图库 &rarr;</a>
       </div>
 
       <div class="featured-grid" id="featured-grid"></div>
     </section>
   </main>
 
-  <footer style="text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-color);">
-    <p style="margin: 0 0 6px 0;">Micheal 的拼豆网 · 在线拼豆设计工具</p>
-    <p style="margin: 0;">2026 Micheal</p>
-  </footer>
+  <div id="site-footer"></div>
 
   <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS } from './assets/js/patterns-data.js';
 
-    // -------------------------------------------------------------
-    // 主题切换控制
-    // -------------------------------------------------------------
-    function updateThemeUI() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const themeBtn = document.getElementById('theme-toggle-btn');
-      if (themeBtn) {
-        themeBtn.textContent = isDark ? '亮色模式' : '暗色模式';
-      }
-    }
+    try { injectChrome('home'); } catch (e) { console.warn(e); }
 
-    const savedTheme = localStorage.getItem('site-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', initialTheme);
-    updateThemeUI();
-
-    document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const target = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', target);
-      localStorage.setItem('site-theme', target);
-      updateThemeUI();
-      window.dispatchEvent(new Event('site:themechange'));
-    });
-
-    // -------------------------------------------------------------
-    // 移动端汉堡包菜单折叠控制 (三条杠展开/收起)
-    // -------------------------------------------------------------
-    const hamburgerBtn = document.getElementById('nav-hamburger-btn');
-    const mobileDropdown = document.getElementById('nav-mobile-dropdown');
-
-    hamburgerBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = mobileDropdown.classList.toggle('open');
-      hamburgerBtn.classList.toggle('active', isOpen);
-    });
-
-    // 点击页面任意外部区域收起下拉菜单
-    document.addEventListener('click', (e) => {
-      if (mobileDropdown && !mobileDropdown.contains(e.target) && e.target !== hamburgerBtn) {
-        mobileDropdown.classList.remove('open');
-        hamburgerBtn?.classList.remove('active');
-      }
-    });
-
-    // -------------------------------------------------------------
-    // 精准 1:1 纯净画幅渲染引擎（固定 240x240 统一坐标，绝无一大一小）
-    // -------------------------------------------------------------
     function drawCardCanvas(canvas, matrix) {
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0b1120' : '#ffffff';
@@ -474,23 +248,19 @@
       const h = matrix.length;
       const w = matrix[0].length;
 
-      // 统一标准 240x240 视口分辨率
       const size = 240;
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext('2d');
 
-      // 背景色填充满整个 1:1 画布
       ctx.fillStyle = canvasBg;
       ctx.fillRect(0, 0, size, size);
 
-      // 计算均等单元格并居中摆放
       const maxDim = Math.max(w, h, 20);
       const cellSize = Math.floor((size - 24) / maxDim);
       const offsetX = Math.floor((size - w * cellSize) / 2);
       const offsetY = Math.floor((size - h * cellSize) / 2);
 
-      // 渲染底板点阵与拼豆颗粒
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
           const cx = offsetX + x * cellSize;
@@ -507,13 +277,11 @@
           const centerY = cy + cellSize / 2;
           const radius = cellSize * 0.44;
 
-          // 实体圆点
           ctx.beginPath();
           ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
           ctx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
           ctx.fill();
 
-          // 细腻质感边缘
           ctx.lineWidth = 0.8;
           ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
           ctx.stroke();
@@ -521,9 +289,6 @@
       }
     }
 
-    // -------------------------------------------------------------
-    // 渲染 8 款规整精选图案
-    // -------------------------------------------------------------
     const grid = document.getElementById('featured-grid');
     const featuredList = ALL_PATTERNS.slice(0, 8);
 
@@ -538,7 +303,7 @@
           </div>
           <div class="featured-meta-row">
             <span class="featured-title">${p.title}</span>
-            <span class="featured-tag">${p.matrix[0].length}×${p.matrix.length}</span>
+            <span class="featured-tag">${p.matrix[0].length}&times;${p.matrix.length}</span>
           </div>
           <a href="create.html?patternId=${encodeURIComponent(p.id)}" class="featured-btn">
             载入设计工坊
@@ -551,7 +316,6 @@
 
     renderFeaturedCards();
 
-    // 监听明暗主题切换，重绘 Canvas 背景
     window.addEventListener('site:themechange', () => {
       featuredList.forEach(p => {
         const cv = document.getElementById(`home-cv-${p.id}`);
