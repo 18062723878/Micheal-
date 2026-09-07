@@ -211,40 +211,6 @@
       border-radius: 8px;
       font-size: 13px;
     }
-
-    .guide-box {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 16px;
-    }
-    .guide-item {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px 20px;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .guide-item:hover {
-      border-color: var(--primary);
-      transform: translateX(4px);
-    }
-    .guide-num {
-      font-size: 24px;
-      font-weight: 800;
-      color: #0d9488;
-      font-family: monospace;
-      min-width: 36px;
-    }
-    .guide-text {
-      color: var(--text-main);
-      font-size: 14px;
-      line-height: 1.6;
-      margin: 0;
-    }
   </style>
 </head>
 <body>
@@ -254,26 +220,26 @@
     <section class="panel-card">
       <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
 
-      <!-- 顶部控制条 (干净利落，无多余按键) -->
+      <!-- 控制条 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
-          📁 上传本地图片
+          上传本地图片
           <input id="upload-input" type="file" accept="image/*,.gif" hidden />
         </label>
         
         <div class="url-input-wrap">
           <input id="url-input" class="form-input" type="url" placeholder="粘贴网络图片直链..." style="width: 190px;" />
-          <button id="btn-import-url" class="btn" type="button">🔗 导入网络图</button>
-          <button id="btn-url-help" class="help-icon-btn" type="button" title="点击查看使用说明">❓ 怎么填？</button>
+          <button id="btn-import-url" class="btn" type="button">导入网络图</button>
+          <button id="btn-url-help" class="help-icon-btn" type="button">怎么填？</button>
           
           <div id="url-help-popover" class="url-help-popover">
-            <h4>💡 如何获取有效图片链接？</h4>
+            <h4>如何获取有效图片链接？</h4>
             <ol>
-              <li>在网页图片上<strong>右键</strong>，点击<strong>「复制图片地址」</strong>。</li>
+              <li>在网页图片上右键，点击<strong>「复制图片地址」</strong>。</li>
               <li>粘贴至输入框后点击【导入网络图】。</li>
             </ol>
             <div class="tip-box">
-              <strong>提示：</strong>若对方网站有防盗链拦截，直接将图片<strong>「另存为」</strong>到本地，点击【上传本地图片】即可 100% 成功导入！
+              <strong>提示：</strong>若对方网站有防盗链拦截，直接将图片<strong>「另存为」</strong>到本地，点击【上传本地图片】即可 100% 成功导入。
             </div>
           </div>
         </div>
@@ -300,7 +266,7 @@
           </select>
         </label>
 
-        <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">↺ 重置画面参数</button>
+        <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">重置画面参数</button>
       </div>
 
       <!-- 参数调节面板 -->
@@ -308,9 +274,9 @@
         <div class="slider-item">
           <div class="slider-header">
             <span class="slider-title">像素尺寸 (板宽)</span>
-            <span id="board-width-val" class="slider-val-box">30px</span>
+            <span id="board-width-val" class="slider-val-box">32px</span>
           </div>
-          <input id="board-width" type="range" min="10" max="80" step="1" value="30" />
+          <input id="board-width" type="range" min="10" max="80" step="1" value="32" />
         </div>
 
         <div class="slider-item">
@@ -343,11 +309,11 @@
       <!-- 双画板联动展示 -->
       <div class="canvas-row">
         <div class="canvas-box">
-          <span class="canvas-label">✨ 纯色实体拼豆效果（暗色模式自适应）</span>
+          <span class="canvas-label">纯色实体拼豆效果</span>
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
-          <span class="canvas-label">🔢 色号对照拼装图纸（标准 A-H/M 编号）</span>
+          <span class="canvas-label">色号对照拼装图纸 (标准 A-H/M 编号)</span>
           <canvas id="schematic-canvas" class="schematic-canvas"></canvas>
         </div>
       </div>
@@ -355,49 +321,15 @@
       <!-- 用色明细展示 -->
       <div id="stats"></div>
 
-      <!-- 纯粹精简的导出操作区 -->
+      <!-- 导出选项 -->
       <div style="display: flex; gap: 14px; margin-top: 24px;">
         <button id="export-png" class="btn btn-primary" type="button" style="padding: 11px 24px; font-weight: 700; font-size: 14px;">
-          ✨ 导出超清图纸 (PNG)
+          导出超清图纸 (PNG)
         </button>
         <button id="export-csv" class="btn" type="button" style="padding: 11px 24px; font-weight: 600; font-size: 14px;">
-          🗺️ 导出色号矩阵 (CSV)
+          导出色号矩阵 (CSV)
         </button>
       </div>
-    </section>
-
-    <!-- 使用指南 -->
-    <section class="panel-card">
-      <div style="margin-bottom: 8px;">
-        <span style="font-size: 13px; font-weight: 700; color: #0d9488;">图片转像素画</span>
-        <h3 style="margin: 4px 0 0 0; color: var(--text-main); font-size: 20px;">如何得到可用的图片转像素画结果</h3>
-      </div>
-
-      <div class="guide-box">
-        <div class="guide-item">
-          <span class="guide-num">01</span>
-          <p class="guide-text"><strong>先确定用途。</strong> 头像和插画可以保留更多细节；贴图、瓦片和方块参考通常需要更强的简化。</p>
-        </div>
-        <div class="guide-item">
-          <span class="guide-num">02</span>
-          <p class="guide-text"><strong>调整像素尺寸，直到主体一眼能看懂。</strong> 如果结果太碎，就调大像素尺寸；如果主体消失，就调小像素尺寸。</p>
-        </div>
-        <div class="guide-item">
-          <span class="guide-num">03</span>
-          <p class="guide-text"><strong>先调亮度、对比度和饱和度，再套用调色板。</strong> 原图明暗关系清楚时，调色板映射会更稳定。</p>
-        </div>
-        <div class="guide-item">
-          <span class="guide-num">04</span>
-          <p class="guide-text"><strong>智能抠图保护内部颜色。</strong> 抠除背景采用了边界泛洪算法，人物内部的白色脸庞和眼白会被轮廓完好保护。</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 快捷入口 -->
-    <section class="panel-card">
-      <h3 style="margin-top: 0; color: var(--text-main);">从白板自由创作</h3>
-      <p style="color: var(--text-muted); font-size: 14px;">打开独立像素画板自由涂鸦绘制，支持画笔、微调滤镜与用色实时统计。</p>
-      <a href="whiteboard.html" class="btn btn-primary" style="text-decoration: none;">打开白板编辑器 →</a>
     </section>
   </main>
 
@@ -457,11 +389,11 @@
       img.onload = () => {
         currentImg = img;
         processImage();
-        statusText.textContent = `已成功导入【${label}】，可滑动调节参数！`;
+        statusText.textContent = `已成功导入【${label}】，可滑动调节参数。`;
       };
       img.onerror = () => {
-        alert('抱歉，该网络图片受到对方防盗链保护。\n\n【解决方法】：请直接把该图片「保存到本地电脑/手机」，然后点击左侧的【📁 上传本地图片】即可 100% 成功导入！');
-        statusText.textContent = '导入失败，请下载该图片后使用「上传本地图片」功能。';
+        alert('该网络图片受到防盗链保护。请直接把图片另存到本地，然后点击【上传本地图片】进行导入。');
+        statusText.textContent = '导入失败，请下载该图片后使用本地上传。';
       };
       img.src = src;
     }
@@ -607,15 +539,13 @@
 
       function isColorMatchSeed(r, g, b, tol) {
         for (const s of seedColors) {
-          if (colorDist(r, g, b, s.r, s.g, s.b) <= tol) {
-            return true;
-          }
+          if (colorDist(r, g, b, s.r, s.g, s.b) <= tol) return true;
         }
         return false;
       }
 
       for (let x = 0; x < width; x++) {
-        let idx = 0 * width + x;
+        let idx = x;
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
           isBg[idx] = 1;
           queue.push([x, 0]);
@@ -628,7 +558,7 @@
       }
 
       for (let y = 0; y < height; y++) {
-        let idx = y * width + 0;
+        let idx = y * width;
         if (!isBg[idx] && isColorMatchSeed(imgData[idx * 4], imgData[idx * 4 + 1], imgData[idx * 4 + 2], tolerance)) {
           isBg[idx] = 1;
           queue.push([0, y]);
@@ -754,6 +684,9 @@
       statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色规范色板)`;
     }
 
+    // =========================================================================
+    // 渲染双画布 (核心重构：彻底解决小图纸下底栏文字与二维码重叠 Bug)
+    // =========================================================================
     function renderCanvases(statsMap = {}) {
       if (gridData.length === 0) return;
       const height = gridData.length;
@@ -765,7 +698,7 @@
 
       const cellSize = 30;
 
-      // 1. 左侧纯色实体拼豆
+      // 1. 左侧纯色实体拼豆预览
       boardCanvas.width = width * cellSize;
       boardCanvas.height = height * cellSize;
       const bCtx = boardCanvas.getContext('2d');
@@ -798,35 +731,49 @@
         }
       }
 
-      // 2. 右侧色号对照图纸
-      const ruler = 28;
-      const patternWidth = width * cellSize + ruler;
-      const patternHeight = height * cellSize + ruler;
-      const bannerHeight = Math.max(140, Math.round(patternWidth * 0.15));
+      // 2. 右侧色号对照图纸 (标尺 + 底栏)
+      const ruler = 32;
+      const gridPixelW = width * cellSize;
+      const gridPixelH = height * cellSize;
 
-      schematicCanvas.width = patternWidth;
-      schematicCanvas.height = patternHeight + bannerHeight;
+      // 核心修复：限制最小画布宽度为 720px，保证底部文案与二维码永远不冲突重叠
+      const minCanvasW = 720;
+      const canvasW = Math.max(minCanvasW, gridPixelW + ruler + 40);
+      
+      // 小网格自适应水平居中摆放
+      const startX = Math.floor((canvasW - (gridPixelW + ruler)) / 2) + ruler;
+      const startY = ruler;
+      const bannerY = gridPixelH + ruler + 20;
+      const bannerHeight = 150;
+
+      schematicCanvas.width = canvasW;
+      schematicCanvas.height = bannerY + bannerHeight;
       const sCtx = schematicCanvas.getContext('2d');
 
+      // 背景色填充满画布
       sCtx.fillStyle = canvasBg;
-      sCtx.fillRect(0, 0, patternWidth, patternHeight);
+      sCtx.fillRect(0, 0, canvasW, bannerY);
 
+      // 标尺文字设置
       sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       sCtx.font = 'bold 11px monospace';
       sCtx.textAlign = 'center';
       sCtx.textBaseline = 'middle';
 
+      // 顶部水平标尺
       for (let x = 0; x < width; x++) {
-        sCtx.fillText((x + 1).toString(), ruler + x * cellSize + cellSize / 2, ruler / 2);
+        sCtx.fillText((x + 1).toString(), startX + x * cellSize + cellSize / 2, startY / 2);
       }
+      // 左侧垂直标尺
       for (let y = 0; y < height; y++) {
-        sCtx.fillText((y + 1).toString(), ruler / 2, ruler + y * cellSize + cellSize / 2);
+        sCtx.fillText((y + 1).toString(), startX - ruler / 2, startY + y * cellSize + cellSize / 2);
       }
 
+      // 绘制网格与拼豆圆孔
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const cx = ruler + x * cellSize;
-          const cy = ruler + y * cellSize;
+          const cx = startX + x * cellSize;
+          const cy = startY + y * cellSize;
 
           sCtx.strokeStyle = gridLine;
           sCtx.lineWidth = 1;
@@ -855,84 +802,95 @@
         }
       }
 
-      // 底部横幅
-      const bannerY = patternHeight;
+      // ---------------------------------------------------------------------
+      // 底部专属横幅 (Banner) 独立渲染：左右分区，彻底防止任何文字重叠
+      // ---------------------------------------------------------------------
       sCtx.fillStyle = '#0f172a';
-      sCtx.fillRect(0, bannerY, patternWidth, bannerHeight);
+      sCtx.fillRect(0, bannerY, canvasW, bannerHeight);
 
+      // 上方细分割线
       sCtx.strokeStyle = '#2563eb';
       sCtx.lineWidth = 3;
       sCtx.beginPath();
       sCtx.moveTo(0, bannerY);
-      sCtx.lineTo(patternWidth, bannerY);
+      sCtx.lineTo(canvasW, bannerY);
       sCtx.stroke();
 
-      const qrSize = Math.max(92, Math.min(130, bannerHeight - 36));
-      const qrX = patternWidth - qrSize - 32;
+      // 右侧二维码定位 (预留安全距离)
+      const qrSize = 104;
+      const qrX = canvasW - qrSize - 36;
       const qrY = bannerY + (bannerHeight - qrSize) / 2;
 
       drawQRCodeOnCanvas(sCtx, 'https://pindouwang.pages.dev', qrX, qrY, qrSize);
 
-      const leftPad = 28;
+      // 左侧文本安全排版 (左对齐，宽度绝对受控在 qrX 之前)
+      const textX = 32;
       sCtx.textAlign = 'left';
       sCtx.textBaseline = 'middle';
+
+      // 1. 标题
       sCtx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       sCtx.fillStyle = '#ffffff';
-      sCtx.fillText('🔵 Micheal 的拼豆网 · 在线设计工坊', leftPad, bannerY + bannerHeight * 0.32);
+      sCtx.fillText('Micheal 的拼豆网 · 在线设计工坊', textX, bannerY + 40);
 
+      // 2. 标语副标题
       sCtx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       sCtx.fillStyle = '#94a3b8';
-      sCtx.fillText('本图纸由 Micheal 的拼豆网生成 · 支持图片转图纸、色号对照与白板创作', leftPad, bannerY + bannerHeight * 0.58);
+      sCtx.fillText('标准 A-H/M 拼豆色号图纸 · 手机扫码可直接载入与导出', textX, bannerY + 76);
 
+      // 3. 统计规格
       const totalBeads = Object.values(statsMap).reduce((acc, cur) => acc + (cur.count || 0), 0);
       const colorKindCount = Object.keys(statsMap).length;
       sCtx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       sCtx.fillStyle = '#38bdf8';
-      sCtx.fillText(`【网格：${width}×${height}】 【共 ${colorKindCount} 色 / ${totalBeads} 颗】   👉 扫右侧二维码即刻在线创作`, leftPad, bannerY + bannerHeight * 0.82);
+      sCtx.fillText(`规格：${width} × ${height} 网格   用色：${colorKindCount} 色 / 共 ${totalBeads} 颗`, textX, bannerY + 112);
     }
 
     // =========================================================================
-    // 4K 超清采样导出生成器 (保证导出的 PNG 无论放大多少倍都极度清晰)
+    // 4K 超清采样导出生成器 (防重叠 + 超高解析度)
     // =========================================================================
     function generateUltraHDPNG() {
       if (gridData.length === 0) return null;
       const height = gridData.length;
       const width = gridData[0].length;
 
-      // 采用极清采样：每格 64 像素
-      const cellSize = 64;
-      const ruler = 56;
-      const patternWidth = width * cellSize + ruler;
-      const patternHeight = height * cellSize + ruler;
-      const bannerHeight = Math.max(260, Math.round(patternWidth * 0.16));
+      const cellSize = 60;
+      const ruler = 64;
+      const gridPixelW = width * cellSize;
+      const gridPixelH = height * cellSize;
+
+      const minExportW = 1440;
+      const canvasW = Math.max(minExportW, gridPixelW + ruler + 80);
+      const startX = Math.floor((canvasW - (gridPixelW + ruler)) / 2) + ruler;
+      const startY = ruler;
+
+      const bannerY = gridPixelH + ruler + 40;
+      const bannerHeight = 260;
 
       const hdCanvas = document.createElement('canvas');
-      hdCanvas.width = patternWidth;
-      hdCanvas.height = patternHeight + bannerHeight;
+      hdCanvas.width = canvasW;
+      hdCanvas.height = bannerY + bannerHeight;
       const ctx = hdCanvas.getContext('2d');
 
-      // 背景纯净白底（利于打印和查看）
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, patternWidth, patternHeight);
+      ctx.fillRect(0, 0, canvasW, bannerY);
 
-      // 标尺文字
       ctx.fillStyle = '#475569';
       ctx.font = 'bold 22px monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
       for (let x = 0; x < width; x++) {
-        ctx.fillText((x + 1).toString(), ruler + x * cellSize + cellSize / 2, ruler / 2);
+        ctx.fillText((x + 1).toString(), startX + x * cellSize + cellSize / 2, startY / 2);
       }
       for (let y = 0; y < height; y++) {
-        ctx.fillText((y + 1).toString(), ruler / 2, ruler + y * cellSize + cellSize / 2);
+        ctx.fillText((y + 1).toString(), startX - ruler / 2, startY + y * cellSize + cellSize / 2);
       }
 
-      // 绘制网格与超清豆豆
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const cx = ruler + x * cellSize;
-          const cy = ruler + y * cellSize;
+          const cx = startX + x * cellSize;
+          const cy = startY + y * cellSize;
 
           ctx.strokeStyle = '#E2E8F0';
           ctx.lineWidth = 1.5;
@@ -944,18 +902,15 @@
             const centerY = cy + cellSize / 2;
             const radius = cellSize * 0.45;
 
-            // 实体彩色圆
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
             ctx.fill();
 
-            // 精致边框
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
             ctx.stroke();
 
-            // 内部高清晰色号文本
             const lum = 0.299 * (bead.r || 100) + 0.587 * (bead.g || 100) + 0.114 * (bead.b || 100);
             ctx.font = `bold 20px monospace`;
             ctx.textAlign = 'center';
@@ -966,42 +921,39 @@
         }
       }
 
-      // 绘制底部高清晰度横幅
-      const bannerY = patternHeight;
+      // 底栏
       ctx.fillStyle = '#0F172A';
-      ctx.fillRect(0, bannerY, patternWidth, bannerHeight);
+      ctx.fillRect(0, bannerY, canvasW, bannerHeight);
 
-      // 分隔线
       ctx.strokeStyle = '#2563EB';
       ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.moveTo(0, bannerY);
-      ctx.lineTo(patternWidth, bannerY);
+      ctx.lineTo(canvasW, bannerY);
       ctx.stroke();
 
-      // 右侧超清二维码
-      const qrSize = Math.max(180, Math.min(220, bannerHeight - 50));
-      const qrX = patternWidth - qrSize - 50;
+      const qrSize = 190;
+      const qrX = canvasW - qrSize - 60;
       const qrY = bannerY + (bannerHeight - qrSize) / 2;
       drawQRCodeOnCanvas(ctx, 'https://pindouwang.pages.dev', qrX, qrY, qrSize);
 
-      // 左侧大字号文案
-      const leftPad = 50;
+      const textX = 56;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
+
       ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillText('🔵 Micheal 的拼豆网 · 在线设计工坊', leftPad, bannerY + bannerHeight * 0.32);
+      ctx.fillText('Micheal 的拼豆网 · 在线设计工坊', textX, bannerY + 70);
 
-      ctx.font = '24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = '22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#94A3B8';
-      ctx.fillText('本图纸由 Micheal 的拼豆网生成 · 支持图片转图纸、色号对照与白板创作', leftPad, bannerY + bannerHeight * 0.58);
+      ctx.fillText('标准 A-H/M 拼豆色号图纸 · 手机扫码可直接载入与导出', textX, bannerY + 135);
 
       const totalBeads = Object.values(currentStatsMap).reduce((acc, cur) => acc + (cur.count || 0), 0);
       const colorKindCount = Object.keys(currentStatsMap).length;
       ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#38BDF8';
-      ctx.fillText(`【网格规格：${width} × ${height}】  【共使用 ${colorKindCount} 色 / ${totalBeads} 颗拼豆】   👉 扫右侧二维码即刻在线创作`, leftPad, bannerY + bannerHeight * 0.82);
+      ctx.fillText(`规格：${width} × ${height} 网格   用色：${colorKindCount} 色 / 共 ${totalBeads} 颗`, textX, bannerY + 195);
 
       return hdCanvas;
     }
@@ -1019,7 +971,7 @@
       }
       let total = items.reduce((sum, item) => sum + item.count, 0);
       let html = `
-        <h3 style="color: var(--text-main); margin-top: 24px;">🎨 所需色号材料清单 (共使用 ${items.length} 种颜色，${total} 颗拼豆)</h3>
+        <h3 style="color: var(--text-main); margin-top: 24px;">所需色号材料清单 (共使用 ${items.length} 种颜色，${total} 颗拼豆)</h3>
         <table class="stats-table">
           <thead><tr><th>色号</th><th>颜色</th><th>名称</th><th>所需数量</th></tr></thead>
           <tbody>
@@ -1038,7 +990,6 @@
       statsContainer.innerHTML = html;
     }
 
-    // 导出 4K 超清 PNG
     exportPngBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const hdCanvas = generateUltraHDPNG();
@@ -1049,7 +1000,6 @@
       link.click();
     });
 
-    // 导出 CSV 网格色号矩阵
     exportCsvBtn.addEventListener('click', () => {
       if (gridData.length === 0) return alert('请先生成或选择拼豆图纸！');
       const height = gridData.length;
