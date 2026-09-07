@@ -43,11 +43,10 @@
       border-radius: 6px;
       padding: 6px 10px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
       transition: all 0.2s;
     }
     .help-icon-btn:hover {
@@ -105,7 +104,7 @@
 
     .filter-controls-panel {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
@@ -177,6 +176,7 @@
       border-radius: 6px;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
       background: var(--canvas-bg);
+      cursor: pointer;
     }
 
     .stats-table {
@@ -193,6 +193,14 @@
     .stats-table th {
       background: var(--table-head);
       color: var(--text-main);
+    }
+    .stats-table tr.is-highlighted {
+      background: rgba(37, 99, 235, 0.12);
+      outline: 2px solid var(--primary);
+    }
+    .stats-table tr.is-excluded {
+      opacity: 0.45;
+      text-decoration: line-through;
     }
     .color-chip {
       display: inline-block;
@@ -211,6 +219,55 @@
       border-radius: 8px;
       font-size: 13px;
     }
+
+    /* 原生裁剪弹窗 */
+    .crop-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.82);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 16px;
+    }
+    .crop-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .crop-modal-dialog {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      max-width: 780px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .crop-canvas-container {
+      width: 100%;
+      height: 380px;
+      background: #000000;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      touch-action: none;
+    }
+    #crop-canvas {
+      cursor: crosshair;
+      max-width: 100%;
+      max-height: 100%;
+    }
   </style>
 </head>
 <body>
@@ -218,9 +275,14 @@
 
   <main class="create-container">
     <section class="panel-card">
-      <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h2 style="margin: 0; color: var(--text-main);">拼豆设计工坊</h2>
+        <a href="whiteboard.html" class="btn btn-outline" style="text-decoration: none; font-size: 13px; font-weight: 600;">
+          前往白板自由画板 →
+        </a>
+      </div>
 
-      <!-- 控制条 -->
+      <!-- 第一控制条：输入与抠图 -->
       <div class="control-row">
         <label class="btn btn-primary" style="cursor: pointer;">
           上传本地图片
@@ -239,25 +301,29 @@
               <li>粘贴至输入框后点击【导入网络图】。</li>
             </ol>
             <div class="tip-box">
-              <strong>提示：</strong>若对方网站有防盗链拦截，直接将图片<strong>「另存为」</strong>到本地，点击【上传本地图片】即可 100% 成功导入。
+              <strong>提示：</strong>若对方网站有防盗链拦截，直接将图片<strong>「另存为」</strong>到本地，点击【上传本地图片】即可导入。
             </div>
           </div>
         </div>
 
-        <!-- 智能抠图 -->
         <div class="bg-cutout-group">
           <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 600; font-size: 13px;">
             <input id="bg-toggle" type="checkbox" checked /> 智能抠除背景
           </label>
           <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted);">
             <span>容差:</span>
-            <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" style="width: 80px;" />
+            <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" style="width: 75px;" />
             <span id="bg-tolerance-val" style="font-weight: 700; color: var(--primary); font-family: monospace;">38</span>
           </div>
         </div>
 
-        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main);">
-          选色板：
+        <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">重置所有参数</button>
+      </div>
+
+      <!-- 第二控制条：专业高级功能设置 -->
+      <div class="control-row" style="background: var(--bg-secondary); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 8px;">
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px;">
+          色板：
           <select id="palette-select" class="form-select">
             <option value="standard72">72 色常用标准版</option>
             <option value="classic88">88 色盒装经典版 (X1~X88)</option>
@@ -266,7 +332,35 @@
           </select>
         </label>
 
-        <button id="btn-reset-filters" class="btn" type="button" style="margin-left: auto;">重置画面参数</button>
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px;">
+          色数限制：
+          <select id="max-color-select" class="form-select">
+            <option value="0">不限制</option>
+            <option value="8">最多 8 色</option>
+            <option value="12">最多 12 色</option>
+            <option value="16">最多 16 色</option>
+            <option value="24">最多 24 色</option>
+            <option value="36">最多 36 色</option>
+            <option value="48">最多 48 色</option>
+          </select>
+        </label>
+
+        <label style="display: flex; align-items: center; gap: 6px; color: var(--text-main); font-size: 13px;">
+          拼豆板分割线：
+          <select id="pegboard-select" class="form-select">
+            <option value="0">不分割</option>
+            <option value="28">28 × 28 标准大方板</option>
+            <option value="29">29 × 29 常用拼接板</option>
+            <option value="50">50 × 50 超大连板</option>
+            <option value="14">14 × 14 小型板</option>
+          </select>
+        </label>
+
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); font-weight: 600; font-size: 13px;">
+          <input id="mark-mode-toggle" type="checkbox" /> 拼装打卡模式 (点击格子标记已拼)
+        </label>
+
+        <button id="btn-clear-checks" class="btn" type="button" style="padding: 4px 10px; font-size: 12px; margin-left: auto;">清空打卡标记</button>
       </div>
 
       <!-- 参数调节面板 -->
@@ -277,6 +371,14 @@
             <span id="board-width-val" class="slider-val-box">32px</span>
           </div>
           <input id="board-width" type="range" min="10" max="80" step="1" value="32" />
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-header">
+            <span class="slider-title">孤立杂色平滑合并</span>
+            <span id="noise-val" class="slider-val-box">0颗</span>
+          </div>
+          <input id="noise-threshold" type="range" min="0" max="5" step="1" value="0" />
         </div>
 
         <div class="slider-item">
@@ -304,7 +406,7 @@
         </div>
       </div>
 
-      <p id="convert-status" style="color: var(--text-muted); font-weight: 500; margin: 4px 0;"></p>
+      <p id="convert-status" style="color: var(--text-muted); font-weight: 500; margin: 6px 0;"></p>
 
       <!-- 双画板联动展示 -->
       <div class="canvas-row">
@@ -313,7 +415,7 @@
           <canvas id="board-canvas" class="board-canvas"></canvas>
         </div>
         <div class="canvas-box">
-          <span class="canvas-label">色号对照拼装图纸 (标准 A-H/M 编号)</span>
+          <span class="canvas-label" id="schematic-label">色号对照拼装图纸 (点击格子可交互高亮或打卡)</span>
           <canvas id="schematic-canvas" class="schematic-canvas"></canvas>
         </div>
       </div>
@@ -331,7 +433,41 @@
         </button>
       </div>
     </section>
+
+    <!-- 底部白板自由创作入口卡片 -->
+    <section class="panel-card">
+      <h3 style="margin-top: 0; color: var(--text-main);">从白板自由创作</h3>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 18px;">
+        打开独立像素画板自由涂鸦绘制，支持画笔、油漆桶、橡皮擦、画面滤镜与用色实时统计。
+      </p>
+      <a href="whiteboard.html" class="btn btn-primary" style="text-decoration: none;">打开白板编辑器 →</a>
+    </section>
   </main>
+
+  <!-- 原生图片自由裁剪弹窗 -->
+  <div id="crop-modal" class="crop-modal-backdrop">
+    <div class="crop-modal-dialog">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; color: var(--text-main); font-size: 18px;">图片选区裁剪</h3>
+        <span style="font-size: 12px; color: var(--text-muted);">在图片上按住鼠标或手指拖拽矩形框</span>
+      </div>
+
+      <div class="crop-canvas-container">
+        <canvas id="crop-canvas"></canvas>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-crop-full" class="btn" type="button">全选整图</button>
+          <button id="btn-crop-square" class="btn" type="button">1:1 正方形居中</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-skip-crop" class="btn" type="button">直接使用原图</button>
+          <button id="btn-confirm-crop" class="btn btn-primary" type="button">确认裁剪并生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="site-footer"></div>
 
@@ -345,6 +481,11 @@
     let gridData = [];
     let currentStatsMap = {};
 
+    // 核心状态管理：排除色号、当前高亮聚焦色号、已完成打卡格子坐标集合
+    const excludedColorCodes = new Set();
+    let activeHighlightCode = null;
+    const checkedBeadCoords = new Set(); // 格式: "x,y"
+
     const uploadInput = document.getElementById('upload-input');
     const urlInput = document.getElementById('url-input');
     const btnImportUrl = document.getElementById('btn-import-url');
@@ -355,6 +496,11 @@
     const bgTolerance = document.getElementById('bg-tolerance');
     const bgToleranceVal = document.getElementById('bg-tolerance-val');
     const paletteSelect = document.getElementById('palette-select');
+    const maxColorSelect = document.getElementById('max-color-select');
+    const pegboardSelect = document.getElementById('pegboard-select');
+    const markModeToggle = document.getElementById('mark-mode-toggle');
+    const btnClearChecks = document.getElementById('btn-clear-checks');
+
     const statusText = document.getElementById('convert-status');
     const boardCanvas = document.getElementById('board-canvas');
     const schematicCanvas = document.getElementById('schematic-canvas');
@@ -364,6 +510,8 @@
 
     const boardWidthInput = document.getElementById('board-width');
     const boardWidthVal = document.getElementById('board-width-val');
+    const noiseThresholdInput = document.getElementById('noise-threshold');
+    const noiseVal = document.getElementById('noise-val');
     const brightnessRange = document.getElementById('brightness-range');
     const brightnessVal = document.getElementById('brightness-val');
     const contrastRange = document.getElementById('contrast-range');
@@ -371,6 +519,19 @@
     const saturateRange = document.getElementById('saturate-range');
     const saturateVal = document.getElementById('saturate-val');
     const btnResetFilters = document.getElementById('btn-reset-filters');
+
+    // 裁剪模态窗元素
+    const cropModal = document.getElementById('crop-modal');
+    const cropCanvas = document.getElementById('crop-canvas');
+    const cropCtx = cropCanvas.getContext('2d');
+    const btnCropFull = document.getElementById('btn-crop-full');
+    const btnCropSquare = document.getElementById('btn-crop-square');
+    const btnSkipCrop = document.getElementById('btn-skip-crop');
+    const btnConfirmCrop = document.getElementById('btn-confirm-crop');
+    let rawLoadedImg = null;
+    let cropBox = { x: 0, y: 0, w: 0, h: 0 };
+    let isCroppingDrag = false;
+    let cropDragStart = { x: 0, y: 0 };
 
     btnUrlHelp.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -382,22 +543,144 @@
       }
     });
 
+    // -------------------------------------------------------------------------
+    // 裁剪功能实现
+    // -------------------------------------------------------------------------
+    function openCropper(img) {
+      rawLoadedImg = img;
+      const maxW = 720;
+      const maxH = 380;
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
+      const scale = Math.min(maxW / w, maxH / h, 1);
+
+      cropCanvas.width = Math.round(w * scale);
+      cropCanvas.height = Math.round(h * scale);
+      cropBox = { x: 0, y: 0, w: cropCanvas.width, h: cropCanvas.height };
+      drawCropCanvas();
+      cropModal.classList.add('open');
+    }
+
+    function drawCropCanvas() {
+      if (!rawLoadedImg) return;
+      cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+      cropCtx.drawImage(rawLoadedImg, 0, 0, cropCanvas.width, cropCanvas.height);
+
+      // 半透明暗色蒙版
+      cropCtx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+
+      // 高亮保留选区
+      cropCtx.clearRect(cropBox.x, cropBox.y, cropBox.w, cropBox.h);
+      cropCtx.drawImage(
+        rawLoadedImg,
+        (cropBox.x / cropCanvas.width) * rawLoadedImg.naturalWidth,
+        (cropBox.y / cropCanvas.height) * rawLoadedImg.naturalHeight,
+        (cropBox.w / cropCanvas.width) * rawLoadedImg.naturalWidth,
+        (cropBox.h / cropCanvas.height) * rawLoadedImg.naturalHeight,
+        cropBox.x, cropBox.y, cropBox.w, cropBox.h
+      );
+
+      // 边框描边
+      cropCtx.strokeStyle = '#2563eb';
+      cropCtx.lineWidth = 2;
+      cropCtx.strokeRect(cropBox.x, cropBox.y, cropBox.w, cropBox.h);
+    }
+
+    cropCanvas.addEventListener('pointerdown', (e) => {
+      const rect = cropCanvas.getBoundingClientRect();
+      const x = Math.max(0, Math.min(cropCanvas.width, (e.clientX - rect.left) * (cropCanvas.width / rect.width)));
+      const y = Math.max(0, Math.min(cropCanvas.height, (e.clientY - rect.top) * (cropCanvas.height / rect.height)));
+      isCroppingDrag = true;
+      cropDragStart = { x, y };
+      cropBox = { x, y, w: 0, h: 0 };
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isCroppingDrag) return;
+      const rect = cropCanvas.getBoundingClientRect();
+      const x = Math.max(0, Math.min(cropCanvas.width, (e.clientX - rect.left) * (cropCanvas.width / rect.width)));
+      const y = Math.max(0, Math.min(cropCanvas.height, (e.clientY - rect.top) * (cropCanvas.height / rect.height)));
+      cropBox.x = Math.min(cropDragStart.x, x);
+      cropBox.y = Math.min(cropDragStart.y, y);
+      cropBox.w = Math.abs(x - cropDragStart.x);
+      cropBox.h = Math.abs(y - cropDragStart.y);
+      drawCropCanvas();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isCroppingDrag) {
+        isCroppingDrag = false;
+        if (cropBox.w < 10 || cropBox.h < 10) {
+          cropBox = { x: 0, y: 0, w: cropCanvas.width, h: cropCanvas.height };
+          drawCropCanvas();
+        }
+      }
+    });
+
+    btnCropFull.addEventListener('click', () => {
+      cropBox = { x: 0, y: 0, w: cropCanvas.width, h: cropCanvas.height };
+      drawCropCanvas();
+    });
+
+    btnCropSquare.addEventListener('click', () => {
+      const size = Math.min(cropCanvas.width, cropCanvas.height);
+      cropBox = {
+        x: Math.floor((cropCanvas.width - size) / 2),
+        y: Math.floor((cropCanvas.height - size) / 2),
+        w: size,
+        h: size
+      };
+      drawCropCanvas();
+    });
+
+    btnSkipCrop.addEventListener('click', () => {
+      cropModal.classList.remove('open');
+      currentImg = rawLoadedImg;
+      processImage();
+    });
+
+    btnConfirmCrop.addEventListener('click', () => {
+      cropModal.classList.remove('open');
+      if (cropBox.w < 5 || cropBox.h < 5) {
+        currentImg = rawLoadedImg;
+      } else {
+        const off = document.createElement('canvas');
+        const srcX = (cropBox.x / cropCanvas.width) * rawLoadedImg.naturalWidth;
+        const srcY = (cropBox.y / cropCanvas.height) * rawLoadedImg.naturalHeight;
+        const srcW = (cropBox.w / cropCanvas.width) * rawLoadedImg.naturalWidth;
+        const srcH = (cropBox.h / cropCanvas.height) * rawLoadedImg.naturalHeight;
+        off.width = Math.round(srcW);
+        off.height = Math.round(srcH);
+        const offCtx = off.getContext('2d');
+        offCtx.drawImage(rawLoadedImg, srcX, srcY, srcW, srcH, 0, 0, off.width, off.height);
+        const croppedImg = new Image();
+        croppedImg.onload = () => {
+          currentImg = croppedImg;
+          processImage();
+        };
+        croppedImg.src = off.toDataURL();
+        return;
+      }
+      processImage();
+    });
+
     function loadImgFromSrc(src, label = '网络图片') {
-      statusText.textContent = `正在读取并转换【${label}】...`;
+      statusText.textContent = `正在读取【${label}】...`;
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => {
-        currentImg = img;
-        processImage();
-        statusText.textContent = `已成功导入【${label}】，可滑动调节参数。`;
+        openCropper(img);
+        statusText.textContent = `已载入【${label}】，请在裁剪弹窗确认选区。`;
       };
       img.onerror = () => {
-        alert('该网络图片受到防盗链保护。请直接把图片另存到本地，然后点击【上传本地图片】进行导入。');
+        alert('该网络图片受到防盗链保护。请将图片另存为到本地后，使用【上传本地图片】进行导入。');
         statusText.textContent = '导入失败，请下载该图片后使用本地上传。';
       };
       img.src = src;
     }
 
+    // 载入 URL 传入图纸
     const urlParams = new URLSearchParams(window.location.search);
     const patternId = urlParams.get('patternId');
     if (patternId) {
@@ -443,13 +726,20 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (event) => {
-        loadImgFromSrc(event.target.result, file.name);
+        const img = new Image();
+        img.onload = () => openCropper(img);
+        img.src = event.target.result;
       };
       reader.readAsDataURL(file);
     });
 
     boardWidthInput.addEventListener('input', (e) => {
       boardWidthVal.textContent = `${e.target.value}px`;
+      if (currentImg) processImage();
+    });
+
+    noiseThresholdInput.addEventListener('input', (e) => {
+      noiseVal.textContent = `${e.target.value}颗`;
       if (currentImg) processImage();
     });
 
@@ -478,11 +768,26 @@
       contrastRange.value = 0; contrastVal.textContent = '0';
       saturateRange.value = 0; saturateVal.textContent = '0';
       bgTolerance.value = 38; bgToleranceVal.textContent = '38';
+      noiseThresholdInput.value = 0; noiseVal.textContent = '0颗';
+      maxColorSelect.value = '0';
+      pegboardSelect.value = '0';
+      excludedColorCodes.clear();
+      activeHighlightCode = null;
       if (currentImg) processImage();
     });
 
     bgToggle.addEventListener('change', () => { if (currentImg) processImage(); });
-    paletteSelect.addEventListener('change', () => { if (currentImg) processImage(); });
+    paletteSelect.addEventListener('change', () => {
+      excludedColorCodes.clear();
+      if (currentImg) processImage();
+    });
+    maxColorSelect.addEventListener('change', () => { if (currentImg) processImage(); });
+    pegboardSelect.addEventListener('change', () => renderCanvases(currentStatsMap));
+
+    btnClearChecks.addEventListener('click', () => {
+      checkedBeadCoords.clear();
+      renderCanvases(currentStatsMap);
+    });
 
     function colorDist(r1, g1, b1, r2, g2, b2) {
       const rmean = (r1 + r2) / 2;
@@ -505,6 +810,7 @@
       return matched;
     }
 
+    // 泛洪背景提取
     function computeBackgroundMask(imgData, width, height, autoBg, tolerance) {
       const isBg = new Uint8Array(width * height);
       const queue = [];
@@ -602,6 +908,93 @@
       return isBg;
     }
 
+    // 孤立杂色平滑合并算法 (BFS 连通域)
+    function smoothNoisePixels(grid, threshold) {
+      if (!threshold || threshold <= 0) return grid;
+      const h = grid.length;
+      const w = grid[0].length;
+      const newGrid = grid.map(row => [...row]);
+      const visited = Array(h).fill(null).map(() => Array(w).fill(false));
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          if (visited[y][x] || !newGrid[y][x]) continue;
+
+          const targetCode = newGrid[y][x].code;
+          const component = [];
+          const queue = [[x, y]];
+          visited[y][x] = true;
+          const neighborColors = [];
+
+          while (queue.length > 0) {
+            const [cx, cy] = queue.shift();
+            component.push([cx, cy]);
+
+            const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+            for (const [dx, dy] of dirs) {
+              const nx = cx + dx;
+              const ny = cy + dy;
+              if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                const nbBead = newGrid[ny][nx];
+                if (nbBead && nbBead.code === targetCode) {
+                  if (!visited[ny][nx]) {
+                    visited[ny][nx] = true;
+                    queue.push([nx, ny]);
+                  }
+                } else if (nbBead) {
+                  neighborColors.push(nbBead);
+                }
+              }
+            }
+          }
+
+          if (component.length <= threshold && neighborColors.length > 0) {
+            const freqMap = new Map();
+            for (const b of neighborColors) {
+              freqMap.set(b, (freqMap.get(b) || 0) + 1);
+            }
+            let maxCount = 0;
+            let dominantBead = null;
+            for (const [bead, count] of freqMap.entries()) {
+              if (count > maxCount) {
+                maxCount = count;
+                dominantBead = bead;
+              }
+            }
+            if (dominantBead) {
+              for (const [px, py] of component) {
+                newGrid[py][px] = dominantBead;
+              }
+            }
+          }
+        }
+      }
+      return newGrid;
+    }
+
+    // 色数上限硬性控制算法
+    function applyColorCountLimit(grid, maxColors, activePalette) {
+      if (!maxColors || maxColors <= 0) return grid;
+      const countMap = new Map();
+      for (const row of grid) {
+        for (const b of row) {
+          if (b) countMap.set(b.code, (countMap.get(b.code) || 0) + 1);
+        }
+      }
+      if (countMap.size <= maxColors) return grid;
+
+      const sorted = Array.from(countMap.entries()).sort((a, b) => b[1] - a[1]);
+      const allowedCodes = new Set(sorted.slice(0, maxColors).map(e => e[0]));
+      const allowedPalette = activePalette.filter(p => allowedCodes.has(p.code));
+
+      return grid.map(row => row.map(bead => {
+        if (!bead) return null;
+        if (allowedCodes.has(bead.code)) return bead;
+        return findNearestColor(bead.r, bead.g, bead.b, allowedPalette);
+      }));
+    }
+
+    // 二维码绘制
     function drawQRCodeOnCanvas(ctx, text, x, y, size) {
       try {
         let qr = qrcode(0, 'M');
@@ -627,6 +1020,7 @@
       }
     }
 
+    // 核心转换管线
     function processImage() {
       if (!currentImg) return;
       statusText.textContent = '正在实时渲染拼豆图纸...';
@@ -651,13 +1045,18 @@
       const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight).data;
       const autoBg = bgToggle.checked;
       const tolerance = parseInt(bgTolerance.value, 10);
-      const activePalette = PALETTES[paletteSelect.value] || PALETTES.standard72;
+      const fullPalette = PALETTES[paletteSelect.value] || PALETTES.standard72;
+
+      // 剔除已排除色号
+      let activePalette = fullPalette.filter(p => !excludedColorCodes.has(p.code));
+      if (activePalette.length === 0) {
+        activePalette = fullPalette;
+        excludedColorCodes.clear();
+      }
 
       const bgMask = computeBackgroundMask(imgData, targetWidth, targetHeight, autoBg, tolerance);
 
-      gridData = [];
-      currentStatsMap = {};
-
+      let initialGrid = [];
       for (let y = 0; y < targetHeight; y++) {
         const row = [];
         for (let x = 0; x < targetWidth; x++) {
@@ -672,21 +1071,37 @@
             const b = imgData[p4 + 2];
             const bead = findNearestColor(r, g, b, activePalette);
             row.push(bead);
+          }
+        }
+        initialGrid.push(row);
+      }
+
+      // 执行杂色平滑
+      const noiseLimit = parseInt(noiseThresholdInput.value, 10);
+      let processedGrid = smoothNoisePixels(initialGrid, noiseLimit);
+
+      // 执行色数上限限制
+      const maxColors = parseInt(maxColorSelect.value, 10);
+      gridData = applyColorCountLimit(processedGrid, maxColors, activePalette);
+
+      // 统计用量
+      currentStatsMap = {};
+      for (let y = 0; y < targetHeight; y++) {
+        for (let x = 0; x < targetWidth; x++) {
+          const bead = gridData[y][x];
+          if (bead) {
             currentStatsMap[bead.code] = currentStatsMap[bead.code] || { ...bead, count: 0 };
             currentStatsMap[bead.code].count += 1;
           }
         }
-        gridData.push(row);
       }
 
       renderCanvases(currentStatsMap);
       renderStats(currentStatsMap);
-      statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${activePalette.length} 色规范色板)`;
+      statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格 (${Object.keys(currentStatsMap).length} 种颜色，共 ${Object.values(currentStatsMap).reduce((a, b) => a + b.count, 0)} 颗)`;
     }
 
-    // =========================================================================
-    // 渲染双画布 (核心重构：彻底解决小图纸下底栏文字与二维码重叠 Bug)
-    // =========================================================================
+    // 绘制双画布
     function renderCanvases(statsMap = {}) {
       if (gridData.length === 0) return;
       const height = gridData.length;
@@ -695,8 +1110,9 @@
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
-
       const cellSize = 30;
+
+      const pegboardSize = parseInt(pegboardSelect.value, 10);
 
       // 1. 左侧纯色实体拼豆预览
       boardCanvas.width = width * cellSize;
@@ -720,6 +1136,11 @@
             const centerY = cy + cellSize / 2;
             const radius = cellSize * 0.44;
 
+            bCtx.save();
+            if (activeHighlightCode && bead.code !== activeHighlightCode) {
+              bCtx.globalAlpha = 0.18;
+            }
+
             bCtx.beginPath();
             bCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             bCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
@@ -727,20 +1148,18 @@
             bCtx.lineWidth = 1;
             bCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
             bCtx.stroke();
+            bCtx.restore();
           }
         }
       }
 
-      // 2. 右侧色号对照图纸 (标尺 + 底栏)
+      // 2. 右侧色号对照图纸
       const ruler = 32;
       const gridPixelW = width * cellSize;
       const gridPixelH = height * cellSize;
 
-      // 核心修复：限制最小画布宽度为 720px，保证底部文案与二维码永远不冲突重叠
       const minCanvasW = 720;
       const canvasW = Math.max(minCanvasW, gridPixelW + ruler + 40);
-      
-      // 小网格自适应水平居中摆放
       const startX = Math.floor((canvasW - (gridPixelW + ruler)) / 2) + ruler;
       const startY = ruler;
       const bannerY = gridPixelH + ruler + 20;
@@ -750,26 +1169,21 @@
       schematicCanvas.height = bannerY + bannerHeight;
       const sCtx = schematicCanvas.getContext('2d');
 
-      // 背景色填充满画布
       sCtx.fillStyle = canvasBg;
       sCtx.fillRect(0, 0, canvasW, bannerY);
 
-      // 标尺文字设置
       sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       sCtx.font = 'bold 11px monospace';
       sCtx.textAlign = 'center';
       sCtx.textBaseline = 'middle';
 
-      // 顶部水平标尺
       for (let x = 0; x < width; x++) {
         sCtx.fillText((x + 1).toString(), startX + x * cellSize + cellSize / 2, startY / 2);
       }
-      // 左侧垂直标尺
       for (let y = 0; y < height; y++) {
         sCtx.fillText((y + 1).toString(), startX - ruler / 2, startY + y * cellSize + cellSize / 2);
       }
 
-      // 绘制网格与拼豆圆孔
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const cx = startX + x * cellSize;
@@ -785,6 +1199,12 @@
             const centerY = cy + cellSize / 2;
             const radius = cellSize * 0.44;
 
+            sCtx.save();
+            const isMatch = !activeHighlightCode || bead.code === activeHighlightCode;
+            if (!isMatch) {
+              sCtx.globalAlpha = 0.16;
+            }
+
             sCtx.beginPath();
             sCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             sCtx.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
@@ -798,17 +1218,67 @@
             sCtx.textBaseline = 'middle';
             sCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
             sCtx.fillText(bead.code, centerX, centerY);
+
+            if (checkedBeadCoords.has(`${x},${y}`)) {
+              sCtx.strokeStyle = '#10b981';
+              sCtx.lineWidth = 3;
+              sCtx.beginPath();
+              sCtx.moveTo(cx + 4, cy + 4);
+              sCtx.lineTo(cx + cellSize - 4, cy + cellSize - 4);
+              sCtx.stroke();
+            }
+
+            sCtx.restore();
           }
         }
       }
 
-      // ---------------------------------------------------------------------
-      // 底部专属横幅 (Banner) 独立渲染：左右分区，彻底防止任何文字重叠
-      // ---------------------------------------------------------------------
+      // 拼豆板拼接线绘制
+      if (pegboardSize > 0) {
+        sCtx.save();
+        sCtx.strokeStyle = '#2563eb';
+        sCtx.lineWidth = 2.5;
+        sCtx.setLineDash([6, 4]);
+
+        for (let bx = pegboardSize; bx < width; bx += pegboardSize) {
+          const px = startX + bx * cellSize;
+          sCtx.beginPath();
+          sCtx.moveTo(px, startY);
+          sCtx.lineTo(px, startY + gridPixelH);
+          sCtx.stroke();
+        }
+
+        for (let by = pegboardSize; by < height; by += pegboardSize) {
+          const py = startY + by * cellSize;
+          sCtx.beginPath();
+          sCtx.moveTo(startX, py);
+          sCtx.lineTo(startX + gridPixelW, py);
+          sCtx.stroke();
+        }
+
+        sCtx.fillStyle = '#2563eb';
+        sCtx.font = 'bold 12px sans-serif';
+        sCtx.textAlign = 'left';
+        sCtx.textBaseline = 'top';
+        let bIdxY = 0;
+        for (let by = 0; by < height; by += pegboardSize) {
+          let bIdxX = 0;
+          for (let bx = 0; bx < width; bx += pegboardSize) {
+            const tagX = startX + bx * cellSize + 4;
+            const tagY = startY + by * cellSize + 4;
+            const label = `板 ${String.fromCharCode(65 + bIdxY)}${bIdxX + 1}`;
+            sCtx.fillText(label, tagX, tagY);
+            bIdxX++;
+          }
+          bIdxY++;
+        }
+        sCtx.restore();
+      }
+
+      // 底部专属横幅
       sCtx.fillStyle = '#0f172a';
       sCtx.fillRect(0, bannerY, canvasW, bannerHeight);
 
-      // 上方细分割线
       sCtx.strokeStyle = '#2563eb';
       sCtx.lineWidth = 3;
       sCtx.beginPath();
@@ -816,29 +1286,23 @@
       sCtx.lineTo(canvasW, bannerY);
       sCtx.stroke();
 
-      // 右侧二维码定位 (预留安全距离)
       const qrSize = 104;
       const qrX = canvasW - qrSize - 36;
       const qrY = bannerY + (bannerHeight - qrSize) / 2;
-
       drawQRCodeOnCanvas(sCtx, 'https://pindouwang.pages.dev', qrX, qrY, qrSize);
 
-      // 左侧文本安全排版 (左对齐，宽度绝对受控在 qrX 之前)
       const textX = 32;
       sCtx.textAlign = 'left';
       sCtx.textBaseline = 'middle';
 
-      // 1. 标题
       sCtx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       sCtx.fillStyle = '#ffffff';
       sCtx.fillText('Micheal 的拼豆网 · 在线设计工坊', textX, bannerY + 40);
 
-      // 2. 标语副标题
       sCtx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       sCtx.fillStyle = '#94a3b8';
       sCtx.fillText('标准 A-H/M 拼豆色号图纸 · 手机扫码可直接载入与导出', textX, bannerY + 76);
 
-      // 3. 统计规格
       const totalBeads = Object.values(statsMap).reduce((acc, cur) => acc + (cur.count || 0), 0);
       const colorKindCount = Object.keys(statsMap).length;
       sCtx.font = 'bold 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -846,9 +1310,57 @@
       sCtx.fillText(`规格：${width} × ${height} 网格   用色：${colorKindCount} 色 / 共 ${totalBeads} 颗`, textX, bannerY + 112);
     }
 
-    // =========================================================================
-    // 4K 超清采样导出生成器 (防重叠 + 超高解析度)
-    // =========================================================================
+    // 交互点击事件：打卡与同色高亮
+    function handleCanvasInteract(clientX, clientY) {
+      if (gridData.length === 0) return;
+      const height = gridData.length;
+      const width = gridData[0].length;
+      const cellSize = 30;
+      const ruler = 32;
+
+      const rect = schematicCanvas.getBoundingClientRect();
+      const scaleX = schematicCanvas.width / rect.width;
+      const scaleY = schematicCanvas.height / rect.height;
+      const canvasX = (clientX - rect.left) * scaleX;
+      const canvasY = (clientY - rect.top) * scaleY;
+
+      const minCanvasW = 720;
+      const gridPixelW = width * cellSize;
+      const canvasW = Math.max(minCanvasW, gridPixelW + ruler + 40);
+      const startX = Math.floor((canvasW - (gridPixelW + ruler)) / 2) + ruler;
+      const startY = ruler;
+
+      if (canvasX < startX || canvasX >= startX + gridPixelW || canvasY < startY || canvasY >= startY + height * cellSize) {
+        return;
+      }
+
+      const gx = Math.floor((canvasX - startX) / cellSize);
+      const gy = Math.floor((canvasY - startY) / cellSize);
+      const targetBead = gridData[gy][gx];
+      if (!targetBead) return;
+
+      if (markModeToggle.checked) {
+        const key = `${gx},${gy}`;
+        if (checkedBeadCoords.has(key)) {
+          checkedBeadCoords.delete(key);
+        } else {
+          checkedBeadCoords.add(key);
+        }
+        renderCanvases(currentStatsMap);
+      } else {
+        if (activeHighlightCode === targetBead.code) {
+          activeHighlightCode = null;
+        } else {
+          activeHighlightCode = targetBead.code;
+        }
+        renderCanvases(currentStatsMap);
+        renderStats(currentStatsMap);
+      }
+    }
+
+    schematicCanvas.addEventListener('click', (e) => handleCanvasInteract(e.clientX, e.clientY));
+
+    // 4K 超清导出
     function generateUltraHDPNG() {
       if (gridData.length === 0) return null;
       const height = gridData.length;
@@ -921,7 +1433,30 @@
         }
       }
 
-      // 底栏
+      // 导出拼豆板分割线
+      const pegboardSize = parseInt(pegboardSelect.value, 10);
+      if (pegboardSize > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([12, 8]);
+        for (let bx = pegboardSize; bx < width; bx += pegboardSize) {
+          const px = startX + bx * cellSize;
+          ctx.beginPath();
+          ctx.moveTo(px, startY);
+          ctx.lineTo(px, startY + gridPixelH);
+          ctx.stroke();
+        }
+        for (let by = pegboardSize; by < height; by += pegboardSize) {
+          const py = startY + by * cellSize;
+          ctx.beginPath();
+          ctx.moveTo(startX, py);
+          ctx.lineTo(startX + gridPixelW, py);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
       ctx.fillStyle = '#0F172A';
       ctx.fillRect(0, bannerY, canvasW, bannerHeight);
 
@@ -963,6 +1498,7 @@
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
+    // 渲染材料统计表与功能交互 (同色高亮与排除重映射)
     function renderStats(statsMap) {
       const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
       if (items.length === 0) {
@@ -971,23 +1507,77 @@
       }
       let total = items.reduce((sum, item) => sum + item.count, 0);
       let html = `
-        <h3 style="color: var(--text-main); margin-top: 24px;">所需色号材料清单 (共使用 ${items.length} 种颜色，${total} 颗拼豆)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 24px;">
+          <h3 style="color: var(--text-main); margin: 0;">所需材料用量清单 (共使用 ${items.length} 种颜色，${total} 颗拼豆)</h3>
+          ${activeHighlightCode ? `<button id="btn-cancel-hl" class="btn" style="padding: 4px 10px; font-size: 12px;">取消高亮聚焦</button>` : ''}
+        </div>
         <table class="stats-table">
-          <thead><tr><th>色号</th><th>颜色</th><th>名称</th><th>所需数量</th></tr></thead>
+          <thead>
+            <tr>
+              <th>色号</th>
+              <th>颜色</th>
+              <th>名称</th>
+              <th>所需数量</th>
+              <th>聚焦</th>
+              <th>操作</th>
+            </tr>
+          </thead>
           <tbody>
       `;
       for (const item of items) {
+        const isExcluded = excludedColorCodes.has(item.code);
+        const isHl = activeHighlightCode === item.code;
         html += `
-          <tr>
+          <tr class="${isHl ? 'is-highlighted' : ''} ${isExcluded ? 'is-excluded' : ''}" data-code="${item.code}">
             <td><strong>${item.code}</strong></td>
             <td><span class="color-chip" style="background: ${item.hex || `rgb(${item.r},${item.g},${item.b})`};"></span></td>
             <td>${item.name || item.code}</td>
             <td>${item.count} 颗</td>
+            <td>
+              <button class="btn btn-focus-color" data-code="${item.code}" type="button" style="padding: 2px 8px; font-size: 12px;">
+                ${isHl ? '取消' : '高亮'}
+              </button>
+            </td>
+            <td>
+              <button class="btn btn-toggle-exclude" data-code="${item.code}" type="button" style="padding: 2px 8px; font-size: 12px;">
+                ${isExcluded ? '恢复' : '排除'}
+              </button>
+            </td>
           </tr>
         `;
       }
       html += '</tbody></table>';
       statsContainer.innerHTML = html;
+
+      // 绑定表格操作按钮
+      document.getElementById('btn-cancel-hl')?.addEventListener('click', () => {
+        activeHighlightCode = null;
+        renderCanvases(currentStatsMap);
+        renderStats(currentStatsMap);
+      });
+
+      document.querySelectorAll('.btn-focus-color').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const code = btn.dataset.code;
+          activeHighlightCode = (activeHighlightCode === code) ? null : code;
+          renderCanvases(currentStatsMap);
+          renderStats(currentStatsMap);
+        });
+      });
+
+      document.querySelectorAll('.btn-toggle-exclude').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const code = btn.dataset.code;
+          if (excludedColorCodes.has(code)) {
+            excludedColorCodes.delete(code);
+          } else {
+            excludedColorCodes.add(code);
+          }
+          processImage();
+        });
+      });
     }
 
     exportPngBtn.addEventListener('click', () => {
