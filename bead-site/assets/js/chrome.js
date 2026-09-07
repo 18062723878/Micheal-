@@ -125,7 +125,6 @@ function injectSponsorModal() {
   });
 }
 
-// 注入统一的导航栏样式
 function injectHeaderStyles() {
   if (document.getElementById('unified-header-style')) return;
 
@@ -161,7 +160,7 @@ function injectHeaderStyles() {
     .nav-desktop-menu {
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 20px;
     }
     .nav-link {
       font-size: 14px;
@@ -211,7 +210,7 @@ function injectHeaderStyles() {
       background: var(--bg-page);
     }
 
-    /* 移动端三条杠按钮 */
+    /* 移动端汉堡菜单 */
     .nav-hamburger-btn {
       display: none;
       flex-direction: column;
@@ -294,7 +293,6 @@ function injectHeaderStyles() {
   document.head.appendChild(style);
 }
 
-// 注入统一顶栏与底栏
 export function injectChrome(activePage = 'home') {
   initTheme();
   injectHeaderStyles();
@@ -309,6 +307,7 @@ export function injectChrome(activePage = 'home') {
           <nav class="nav-desktop-menu">
             <a href="index.html" class="nav-link ${activePage === 'home' ? 'active' : ''}">首页</a>
             <a href="create.html" class="nav-link ${activePage === 'create' ? 'active' : ''}">创作工坊</a>
+            <a href="whiteboard.html" class="nav-link ${activePage === 'whiteboard' ? 'active' : ''}">白板画板</a>
             <a href="inspiration.html" class="nav-link ${activePage === 'inspiration' ? 'active' : ''}">灵感图库</a>
             <a href="tutorial.html" class="nav-link ${activePage === 'tutorial' ? 'active' : ''}">制作教程</a>
           </nav>
@@ -328,6 +327,7 @@ export function injectChrome(activePage = 'home') {
           <ul class="nav-mobile-list">
             <li><a href="index.html" class="nav-mobile-link ${activePage === 'home' ? 'active' : ''}">首页</a></li>
             <li><a href="create.html" class="nav-mobile-link ${activePage === 'create' ? 'active' : ''}">创作工坊</a></li>
+            <li><a href="whiteboard.html" class="nav-mobile-link ${activePage === 'whiteboard' ? 'active' : ''}">白板画板</a></li>
             <li><a href="inspiration.html" class="nav-mobile-link ${activePage === 'inspiration' ? 'active' : ''}">灵感图库</a></li>
             <li><a href="tutorial.html" class="nav-mobile-link ${activePage === 'tutorial' ? 'active' : ''}">制作教程</a></li>
             <li><a href="javascript:void(0)" class="nav-mobile-link" id="mobile-sponsor-btn">赞助支持</a></li>
@@ -336,11 +336,9 @@ export function injectChrome(activePage = 'home') {
       </header>
     `;
 
-    // 绑定主题切换事件
     document.getElementById('theme-toggle-btn')?.addEventListener('click', toggleTheme);
     updateThemeButton();
 
-    // 绑定汉堡菜单事件
     const hamburgerBtn = document.getElementById('nav-hamburger-btn');
     const mobileDropdown = document.getElementById('nav-mobile-dropdown');
 
@@ -357,7 +355,6 @@ export function injectChrome(activePage = 'home') {
       }
     });
 
-    // 绑定赞助弹窗
     injectSponsorModal();
     const openSponsor = () => document.getElementById('sponsor-modal')?.classList.add('open');
     document.getElementById('btn-open-sponsor')?.addEventListener('click', openSponsor);
