@@ -85,7 +85,7 @@
         <article class="step-card reveal">
           <span class="step-num">STEP 01</span>
           <h4>导入图片</h4>
-          <p>上传本地图片或粘贴网络图片直链，支持框选裁剪主体区域。</p>
+          <p>上传本地图片，支持框选裁剪主体区域，自动匹配标准色卡。</p>
         </article>
         <article class="step-card reveal">
           <span class="step-num">STEP 02</span>
@@ -149,27 +149,46 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS, PALETTES } from './assets/js/patterns-data.js';
-    import { BeadViewer } from './assets/js/bead-viewer.js';
+    import { BeadViewer, fitCellToBox, aspectForMatrix } from './assets/js/bead-viewer.js';
 
     try { injectChrome('home'); } catch (e) { console.warn(e); }
 
     const grid = document.getElementById('featured-grid');
-    const featuredList = ALL_PATTERNS.slice(0, 8);
-    const viewers = [];
+    // 首页精选：跨分类挑选，含本批新增图纸
+    const FEATURED_IDS = [
+      'mount-fuji-sakura',
+      'shiba-inu-portrait',
+      'matcha-ice-cream',
+      'pikachu-lightning',
+      'festival-lantern',
+      'unicorn-fantasy',
+      'night-lighthouse',
+      'genshin-paimon',
+    ];
+    const byId = new Map(ALL_PATTERNS.map(p => [p.id, p]));
+    const featuredList = [];
+    FEATURED_IDS.forEach(id => {
+      const p = byId.get(id);
+      if (p) featuredList.push(p);
+    });
+    for (const p of ALL_PATTERNS) {
+      if (featuredList.length >= 8) break;
+      if (!featuredList.includes(p)) featuredList.push(p);
+    }
+    const thumbs = [];
 
     document.getElementById('metric-patterns').textContent = `${ALL_PATTERNS.length}+`;
     document.getElementById('metric-colors').textContent =
       `${(PALETTES.full221 || []).length || Object.values(PALETTES).flat().length}`;
 
-    // 缩略图格子尺寸：让整图在卡片里完整可见
-    function thumbCellSize(matrix) {
-      const dim = Math.max(matrix.length, matrix[0].length, 1);
-      return Math.max(2, Math.min(16, Math.floor(168 / dim)));
-    }
-
     function renderFeaturedCards() {
       grid.innerHTML = '';
+      thumbs.length = 0;
+
       featuredList.forEach(p => {
+        const rows = p.matrix.length;
+        const cols = p.matrix[0].length;
+
         const card = document.createElement('article');
         card.className = 'featured-card reveal';
         card.innerHTML = `
@@ -179,7 +198,7 @@
           <div class="featured-body">
             <div class="featured-meta-row">
               <span class="featured-title">${p.title}</span>
-              <span class="badge">${p.matrix[0].length}×${p.matrix.length}</span>
+              <span class="badge">${cols}×${rows}</span>
             </div>
             <div class="featured-meta-row">
               <span class="badge badge--accent">${p.tag || '精选'}</span>
@@ -189,9 +208,13 @@
         `;
         grid.appendChild(card);
 
+        const box = card.querySelector('.featured-preview');
+        // 外框贴合图纸比例，避免留白过多导致图片显小
+        box.style.aspectRatio = String(aspectForMatrix(cols, rows));
+
         const canvas = card.querySelector('canvas');
         const viewer = new BeadViewer(canvas, {
-          cellSize: thumbCellSize(p.matrix),
+          cellSize: 8,
           beadStyle: 'round',
           gap: 'small',
           showGrid: false,
@@ -199,24 +222,34 @@
           showRuler: false,
         });
         viewer.setMatrix(p.matrix);
-        viewers.push(viewer);
+        thumbs.push({ viewer, box, cols, rows });
       });
-      // 卡片渲染完成后触发一次淡入
+
       requestAnimationFrame(() => {
-        card_reveal_fallback();
+        layoutThumbs();
+        document.querySelectorAll('.featured-card.reveal').forEach((el, i) => {
+          setTimeout(() => el.classList.add('is-visible'), i * 60);
+        });
       });
     }
 
-    function card_reveal_fallback() {
-      document.querySelectorAll('.featured-card.reveal').forEach((el, i) => {
-        setTimeout(() => el.classList.add('is-visible'), i * 60);
+    /** 按容器实测尺寸重算缩略图格子大小，使图片尽量充满外框 */
+    function layoutThumbs() {
+      thumbs.forEach(({ viewer, box, cols, rows }) => {
+        viewer.setOptions({ cellSize: fitCellToBox(box, cols, rows, 16) });
       });
     }
 
     renderFeaturedCards();
 
+    let thumbResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(thumbResizeTimer);
+      thumbResizeTimer = setTimeout(layoutThumbs, 160);
+    });
+
     window.addEventListener('site:themechange', () => {
-      viewers.forEach(v => v.render());
+      layoutThumbs();
     });
   </script>
 </body>

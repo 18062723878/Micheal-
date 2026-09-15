@@ -1245,8 +1245,8 @@ input[type='range']:focus-visible {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   min-height: 240px;
   overscroll-behavior: contain;
 }
@@ -1256,6 +1256,7 @@ input[type='range']:focus-visible {
   width: auto;
   height: auto;
   max-width: 100%;
+  margin: auto;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
   background: var(--canvas-bg);
@@ -1264,7 +1265,7 @@ input[type='range']:focus-visible {
 }
 
 .bead-stage--fit canvas {
-  max-height: min(62vh, 640px);
+  max-height: min(70vh, 720px);
 }
 
 .bead-stage--interactive canvas {
@@ -1353,6 +1354,106 @@ input[type='range']:focus-visible {
   color: var(--foreground);
 }
 
+/* 帮助面板与字段提示 */
+.help-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--muted);
+  padding: 0 16px;
+}
+
+.help-panel > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.help-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-panel > summary::before {
+  content: '?';
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.help-panel[open] > summary::before {
+  content: '−';
+}
+
+.help-panel > summary::after {
+  content: '展开';
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.help-panel[open] > summary::after {
+  content: '收起';
+}
+
+.help-panel-body {
+  padding: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+}
+
+.help-panel-body ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.help-panel-body li {
+  margin-bottom: 6px;
+}
+
+.help-panel-body b {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.help-panel-body code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+}
+
+.group-hint {
+  margin: -4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--muted-foreground);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+}
 /* ------------------------------------------------------------------ *
  * 15. 拼豆模式（全屏）
  * ------------------------------------------------------------------ */
@@ -1439,6 +1540,57 @@ input[type='range']:focus-visible {
   color: var(--accent);
   font-size: 12.5px;
   line-height: 1.6;
+}
+
+/* 缩放控制条 */
+.zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.zoom-controls button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--dur) ease, color var(--dur) ease;
+}
+
+.zoom-controls button:hover {
+  background: var(--muted);
+  color: var(--accent);
+}
+
+.zoom-controls .zoom-level {
+  min-width: 62px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.zoom-controls .zoom-reset {
+  width: auto;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+}
+
+.bead-mode-stage-wrap {
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 /* ------------------------------------------------------------------ *

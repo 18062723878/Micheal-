@@ -329,14 +329,42 @@ export class BeadViewer {
   }
 
   resolveCellSize() {
-    const { fit, cellSize, maxCell, minCell, showRuler } = this.options;
-    if (!fit) return cellSize;
-    const host = this.canvas.parentElement;
-    const hostWidth = host ? host.clientWidth : 0;
-    const available = Math.max(160, hostWidth - 44);
-    const cols = this.cols + (showRuler ? RULER_FACTOR * 2 : 0.5);
-    const size = Math.floor(available / Math.max(1, cols));
-    return Math.max(minCell, Math.min(size, maxCell));
+    const {
+      fit,
+      cellSize,
+      maxCell,
+      minCell,
+      showRuler,
+      zoom = 1,
+      fitHeightEl = null,
+      maxFitHeight = 0,
+    } = this.options;
+    let base;
+    if (fit) {
+      const host = this.canvas.parentElement;
+      const hostWidth = host ? host.clientWidth : 0;
+      const availW = Math.max(160, hostWidth - 44);
+      const colUnits = this.cols + (showRuler ? RULER_FACTOR * 2 : 0.5);
+      let sizeW = availW / Math.max(1, colUnits);
+
+      // 高度预算：优先用容器实测高度，否则用调用方给定的上限
+      // （避免渲染尺寸远大于显示尺寸而被 CSS 强行缩放，导致网格线出现条纹）
+      let availH = 0;
+      if (fitHeightEl && fitHeightEl.clientHeight > 0) availH = fitHeightEl.clientHeight;
+      else if (maxFitHeight > 0) availH = maxFitHeight;
+
+      let sizeH = Infinity;
+      if (availH > 0) {
+        const rowUnits = this.rows + (showRuler ? RULER_FACTOR * 2 : 0.5);
+        sizeH = (availH - 40) / Math.max(1, rowUnits);
+      }
+
+      base = Math.max(minCell, Math.min(Math.floor(Math.min(sizeW, sizeH)), maxCell));
+    } else {
+      base = cellSize;
+    }
+    if (zoom === 1) return base;
+    return Math.max(1, Math.min(240, Math.round(base * zoom)));
   }
 
   render() {
@@ -404,8 +432,7 @@ export class BeadViewer {
 /* ------------------------------------------------------------------ *
  * 图例（色卡）构建
  * ------------------------------------------------------------------ */
-export function buildLegend(container, statsList, { activeCode = null, onClick } = {}) {
-  if (!container) return;
+export function buildLegend(container, statsList, { activeCode = null, onClick } = {}) {  if (!container) return;
   container.innerHTML = '';
   statsList.forEach(item => {
     const btn = document.createElement('button');
@@ -423,4 +450,31 @@ export function buildLegend(container, statsList, { activeCode = null, onClick }
     }
     container.appendChild(btn);
   });
+}
+
+/* ------------------------------------------------------------------ *
+ * 缩略图自适应工具
+ * ------------------------------------------------------------------ */
+
+/**
+ * 依据容器实际渲染尺寸反推缩略图格子大小，
+ * 让图纸完整显示且尽量填满容器（避免「外框大、图小」）。
+ */
+export function fitCellToBox(box, cols, rows, padding = 16, maxCell = 28) {
+  if (!box) return 8;
+  const rect = box.getBoundingClientRect();
+  const availW = Math.max(24, rect.width - padding);
+  const availH = Math.max(24, rect.height - padding);
+  const cell = Math.floor(
+    Math.min(availW / Math.max(1, cols), availH / Math.max(1, rows))
+  );
+  return Math.max(2, Math.min(maxCell, cell));
+}
+
+/**
+ * 让预览外框贴合图纸自身的宽高比（做上下限收敛，避免极端长条卡片）。
+ */
+export function aspectForMatrix(cols, rows, min = 0.78, max = 1.28) {
+  const ratio = cols / Math.max(1, rows);
+  return Math.min(max, Math.max(min, ratio));
 }

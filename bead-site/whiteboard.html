@@ -84,6 +84,25 @@
       width: 100%;
     }
 
+    /* 侧栏内的参数滑块（全屏状态下同样可用） */
+    .side-slider {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+    .side-slider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-main);
+    }
+    .side-slider input[type="range"] {
+      width: 100%;
+    }
+
     /* 双工作台排版 */
     .workbench-row {
       display: flex;
@@ -282,9 +301,12 @@
     }
     .board-workbench.is-fullscreen .draw-sidebar {
       width: 250px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .board-workbench.is-fullscreen .color-swatches-scroll {
-      max-height: calc(100vh - 360px);
+      max-height: calc(100vh - 560px);
+      min-height: 96px;
     }
 
     .stats-table {
@@ -563,6 +585,48 @@
                 </select>
               </div>
 
+              <!-- 全屏参数调节：顶部筛选栏在全屏时会被覆盖层遮住，
+                   这里提供一组完全同步的控件，全屏下也能改尺寸与画面滤镜。 -->
+              <div data-page-node-id="fs-controls-block">
+                <div class="sidebar-section-title" data-page-node-id="fs-controls-title">
+                  <span>全屏参数调节</span>
+                </div>
+
+                <div class="side-slider">
+                  <div class="side-slider-header">
+                    <span>像素尺寸（板宽）</span>
+                    <span id="wb-size-side-val" class="slider-val-box">29</span>
+                  </div>
+                  <input id="wb-size-side" type="range" min="10" max="60" step="1" value="29" aria-label="像素尺寸" />
+                </div>
+
+                <div class="side-slider">
+                  <div class="side-slider-header">
+                    <span>亮度</span>
+                    <span id="wb-bright-side-val" class="slider-val-box">0</span>
+                  </div>
+                  <input id="wb-bright-side" type="range" min="-100" max="100" step="1" value="0" aria-label="亮度" />
+                </div>
+
+                <div class="side-slider">
+                  <div class="side-slider-header">
+                    <span>对比度</span>
+                    <span id="wb-contrast-side-val" class="slider-val-box">0</span>
+                  </div>
+                  <input id="wb-contrast-side" type="range" min="-100" max="100" step="1" value="0" aria-label="对比度" />
+                </div>
+
+                <div class="side-slider">
+                  <div class="side-slider-header">
+                    <span>饱和度</span>
+                    <span id="wb-saturate-side-val" class="slider-val-box">0</span>
+                  </div>
+                  <input id="wb-saturate-side" type="range" min="-100" max="100" step="1" value="0" aria-label="饱和度" />
+                </div>
+
+                <button id="btn-reset-filters-side" class="btn btn-sm" type="button" style="width: 100%; margin-top: 8px;">↺ 重置参数</button>
+              </div>
+
               <div data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
                 <div class="sidebar-section-title" data-page-node-id="hm9BCDlXJKWjlCC0VwNWmt">
                   <span data-page-node-id="X8h0uAJ6wciSi9ND5UHUUZ">当前画笔色</span>
@@ -738,6 +802,29 @@
     const wbSaturateVal = document.getElementById('wb-saturate-val');
     const btnResetFilters = document.getElementById('btn-reset-filters');
 
+    // 侧栏「全屏参数调节」控件（与上方筛选栏双向同步）
+    const wbSizeSide = document.getElementById('wb-size-side');
+    const wbSizeSideVal = document.getElementById('wb-size-side-val');
+    const wbBrightSide = document.getElementById('wb-bright-side');
+    const wbBrightSideVal = document.getElementById('wb-bright-side-val');
+    const wbContrastSide = document.getElementById('wb-contrast-side');
+    const wbContrastSideVal = document.getElementById('wb-contrast-side-val');
+    const wbSaturateSide = document.getElementById('wb-saturate-side');
+    const wbSaturateSideVal = document.getElementById('wb-saturate-side-val');
+    const btnResetFiltersSide = document.getElementById('btn-reset-filters-side');
+
+    /** 把主滑块的值镜像到侧栏滑块（尺寸/亮度/对比度/饱和度） */
+    function mirrorFiltersToSide() {
+      wbSizeSide.value = wbSizeSlider.value;
+      wbSizeSideVal.textContent = wbSizeSlider.value;
+      wbBrightSide.value = wbBrightRange.value;
+      wbBrightSideVal.textContent = wbBrightRange.value;
+      wbContrastSide.value = wbContrastRange.value;
+      wbContrastSideVal.textContent = wbContrastRange.value;
+      wbSaturateSide.value = wbSaturateRange.value;
+      wbSaturateSideVal.textContent = wbSaturateRange.value;
+    }
+
     function initPalette() {
       swatchesContainer.innerHTML = '';
       activePaletteList.forEach(item => {
@@ -786,9 +873,11 @@
       if (confirm(`调整尺寸为 ${newSize}×${newSize} 将重置画板，是否继续？`)) {
         resetBoardTo(newSize);
         boardSizeSelect.value = String(newSize);
+        mirrorFiltersToSide();
       } else {
         e.target.value = boardSize;
         boardSizeVal.textContent = `${boardSize}px`;
+        mirrorFiltersToSide();
       }
     });
 
@@ -801,30 +890,78 @@
         resetBoardTo(newSize);
         wbSizeSlider.value = String(newSize);
         boardSizeVal.textContent = `${newSize}px`;
+        mirrorFiltersToSide();
       } else {
         e.target.value = String(boardSize);
       }
     });
 
+    // 侧栏像素尺寸滑块：与上方滑杆、下拉框完全同步（use change 避免拖动中反复弹窗）
+    wbSizeSide.addEventListener('change', (e) => {
+      const newSize = parseInt(e.target.value, 10);
+      if (newSize === boardSize) {
+        mirrorFiltersToSide();
+        return;
+      }
+      if (confirm(`调整尺寸为 ${newSize}×${newSize} 将重置画板，是否继续？`)) {
+        resetBoardTo(newSize);
+        wbSizeSlider.value = String(newSize);
+        boardSizeVal.textContent = `${newSize}px`;
+        boardSizeSelect.value = String(newSize);
+      }
+      mirrorFiltersToSide();
+    });
+
     wbBrightRange.addEventListener('input', (e) => {
       wbBrightVal.textContent = e.target.value;
+      wbBrightSide.value = e.target.value;
+      wbBrightSideVal.textContent = e.target.value;
       applyFiltersAndRender();
     });
     wbContrastRange.addEventListener('input', (e) => {
       wbContrastVal.textContent = e.target.value;
+      wbContrastSide.value = e.target.value;
+      wbContrastSideVal.textContent = e.target.value;
       applyFiltersAndRender();
     });
     wbSaturateRange.addEventListener('input', (e) => {
       wbSaturateVal.textContent = e.target.value;
+      wbSaturateSide.value = e.target.value;
+      wbSaturateSideVal.textContent = e.target.value;
       applyFiltersAndRender();
     });
 
-    btnResetFilters.addEventListener('click', () => {
+    // 侧栏画面滤镜：反向镜像到上方筛选栏，改任意一处效果一致
+    wbBrightSide.addEventListener('input', (e) => {
+      wbBrightSideVal.textContent = e.target.value;
+      wbBrightRange.value = e.target.value;
+      wbBrightVal.textContent = e.target.value;
+      applyFiltersAndRender();
+    });
+    wbContrastSide.addEventListener('input', (e) => {
+      wbContrastSideVal.textContent = e.target.value;
+      wbContrastRange.value = e.target.value;
+      wbContrastVal.textContent = e.target.value;
+      applyFiltersAndRender();
+    });
+    wbSaturateSide.addEventListener('input', (e) => {
+      wbSaturateSideVal.textContent = e.target.value;
+      wbSaturateRange.value = e.target.value;
+      wbSaturateVal.textContent = e.target.value;
+      applyFiltersAndRender();
+    });
+
+    function resetAllFilters() {
       wbBrightRange.value = 0; wbBrightVal.textContent = '0';
       wbContrastRange.value = 0; wbContrastVal.textContent = '0';
       wbSaturateRange.value = 0; wbSaturateVal.textContent = '0';
+      mirrorFiltersToSide();
       applyFiltersAndRender();
-    });
+    }
+
+    btnResetFilters.addEventListener('click', resetAllFilters);
+    btnResetFiltersSide.addEventListener('click', resetAllFilters);
+    mirrorFiltersToSide();
 
     function pushHistory() {
       if (historyStack.length >= 25) historyStack.shift();
@@ -1088,14 +1225,10 @@
     btnFsLeft.addEventListener('click', () => toggleFullscreen(wbLeft, btnFsLeft, '⛶ 全屏编辑'));
     btnFsRight.addEventListener('click', () => toggleFullscreen(wbRight, btnFsRight, '⛶ 全屏查看'));
 
-    // 手机上打开白板就直接进入全屏。
-    // 原因：手机屏幕本来就不大，再被顶部导航、标题卡、右侧另一个工作台
-    // 分掉空间，画布就只剩一小条了。全屏后画布能吃掉整屏。
+    // 不再自动进入全屏：窄屏（手机）打开白板时保持默认布局，
+    // 由用户主动点击「⛶ 全屏编辑」自行决定是否全屏。
     // 判断用 matchMedia 而不是 userAgent：后者不可靠，平板和折叠屏会误判。
     const isNarrowScreen = window.matchMedia('(max-width: 720px)');
-    if (isNarrowScreen.matches && !wbLeft.classList.contains('is-fullscreen')) {
-      toggleFullscreen(wbLeft, btnFsLeft, '⛶ 全屏编辑');
-    }
 
     // 用户把窗口从手机尺寸拉宽到电脑尺寸时（比如平板转屏、桌面缩放窗口），
     // 自动退出全屏，免得界面卡在奇怪的状态。

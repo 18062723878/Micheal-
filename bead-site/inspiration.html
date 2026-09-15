@@ -15,12 +15,13 @@
     <header class="page-head reveal">
       <span class="section-label">Inspiration</span>
       <h1>精选拼豆创作图纸库</h1>
-      <p>涵盖网络顶流、动漫 IP、人文建筑、治愈萌宠与节日美食。点击任意图纸即可查看色号清单，或直接带入创作工坊进行微调。</p>
+      <p>收录 <strong id="gallery-count">—</strong> 款图纸，涵盖网络顶流、动漫 IP、游戏像素、人文建筑、治愈萌宠与节日美食。点击任意图纸即可查看色号清单，或直接带入创作工坊进行微调。</p>
     </header>
 
     <div class="filter-tabs" id="filter-tabs">
       <button class="filter-tab active" data-category="all">全部</button>
       <button class="filter-tab" data-category="anime">🔥 热门动漫</button>
+      <button class="filter-tab" data-category="games">🎮 游戏像素</button>
       <button class="filter-tab" data-category="architecture">🏯 名胜古建</button>
       <button class="filter-tab" data-category="pets">🐾 治愈萌宠</button>
       <button class="filter-tab" data-category="food">🍔 美食甜品</button>
@@ -61,7 +62,7 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS } from './assets/js/patterns-data.js';
-    import { BeadViewer, buildLegend, computeStats, renderPattern } from './assets/js/bead-viewer.js';
+    import { BeadViewer, buildLegend, computeStats, renderPattern, fitCellToBox, aspectForMatrix } from './assets/js/bead-viewer.js';
 
     try { injectChrome('inspiration'); } catch (e) { console.warn(e); }
 
@@ -77,6 +78,9 @@
     let selectedPattern = null;
     let modalHighlight = null;
 
+    const galleryCount = document.getElementById('gallery-count');
+    if (galleryCount) galleryCount.textContent = String(ALL_PATTERNS.length);
+
     const EXHIBIT_THEME = {
       isDark: false,
       canvasBg: '#ffffff',
@@ -87,22 +91,20 @@
       check: '#10b981',
     };
 
-    function thumbCellSize(matrix) {
-      const dim = Math.max(matrix.length, matrix[0].length, 1);
-      return Math.max(2, Math.min(16, Math.floor(160 / dim)));
-    }
-
     function renderCards(filter = 'all') {
       gridContainer.innerHTML = '';
       thumbs.length = 0;
 
       const list = filter === 'all' ? ALL_PATTERNS : ALL_PATTERNS.filter(p => p.category === filter);
       list.forEach((p, i) => {
+        const rows = p.matrix.length;
+        const cols = p.matrix[0].length;
+
         const card = document.createElement('article');
         card.className = 'pattern-card reveal';
         card.innerHTML = `
           <div class="pattern-preview-box">
-            <canvas aria-label="${p.title} 预览"></canvas>
+            <canvas class="pattern-canvas-thumb" aria-label="${p.title} 预览"></canvas>
           </div>
           <div class="pattern-info">
             <div class="pattern-title-row">
@@ -110,7 +112,7 @@
               <span class="badge badge--accent">${p.tag || '精选'}</span>
             </div>
             <div class="pattern-meta">
-              <span>${p.matrix[0].length}×${p.matrix.length} 网格</span>
+              <span>${cols}×${rows} 网格</span>
               <span>${p.difficulty || ''}</span>
             </div>
           </div>
@@ -118,9 +120,13 @@
         card.addEventListener('click', () => openModal(p));
         gridContainer.appendChild(card);
 
+        // 外框贴合图纸比例：留白更少、图纸更醒目
+        const box = card.querySelector('.pattern-preview-box');
+        box.style.aspectRatio = String(aspectForMatrix(cols, rows));
+
         const canvas = card.querySelector('canvas');
         const viewer = new BeadViewer(canvas, {
-          cellSize: thumbCellSize(p.matrix),
+          cellSize: 8,
           beadStyle: 'round',
           gap: 'small',
           showGrid: false,
@@ -128,11 +134,26 @@
           showRuler: false,
         });
         viewer.setMatrix(p.matrix);
-        thumbs.push(viewer);
+        thumbs.push({ viewer, box, cols, rows });
 
         setTimeout(() => card.classList.add('is-visible'), Math.min(i, 10) * 40);
       });
+
+      requestAnimationFrame(layoutThumbs);
     }
+
+    /** 按容器实测尺寸重算缩略图格子大小，图片填满外框 */
+    function layoutThumbs() {
+      thumbs.forEach(({ viewer, box, cols, rows }) => {
+        viewer.setOptions({ cellSize: fitCellToBox(box, cols, rows, 16) });
+      });
+    }
+
+    let thumbResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(thumbResizeTimer);
+      thumbResizeTimer = setTimeout(layoutThumbs, 160);
+    });
 
     function openModal(p) {
       selectedPattern = p;
@@ -217,15 +238,26 @@
         document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         renderCards(btn.dataset.category);
+        updateTabCounts();
       });
     });
 
+    /** 在筛选标签上补齐各类数量，方便一眼看到图库规模 */
+    function updateTabCounts() {
+      const countOf = cat => (cat === 'all' ? ALL_PATTERNS.length : ALL_PATTERNS.filter(p => p.category === cat).length);
+      document.querySelectorAll('.filter-tab').forEach(btn => {
+        const label = btn.textContent.replace(/\s*\(\d+\)$/, '');
+        btn.textContent = `${label} (${countOf(btn.dataset.category)})`;
+      });
+    }
+
     window.addEventListener('site:themechange', () => {
-      thumbs.forEach(v => v.render());
+      layoutThumbs();
       if (modalViewer && modal.classList.contains('open')) modalViewer.render();
     });
 
     renderCards('all');
+    updateTabCounts();
   </script>
 </body>
 </html>
