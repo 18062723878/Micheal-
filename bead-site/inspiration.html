@@ -4,82 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>创作灵感 · Micheal 的拼豆网</title>
+  <meta name="description" content="精选拼豆创作图纸库，涵盖热门动漫、名胜古建、治愈萌宠与节日美食，点击即可查看色号清单并带入创作工坊。" />
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
-  <style>
-    .inspiration-container { max-width: 1380px; margin: 0 auto; padding: 32px 20px; }
-    .inspiration-header h1 { font-size: 28px; color: var(--text-main); margin-bottom: 8px; font-weight: 800; }
-    .inspiration-header p { color: var(--text-muted); font-size: 15px; margin: 0 0 24px 0; }
-    .filter-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-    .filter-tab {
-      padding: 8px 18px; border-radius: 9999px; border: 1px solid var(--border-color);
-      background: var(--bg-card); color: var(--text-main); font-size: 14px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .filter-tab.active {
-      background: var(--primary); color: #ffffff !important; border-color: var(--primary);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-    .patterns-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
-    .pattern-card {
-      background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color);
-      box-shadow: var(--shadow); padding: 16px; cursor: pointer; display: flex; flex-direction: column;
-      align-items: center; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-    .pattern-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15); }
-    .pattern-preview-box {
-      width: 100%; aspect-ratio: 1 / 1; background: var(--bg-secondary); border-radius: 12px;
-      border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
-    }
-    .pattern-canvas-thumb { max-width: 90%; max-height: 90%; object-fit: contain; }
-    .pattern-info { width: 100%; display: flex; flex-direction: column; gap: 6px; }
-    .pattern-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
-    .pattern-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(37, 99, 235, 0.12); color: var(--primary); font-weight: 600; }
-    .pattern-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
-
-    /* Modal 弹窗 */
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(11, 15, 25, 0.75); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center; z-index: 1000;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 16px;
-    }
-    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
-    .modal-dialog {
-      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;
-      max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; position: relative;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
-    .modal-close-btn {
-      position: absolute; top: 18px; right: 18px; border: 1px solid var(--border-color);
-      background: var(--bg-secondary); color: var(--text-main); width: 32px; height: 32px;
-      border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .modal-layout { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 16px; }
-    .modal-canvas-wrap {
-      flex: 1 1 360px; background: var(--bg-secondary); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: center; max-height: 480px; overflow: auto;
-    }
-    .modal-details { flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px; }
-    .color-list { max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 12px; }
-    .color-list-item {
-      display: flex; align-items: center; justify-content: space-between; padding: 6px 0;
-      border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-main);
-    }
-    .color-dot { width: 14px; height: 14px; border-radius: 3px; display: inline-block; vertical-align: middle; margin-right: 6px; }
-  </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main class="inspiration-container">
-    <div class="inspiration-header">
-      <h1>✨ 精选拼豆创作图纸库 (50+款)</h1>
-      <p>涵盖网络顶流、动漫 IP、人文建筑、治愈萌宠与节日美食。点击即可带入创作页进行编辑。</p>
-    </div>
+    <header class="page-head reveal">
+      <span class="section-label">Inspiration</span>
+      <h1>精选拼豆创作图纸库</h1>
+      <p>涵盖网络顶流、动漫 IP、人文建筑、治愈萌宠与节日美食。点击任意图纸即可查看色号清单，或直接带入创作工坊进行微调。</p>
+    </header>
 
-    <!-- 筛选 -->
-    <div class="filter-tabs">
-      <button class="filter-tab active" data-category="all">全部 (50+)</button>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" data-category="all">全部</button>
       <button class="filter-tab" data-category="anime">🔥 热门动漫</button>
       <button class="filter-tab" data-category="architecture">🏯 名胜古建</button>
       <button class="filter-tab" data-category="pets">🐾 治愈萌宠</button>
@@ -90,29 +30,26 @@
     <div class="patterns-grid" id="patterns-grid"></div>
   </main>
 
-  <!-- 弹窗 -->
-  <div class="modal-backdrop" id="pattern-modal">
+  <!-- 图纸详情弹窗 -->
+  <div class="modal-backdrop" id="pattern-modal" role="dialog" aria-modal="true" aria-label="图纸详情">
     <div class="modal-dialog">
-      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
-      <h2 id="modal-title" style="margin: 0; color: var(--text-main); font-size: 20px;"></h2>
-      <p id="modal-desc" style="color: var(--text-muted); font-size: 13px; margin: 6px 0 0 0;"></p>
+      <button class="modal-close-btn" id="modal-close-btn" type="button" aria-label="关闭">&times;</button>
+      <h2 id="modal-title" style="margin:0;font-size:22px;font-family:var(--font-display);"></h2>
+      <p id="modal-desc" class="muted" style="font-size:13.5px;margin:8px 0 0;"></p>
 
       <div class="modal-layout">
         <div class="modal-canvas-wrap">
-          <canvas id="modal-canvas"></canvas>
+          <canvas id="modal-canvas" aria-label="图纸预览"></canvas>
         </div>
 
         <div class="modal-details">
-          <h4 style="margin: 0; color: var(--text-main);">🎨 所需色号清单</h4>
+          <span class="section-label section-label--plain">Color List</span>
           <div class="color-list" id="modal-color-list"></div>
+          <p class="muted" style="font-size:12.5px;margin:0;">点击色卡，可在预览图中高亮该色号的全部豆子。</p>
 
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
-            <button id="modal-transfer-btn" class="btn btn-primary" style="padding: 10px; font-weight: bold;">
-              🖌️ 用这张图开始创作 →
-            </button>
-            <button id="modal-export-btn" class="btn" style="padding: 10px;">
-              📥 导出高清图纸 (PNG)
-            </button>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:auto;padding-top:8px;">
+            <button id="modal-transfer-btn" class="btn btn-primary btn-block" type="button">用这张图开始创作 →</button>
+            <button id="modal-export-btn" class="btn btn-outline btn-block" type="button">导出图纸 (PNG)</button>
           </div>
         </div>
       </div>
@@ -124,118 +61,130 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS } from './assets/js/patterns-data.js';
+    import { BeadViewer, buildLegend, computeStats, renderPattern } from './assets/js/bead-viewer.js';
 
     try { injectChrome('inspiration'); } catch (e) { console.warn(e); }
 
-    // 绘制纯色实体拼豆（去除任何多余白点）
-    function drawPattern(canvas, matrix, cellSize = 22) {
-      const h = matrix.length;
-      const w = matrix[0].length;
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const canvasBg = isDark ? '#0f172a' : '#ffffff';
-      const gridLine = isDark ? '#1e293b' : '#f1f5f9';
-
-      canvas.width = w * cellSize;
-      canvas.height = h * cellSize;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = canvasBg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          const cx = x * cellSize;
-          const cy = y * cellSize;
-
-          ctx.strokeStyle = gridLine;
-          ctx.lineWidth = 1;
-          ctx.strokeRect(cx, cy, cellSize, cellSize);
-
-          const bead = matrix[y][x];
-          if (!bead) continue;
-
-          const centerX = cx + cellSize / 2;
-          const centerY = cy + cellSize / 2;
-          const radius = cellSize * 0.44;
-
-          // 纯色实体拼豆
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-          ctx.fillStyle = bead.hex;
-          ctx.fill();
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-          ctx.stroke();
-        }
-      }
-    }
-
     const gridContainer = document.getElementById('patterns-grid');
-
-    function renderCards(filter = 'all') {
-      gridContainer.innerHTML = '';
-      const list = filter === 'all' ? ALL_PATTERNS : ALL_PATTERNS.filter(p => p.category === filter);
-
-      list.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'pattern-card';
-        card.innerHTML = `
-          <div class="pattern-preview-box">
-            <canvas id="cv-${p.id}" class="pattern-canvas-thumb"></canvas>
-          </div>
-          <div class="pattern-info">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="pattern-title">${p.title}</span>
-              <span class="pattern-tag">${p.tag}</span>
-            </div>
-            <div class="pattern-meta">
-              <span>${p.matrix[0].length}×${p.matrix.length} 网格</span>
-              <span style="color:#f59e0b;">${p.difficulty}</span>
-            </div>
-          </div>
-        `;
-        card.addEventListener('click', () => openModal(p));
-        gridContainer.appendChild(card);
-        drawPattern(card.querySelector(`#cv-${p.id}`), p.matrix, 16);
-      });
-    }
-
-    let selectedPattern = null;
     const modal = document.getElementById('pattern-modal');
     const modalCanvas = document.getElementById('modal-canvas');
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
     const modalColorList = document.getElementById('modal-color-list');
 
-    function openModal(p) {
-      selectedPattern = p;
-      modalTitle.textContent = p.title;
-      modalDesc.textContent = `${p.tag} · ${p.desc}`;
-      drawPattern(modalCanvas, p.matrix, 28);
+    const thumbs = [];
+    let modalViewer = null;
+    let selectedPattern = null;
+    let modalHighlight = null;
 
-      const colorMap = {};
-      p.matrix.forEach(row => row.forEach(b => {
-        if (b) {
-          colorMap[b.code] = colorMap[b.code] || { ...b, count: 0 };
-          colorMap[b.code].count++;
-        }
-      }));
+    const EXHIBIT_THEME = {
+      isDark: false,
+      canvasBg: '#ffffff',
+      grid: 'rgba(15,23,42,0.10)',
+      gridStrong: 'rgba(15,23,42,0.2)',
+      rulerText: '#64748b',
+      accent: '#0052ff',
+      check: '#10b981',
+    };
 
-      modalColorList.innerHTML = '';
-      Object.values(colorMap).sort((a, b) => b.count - a.count).forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'color-list-item';
-        div.innerHTML = `
-          <div><span class="color-dot" style="background:${item.hex};"></span><strong>${item.code}</strong> (${item.name})</div>
-          <span>${item.count} 颗</span>
-        `;
-        modalColorList.appendChild(div);
-      });
-
-      modal.classList.add('open');
+    function thumbCellSize(matrix) {
+      const dim = Math.max(matrix.length, matrix[0].length, 1);
+      return Math.max(2, Math.min(16, Math.floor(160 / dim)));
     }
 
-    document.getElementById('modal-close-btn').addEventListener('click', () => modal.classList.remove('open'));
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+    function renderCards(filter = 'all') {
+      gridContainer.innerHTML = '';
+      thumbs.length = 0;
+
+      const list = filter === 'all' ? ALL_PATTERNS : ALL_PATTERNS.filter(p => p.category === filter);
+      list.forEach((p, i) => {
+        const card = document.createElement('article');
+        card.className = 'pattern-card reveal';
+        card.innerHTML = `
+          <div class="pattern-preview-box">
+            <canvas aria-label="${p.title} 预览"></canvas>
+          </div>
+          <div class="pattern-info">
+            <div class="pattern-title-row">
+              <span class="pattern-title">${p.title}</span>
+              <span class="badge badge--accent">${p.tag || '精选'}</span>
+            </div>
+            <div class="pattern-meta">
+              <span>${p.matrix[0].length}×${p.matrix.length} 网格</span>
+              <span>${p.difficulty || ''}</span>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => openModal(p));
+        gridContainer.appendChild(card);
+
+        const canvas = card.querySelector('canvas');
+        const viewer = new BeadViewer(canvas, {
+          cellSize: thumbCellSize(p.matrix),
+          beadStyle: 'round',
+          gap: 'small',
+          showGrid: false,
+          showCode: false,
+          showRuler: false,
+        });
+        viewer.setMatrix(p.matrix);
+        thumbs.push(viewer);
+
+        setTimeout(() => card.classList.add('is-visible'), Math.min(i, 10) * 40);
+      });
+    }
+
+    function openModal(p) {
+      selectedPattern = p;
+      modalHighlight = null;
+      modalTitle.textContent = p.title;
+      modalDesc.textContent = `${p.tag || ''} · ${p.desc || ''}`;
+
+      const dim = Math.max(p.matrix.length, p.matrix[0].length, 1);
+      const cellSize = Math.max(8, Math.min(34, Math.floor(520 / dim)));
+
+      modalViewer = new BeadViewer(modalCanvas, {
+        cellSize,
+        beadStyle: 'round',
+        gap: 'small',
+        showGrid: true,
+        showCode: cellSize >= 17,
+        showRuler: true,
+        highlightCode: null,
+      });
+      modalViewer.setMatrix(p.matrix);
+
+      const stats = computeStats(p.matrix);
+      renderModalLegend(stats.list);
+
+      modal.classList.add('open');
+      document.body.classList.add('is-locked');
+    }
+
+    function renderModalLegend(statsList) {
+      buildLegend(modalColorList, statsList, { activeCode: modalHighlight });
+      modalColorList.querySelectorAll('.bead-legend-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const code = btn.dataset.code;
+          modalHighlight = modalHighlight === code ? null : code;
+          modalViewer.setOptions({ highlightCode: modalHighlight });
+          renderModalLegend(statsList);
+        });
+      });
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.classList.remove('is-locked');
+    }
+
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
 
     document.getElementById('modal-transfer-btn').addEventListener('click', () => {
       if (!selectedPattern) return;
@@ -244,9 +193,22 @@
 
     document.getElementById('modal-export-btn').addEventListener('click', () => {
       if (!selectedPattern) return;
+      const dim = Math.max(selectedPattern.matrix.length, selectedPattern.matrix[0].length, 1);
+      const cellSize = Math.max(24, Math.min(64, Math.floor(1440 / dim)));
+      const off = document.createElement('canvas');
+      const ctx = off.getContext('2d');
+      renderPattern(ctx, selectedPattern.matrix, {
+        cellSize,
+        beadStyle: 'round',
+        gap: 'small',
+        showGrid: true,
+        showCode: true,
+        showRuler: true,
+        theme: EXHIBIT_THEME,
+      });
       const link = document.createElement('a');
       link.download = `Micheal-Beads-${selectedPattern.id}.png`;
-      link.href = modalCanvas.toDataURL('image/png');
+      link.href = off.toDataURL('image/png');
       link.click();
     });
 
@@ -256,6 +218,11 @@
         btn.classList.add('active');
         renderCards(btn.dataset.category);
       });
+    });
+
+    window.addEventListener('site:themechange', () => {
+      thumbs.forEach(v => v.render());
+      if (modalViewer && modal.classList.contains('open')) modalViewer.render();
     });
 
     renderCards('all');

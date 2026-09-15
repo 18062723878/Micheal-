@@ -1,5 +1,5 @@
-// inspiration.js — render the inspiration index and per-category subpages.
-// Shared by inspiration.html (index) and inspiration/<cat>.html (subpages).
+// inspiration.js — render the per-category inspiration subpages.
+// The inspiration index page renders via its own inline script + bead-viewer.js.
 import { renderGrid } from './convert.js';
 import { exportPNG, exportCSV, exportPDF } from './exporter.js';
 import { decodeGrid } from './home.js';
@@ -17,39 +17,6 @@ async function loadData() {
   if (!res.ok) throw new Error('无法加载 ' + DATA_URL);
   _data = await res.json();
   return _data;
-}
-
-/**
- * Render the inspiration index (category cards) into #category-grid.
- */
-export async function initInspirationIndex() {
-  const wrap = document.getElementById('category-grid');
-  if (!wrap) return;
-  try {
-    const data = await loadData();
-    wrap.innerHTML = '';
-    data.categories.forEach((cat) => {
-      const first = cat.examples[0];
-      const grid = decodeGrid(first);
-      const card = document.createElement('a');
-      card.className = 'card category-card';
-      card.href = `inspiration/${cat.id}.html`;
-      const thumb = document.createElement('div');
-      thumb.className = 'category-thumb';
-      const cv = document.createElement('canvas');
-      cv.className = 'category-canvas';
-      renderGrid(cv, grid, Math.max(4, Math.floor(140 / grid[0].length)), { labels: false });
-      thumb.appendChild(cv);
-      const body = document.createElement('div');
-      body.className = 'category-body';
-      body.innerHTML = `<h3>${cat.name}</h3><p>${cat.examples.length} 个示例</p>`;
-      card.appendChild(thumb);
-      card.appendChild(body);
-      wrap.appendChild(card);
-    });
-  } catch (e) {
-    wrap.innerHTML = `<p class="error">灵感加载失败：${e.message}</p>`;
-  }
 }
 
 /**
@@ -135,5 +102,4 @@ function openLightbox(gridJson, title, tip) {
 
 // Attach to window for non-module consumers.
 const BeadStudio = (window.BeadStudio = window.BeadStudio || {});
-BeadStudio.initInspirationIndex = initInspirationIndex;
 BeadStudio.initInspirationCategory = initInspirationCategory;
