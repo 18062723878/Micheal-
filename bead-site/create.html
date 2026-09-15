@@ -144,7 +144,18 @@
         <!-- 左列：画幅与色板配置 -->
         <div class="settings-group">
           <div class="settings-group-title">画幅与色板配置</div>
-          <p class="group-hint">先定画幅格数与可用色号范围：这两项决定图纸的精细度、拼豆总数与备料种类。</p>
+
+          <details class="help-panel help-panel--group">
+            <summary>本组参数说明</summary>
+            <div class="help-panel-body">
+              <ul>
+                <li><b>像素尺寸（板宽）</b>：图纸横向的格子数，高度按原图比例自动换算。32 格适合挂件与钥匙扣，48–64 格适合摆件与大幅作品；格子越多细节越丰富，用豆量也成倍增长。</li>
+                <li><b>标准色板选择</b>：转换时用来比对的拼豆色库。色库越大颜色还原越准，但需要准备的色号也越多；按你手上实际拥有的色号套装选择即可。</li>
+                <li><b>色数上限限制</b>：限制成品最多使用几种颜色，适合按现有库存拼豆。超出的颜色会自动替换为最接近的保留色，用色越少拼装越轻松。</li>
+                <li><b>拼豆板拼接线</b>：按真实拼板的格数画出蓝色虚线分割线并标注板号，多板作品可以分板拼装、分区核对。</li>
+              </ul>
+            </div>
+          </details>
 
           <div class="slider-row">
             <div class="slider-row-header">
@@ -152,7 +163,6 @@
               <span id="board-width-val" class="slider-val-badge">32px</span>
             </div>
             <input id="board-width" type="range" min="10" max="80" step="1" value="32" />
-            <span class="field-hint">图纸横向的格子数，高度按原图比例自动换算。32 格适合挂件与钥匙扣，48–64 格适合摆件与大幅作品；格子越多细节越丰富，用豆量也成倍增长。</span>
           </div>
 
           <div class="form-item">
@@ -164,7 +174,6 @@
               <option value="full221">221 色全套色谱 (A-H/M)</option>
             </select>
           </div>
-          <span class="field-hint">转换时用来比对的拼豆色库。色库越大，颜色还原越准，但需要准备的色号也越多；按你手上实际拥有的色号套装选择即可。</span>
 
           <div class="form-item">
             <span>色数上限限制</span>
@@ -178,7 +187,6 @@
               <option value="48">最多 48 色</option>
             </select>
           </div>
-          <span class="field-hint">限制成品最多使用几种颜色，适合按现有库存拼豆。超出的颜色会自动替换为最接近的保留色，用色越少，拼装时换色越轻松。</span>
 
           <div class="form-item">
             <span>拼豆板拼接线</span>
@@ -190,13 +198,23 @@
               <option value="14">14 × 14 小型板</option>
             </select>
           </div>
-          <span class="field-hint">按真实拼板的格数在图纸上画出蓝色虚线分割线，并标注「板 A1」这类板号，多板作品可以分板拼装、分区核对。</span>
         </div>
 
         <!-- 右列：图像与杂色优化 -->
         <div class="settings-group">
           <div class="settings-group-title">图像与杂色优化</div>
-          <p class="group-hint">决定原图哪些部分保留、颜色如何取舍与微调，直接影响到成品是否干净好拼。</p>
+
+          <details class="help-panel help-panel--group">
+            <summary>本组参数说明</summary>
+            <div class="help-panel-body">
+              <ul>
+                <li><b>智能抠除背景色</b>：自动识别图片四边连通的纯色背景并整块剔除，只保留主体。人像、商品图这类纯色背景效果最好；若主体与背景同色可关闭此项，改用背景容差微调。</li>
+                <li><b>背景容差</b>：背景色的判定宽容度。数值越大，与背景相近的颜色越容易被一起剔除；背景带渐变或阴影时适当调大，主体被误删时调小。</li>
+                <li><b>孤立杂色平滑合并</b>：把面积不超过设定颗数的零散小色块并入周围占比最高的颜色，用于消除过渡边缘的杂色、减少换色；调得过大会丢失眼睛等细节。</li>
+                <li><b>画面微调</b>：转图纸前先校正画面。偏暗的图提高亮度，发灰的图提高对比度，色彩寡淡的图提高饱和度；调整后图纸实时重算，可边拖边看效果。</li>
+              </ul>
+            </div>
+          </details>
 
           <div class="form-item">
             <label class="toggle-chip is-active" id="bg-toggle-chip" style="cursor:pointer;">
@@ -204,7 +222,6 @@
               <span>智能抠除背景色</span>
             </label>
           </div>
-          <span class="field-hint">自动识别图片四边连通的纯色背景并整块剔除，只保留主体。人像、商品图这类纯色背景效果最好；若主体本身与背景同色，可关闭此项改用背景容差微调。</span>
 
           <div class="slider-row">
             <div class="slider-row-header">
@@ -212,7 +229,6 @@
               <span id="bg-tolerance-val" class="slider-val-badge">38</span>
             </div>
             <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" />
-            <span class="field-hint">背景色的判定宽容度。数值越大，与背景相近的颜色越容易被一起剔除；背景带渐变或阴影时适当调大，主体被误删时调小。</span>
           </div>
 
           <div class="slider-row">
@@ -221,7 +237,6 @@
               <span id="noise-val" class="slider-val-badge">0颗</span>
             </div>
             <input id="noise-threshold" type="range" min="0" max="5" step="1" value="0" />
-            <span class="field-hint">把面积不超过设定颗数的零散小色块，并入周围占比最高的颜色。用于消除过渡边缘的杂色，减少来回换色；调得过大会丢失眼睛等细节。</span>
           </div>
 
           <div class="slider-row">
@@ -234,7 +249,6 @@
               <input id="contrast-range" type="range" min="-100" max="100" step="1" value="0" title="对比度" aria-label="对比度" />
               <input id="saturate-range" type="range" min="-100" max="100" step="1" value="0" title="饱和度" aria-label="饱和度" />
             </div>
-            <span class="field-hint">转图纸前先校正画面：偏暗的图提高亮度，发灰的图提高对比度，色彩寡淡的图提高饱和度。调整后图纸会实时重算，可以边拖边看效果。</span>
           </div>
         </div>
       </div>
