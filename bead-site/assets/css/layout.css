@@ -897,6 +897,17 @@
   border: 1px solid var(--border);
   background: var(--card);
   box-shadow: var(--shadow-xl);
+  /* 渐进式展开：面板随灯箱打开上浮渐入 */
+  opacity: 0;
+  transform: translateY(16px) scale(0.965);
+  transition:
+    opacity 0.26s ease,
+    transform 0.3s var(--ease-out, ease-out);
+}
+
+.lightbox.is-open .lightbox-panel {
+  opacity: 1;
+  transform: none;
 }
 
 .lightbox-close {

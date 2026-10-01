@@ -1736,6 +1736,147 @@ input[type='range']:focus-visible {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * 展开界面渐进动画（帮助面板 / 弹窗 / 灯箱 / 拼豆模式）
+ * 说明：
+ *  - details 面板使用 ::details-content 高度过渡（渐进增强，
+ *    旧浏览器不支持时自动退化为直接展开，功能不受影响）
+ *  - 列表项、弹窗内容采用逐级延迟的渐入，形成「渐进式」展开节奏
+ *  - prefers-reduced-motion 下由底部全局规则统一关闭
+ * ------------------------------------------------------------------ */
+:root {
+  interpolate-size: allow-keywords;
+}
+
+/* --- 帮助面板（<details class="help-panel">）：高度平滑展开 --- */
+details.help-panel::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.3s var(--ease-out, ease-out),
+    content-visibility 0.3s allow-discrete;
+}
+
+details.help-panel[open]::details-content {
+  block-size: auto;
+}
+
+details.help-panel .help-panel-body {
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+details.help-panel[open] .help-panel-body {
+  opacity: 1;
+  transition-delay: 0.08s;
+}
+
+@keyframes helpItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 渐进式：面板内条目自上而下逐条浮现 */
+details.help-panel[open] .help-panel-body li {
+  animation: helpItemIn 0.32s var(--ease-out, ease-out) both;
+}
+details.help-panel[open] .help-panel-body li:nth-child(2)  { animation-delay: 0.05s; }
+details.help-panel[open] .help-panel-body li:nth-child(3)  { animation-delay: 0.1s; }
+details.help-panel[open] .help-panel-body li:nth-child(4)  { animation-delay: 0.15s; }
+details.help-panel[open] .help-panel-body li:nth-child(5)  { animation-delay: 0.2s; }
+details.help-panel[open] .help-panel-body li:nth-child(6)  { animation-delay: 0.25s; }
+details.help-panel[open] .help-panel-body li:nth-child(7)  { animation-delay: 0.3s; }
+details.help-panel[open] .help-panel-body li:nth-child(8)  { animation-delay: 0.35s; }
+details.help-panel[open] .help-panel-body li:nth-child(9)  { animation-delay: 0.4s; }
+details.help-panel[open] .help-panel-body li:nth-child(10) { animation-delay: 0.45s; }
+details.help-panel[open] .help-panel-body li:nth-child(11) { animation-delay: 0.5s; }
+details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.55s; }
+
+/* --- 弹窗（.modal-backdrop）：对话框上浮渐入 + 内容渐进 --- */
+.modal-backdrop .modal-dialog {
+  opacity: 0;
+  transform: translateY(16px) scale(0.965);
+  transition:
+    opacity 0.26s ease,
+    transform 0.3s var(--ease-out, ease-out);
+}
+
+.modal-backdrop.open .modal-dialog {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes modalChildIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.modal-backdrop.open .modal-dialog > * {
+  animation: modalChildIn 0.34s var(--ease-out, ease-out) both;
+}
+.modal-backdrop.open .modal-dialog > *:nth-child(2) { animation-delay: 0.05s; }
+.modal-backdrop.open .modal-dialog > *:nth-child(3) { animation-delay: 0.1s; }
+.modal-backdrop.open .modal-dialog > *:nth-child(4) { animation-delay: 0.15s; }
+.modal-backdrop.open .modal-dialog > *:nth-child(5) { animation-delay: 0.2s; }
+
+/* --- 拼豆模式（全屏）：顶栏 / 画布 / 侧栏分层渐入 --- */
+@keyframes modeBarIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes modeStageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes modeAsideIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bead-mode-overlay.open .bead-mode-bar {
+  animation: modeBarIn 0.28s var(--ease-out, ease-out) both;
+}
+
+.bead-mode-overlay.open .bead-mode-stage-wrap {
+  animation: modeStageIn 0.34s var(--ease-out, ease-out) 0.06s both;
+}
+
+.bead-mode-overlay.open .bead-mode-aside {
+  animation: modeAsideIn 0.34s var(--ease-out, ease-out) 0.12s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
