@@ -14,6 +14,7 @@
 import { strict as assert } from 'node:assert';
 import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -80,8 +81,16 @@ function listJs(dir) {
   return readdirSync(join(ROOT, dir)).filter((f) => f.endsWith('.js'));
 }
 function nodeCheck(fileRel) {
+  const abs = join(ROOT, fileRel);
   try {
-    execFileSync(NODE, ['--check', join(ROOT, fileRel)], { stdio: 'pipe' });
+    // 首选：进程内 ESM parse（vm.SourceTextModule 仅做语法编译，不执行代码），
+    // 避免在 node.exe 被占用（EBUSY）的受限环境下派生子进程失败。
+    if (typeof vm.SourceTextModule === 'function') {
+      new vm.SourceTextModule(readFileSync(abs, 'utf8'), { identifier: abs });
+      return { ok: true, err: null };
+    }
+    // 回退：旧 Node 无 SourceTextModule 时仍用 node --check 子进程。
+    execFileSync(NODE, ['--check', abs], { stdio: 'pipe' });
     return { ok: true, err: null };
   } catch (e) {
     return { ok: false, err: e.stderr ? e.stderr.toString() : e.message };
@@ -499,6 +508,107 @@ async function main() {
     exportCSV(grid, { filename: 't3.csv' });
     assert.ok(lastBlobContent.startsWith('﻿'), 'missing UTF-8 BOM');
     assert.ok(lastBlobContent.includes('\r\n'), 'missing CRLF line endings');
+  });
+
+  // =====================================================================
+  // GROUP 8 — Bead-viewer: hollow-style code label legibility
+  // 中空圆珠中心孔洞填充画布底色，色号文字颜色必须与孔洞底色对比，
+  // 且叠加底色光晕描边；否则深色豆子的白色文字会在浅色主题下「隐身」。
+  // =====================================================================
+  const { renderPattern } = await import('../assets/js/bead-viewer.js');
+
+  function makeMockCtx() {
+    const ops = [];
+    const ctx = {
+      canvas: { width: 0, height: 0 },
+      globalAlpha: 1,
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      lineJoin: '',
+      font: '',
+      textAlign: '',
+      textBaseline: '',
+      shadowColor: '',
+      shadowBlur: 0,
+      save() {}, restore() {}, beginPath() {}, arc() {}, rect() {}, roundRect() {},
+      fill() {}, stroke() {}, clip() {}, clearRect() {}, fillRect() {},
+      moveTo() {}, lineTo() {}, strokeRect() {},
+      fillText(text) { ops.push({ op: 'fillText', text, fillStyle: this.fillStyle, alpha: this.globalAlpha }); },
+      strokeText(text) { ops.push({ op: 'strokeText', text, strokeStyle: this.strokeStyle, alpha: this.globalAlpha }); },
+    };
+    return { ctx, ops };
+  }
+
+  const DARK_BEAD = { code: 'H7', r: 20, g: 24, b: 40, hex: '#141828' };
+  const LIGHT_THEME = {
+    isDark: false, canvasBg: '#ffffff', grid: 'rgba(15,23,42,0.10)',
+    gridStrong: 'rgba(15,23,42,0.2)', rulerText: '#64748b', accent: '#0052ff', check: '#10b981',
+  };
+  const DARK_THEME = { ...LIGHT_THEME, isDark: true, canvasBg: '#0f172a', accent: '#6d95ff' };
+
+  function renderOne(beadStyle, theme, bead = DARK_BEAD) {
+    const { ctx, ops } = makeMockCtx();
+    renderPattern(ctx, [[bead]], {
+      cellSize: 24,
+      beadStyle,
+      gap: 'none',
+      showGrid: false,
+      showRuler: false,
+      showCode: true,
+      highlightCode: null,
+      dimOthers: false,
+      checked: new Set(),
+      excluded: new Set(),
+      theme,
+    });
+    return ops.filter((o) => o.text === bead.code);
+  }
+
+  await case_('G8-hollow-code', 'hollow + light theme: dark bead code label uses dark fill (visible on white hole)', () => {
+    const ops = renderOne('hollow', LIGHT_THEME);
+    const fills = ops.filter((o) => o.op === 'fillText');
+    assert.ok(fills.length === 1, `expected exactly 1 fillText, got ${fills.length}`);
+    assert.notStrictEqual(
+      fills[0].fillStyle,
+      'rgba(255,255,255,0.9)',
+      'regression: white label on white hole — code would be invisible'
+    );
+    assert.strictEqual(fills[0].fillStyle, 'rgba(15,23,42,0.85)');
+  });
+
+  await case_('G8-hollow-code', 'hollow + light theme: code label has canvas-bg halo stroke over the colored ring', () => {
+    const ops = renderOne('hollow', LIGHT_THEME);
+    const halos = ops.filter((o) => o.op === 'strokeText');
+    assert.ok(halos.length === 1, `expected exactly 1 strokeText halo, got ${halos.length}`);
+    assert.strictEqual(halos[0].strokeStyle, 'rgba(255,255,255,0.9)');
+  });
+
+  await case_('G8-hollow-code', 'hollow + dark theme: dark bead code label uses light fill on dark hole + dark halo', () => {
+    const ops = renderOne('hollow', DARK_THEME);
+    const fill = ops.find((o) => o.op === 'fillText');
+    const halo = ops.find((o) => o.op === 'strokeText');
+    assert.ok(fill && halo, 'missing fillText/strokeText');
+    assert.strictEqual(fill.fillStyle, 'rgba(255,255,255,0.92)');
+    assert.strictEqual(halo.strokeStyle, 'rgba(15,23,42,0.9)');
+  });
+
+  await case_('G8-hollow-code', 'hollow + light theme: light bead keeps dark fill (contrast vs white hole)', () => {
+    const ops = renderOne('hollow', LIGHT_THEME, { code: 'A01', r: 240, g: 240, b: 240, hex: '#f0f0f0' });
+    const fill = ops.find((o) => o.op === 'fillText');
+    assert.ok(fill, 'missing fillText');
+    assert.strictEqual(fill.fillStyle, 'rgba(15,23,42,0.85)');
+  });
+
+  await case_('G8-hollow-code', 'round/square style: luminance-based label color preserved (no behavior change)', () => {
+    for (const style of ['round', 'square']) {
+      const ops = renderOne(style, LIGHT_THEME);
+      const fill = ops.find((o) => o.op === 'fillText');
+      const stroke = ops.find((o) => o.op === 'strokeText');
+      assert.ok(fill, `${style}: missing fillText`);
+      assert.strictEqual(fill.fillStyle, 'rgba(255,255,255,0.9)', `${style}: dark bead should keep white label`);
+      assert.ok(!stroke, `${style}: non-hollow style must not add halo strokes`);
+    }
   });
 
   // -------------------------------------------------------------------------

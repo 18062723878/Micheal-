@@ -231,9 +231,23 @@ export function renderPattern(ctx, matrix, options = {}) {
         const bead = matrix[y][x];
         if (!bead) continue;
         const isMatch = !highlightCode || bead.code === highlightCode;
+        const cx = originX + x * cellSize + cellSize / 2;
+        const cy = originY + y * cellSize + cellSize / 2;
         ctx.globalAlpha = isMatch ? 1 : 0.12;
-        ctx.fillStyle = luminance(bead) > 148 ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.9)';
-        ctx.fillText(bead.code, originX + x * cellSize + cellSize / 2, originY + y * cellSize + cellSize / 2);
+        if (beadStyle === 'hollow') {
+          // 中空圆珠的中心孔洞填充的是画布底色（浅色主题下为白色），
+          // 若仍按豆子亮度选白色文字，深色豆子的色号会「隐身」在白色孔洞里。
+          // 因此：文字填充色与孔洞底色形成对比，并叠加一圈底色光晕描边，
+          // 保证文字压到彩色环上时依然可读。
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = Math.max(1.5, cellSize * 0.08);
+          ctx.strokeStyle = theme.isDark ? 'rgba(15,23,42,0.9)' : 'rgba(255,255,255,0.9)';
+          ctx.strokeText(bead.code, cx, cy);
+          ctx.fillStyle = theme.isDark ? 'rgba(255,255,255,0.92)' : 'rgba(15,23,42,0.85)';
+        } else {
+          ctx.fillStyle = luminance(bead) > 148 ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.9)';
+        }
+        ctx.fillText(bead.code, cx, cy);
       }
     }
     ctx.restore();

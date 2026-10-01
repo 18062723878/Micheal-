@@ -1,6 +1,6 @@
 {
-  "total": 36,
-  "passed": 36,
+  "total": 41,
+  "passed": 41,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -36,6 +36,11 @@
     "G7-export": {
       "total": 3,
       "pass": 3,
+      "fail": 0
+    },
+    "G8-hollow-code": {
+      "total": 5,
+      "pass": 5,
       "fail": 0
     }
   },
