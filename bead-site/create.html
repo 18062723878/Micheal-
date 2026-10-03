@@ -177,9 +177,9 @@
       </div>
 
       <!-- 结构化设置栅格 -->
-      <div class="settings-grid">
-        <!-- 左列：画幅与色板配置 -->
-        <div class="settings-group">
+      <div class="settings-grid" id="studio-params">
+        <!-- 左列：画幅与色板配置（高频，默认展开） -->
+        <div class="settings-group" data-pp-group="canvas">
           <div class="settings-group-title">画幅与色板配置</div>
 
           <details class="help-panel help-panel--group">
@@ -237,8 +237,8 @@
           </div>
         </div>
 
-        <!-- 右列：图像与杂色优化 -->
-        <div class="settings-group">
+        <!-- 右列：图像与杂色优化（低频，默认折叠） -->
+        <div class="settings-group" data-pp-group="enhance">
           <div class="settings-group-title">图像与杂色优化</div>
 
           <details class="help-panel help-panel--group">
@@ -491,6 +491,8 @@
     // 侧栏的教程检索：教程数据、搜索逻辑与侧栏组件都抽成共享模块，
     // 保证创作工坊与白板画板两页**表现完全一致**，但各自持有独立实例。
     import { initSidebar } from './assets/js/sidebar.js';
+    // 参数面板的分组收纳（只搬 DOM，不改控件）
+    import { initParamPanel } from './assets/js/param-panel.js';
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
@@ -540,6 +542,35 @@
       storageKey: 'studio.sidebar.collapsed',
       otherHref: 'whiteboard.html',
     });
+
+    /* ----------------------------------------------------------------
+     * 参数面板分组收纳
+     *
+     * 原先两组参数（画幅与色板 / 图像与杂色优化）常驻展开，占掉大量纵向空间，
+     * 把图纸展示台推到很下面。现在：
+     *   - 「画幅与色板配置」保持展开（最常用：板宽与色板）
+     *   - 「图像与杂色优化」默认折叠（低频：抠背景/容差/杂色/画面微调）
+     *   - 整块可一键收起，把首屏完全让给图纸
+     *
+     * 注意：只把已存在的 DOM 搬进分组容器，
+     * 控件的 id / min / max / step / value 与事件绑定一律不动。
+     * ----------------------------------------------------------------- */
+    (function initStudioParams() {
+      const grid = $('studio-params');
+      if (!grid) return;
+      const pick = (name) => grid.querySelector(`[data-pp-group="${name}"]`);
+      initParamPanel({
+        panel: grid,
+        title: '参数设置',
+        groups: [
+          { key: 'canvas', title: '画幅与色板配置', hint: '板宽 / 色板', open: true, nodes: [pick('canvas')] },
+          { key: 'enhance', title: '图像与杂色优化', hint: '抠背景 / 微调', open: false, nodes: [pick('enhance')] },
+        ].filter((g) => g.nodes.every(Boolean)),
+        groupsKey: 'studio.params.groups',
+        collapsedKey: 'studio.params.collapsed',
+        breakpoint: 900,
+      });
+    })();
 
     const uploadInput = $('upload-input');
     const bgToggle = $('bg-toggle');

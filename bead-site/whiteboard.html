@@ -150,6 +150,20 @@
       box-sizing: border-box;
       position: relative;
       transition: all 0.25s ease;
+      /* 桌面端：把工作台高度约束在视口内，参数面板再长也不会把画布推走。
+         min-height 0 是关键 —— 否则 flex 子项会被内容撑高。
+         150px 为页头 + 标题区 + 折叠条的预估占用；下方脚本会用实测值
+         覆盖这个 CSS 兜底值，保证不同浏览器下都刚好填满首屏。 */
+      min-height: 0;
+      max-height: calc(100vh - 150px);
+      --wb-vh-offset: 150px;
+    }
+    .board-workbench {
+      max-height: calc(100vh - var(--wb-vh-offset, 150px));
+    }
+    /* 第二个工作台（色板图纸）内容较少，允许更矮 */
+    .board-workbench:nth-of-type(2) {
+      max-height: none;
     }
     .workbench-header {
       display: flex;
@@ -172,7 +186,15 @@
       display: flex;
       gap: 14px;
       flex: 1;
-      min-height: 480px;
+      /* 桌面端用 0 而不是固定 480px：工作台被 max-height 约束后，
+         固定 min-height 会反过来把内容撑破容器，导致画布超出首屏。
+         窄屏另有 min-height 兜底（见下方媒体查询）。 */
+      min-height: 0;
+      min-width: 0;
+    }
+    /* 窄屏没有高度约束，恢复一个最小高度保证可操作 */
+    @media (max-width: 900px) {
+      .workbench-body { min-height: 420px; }
     }
     .viewport-box {
       flex: 1;
@@ -225,9 +247,10 @@
       padding: 5px 4px;
     }
 
-    /* 侧边常驻工具栏与调色盘 */
+    /* 侧边常驻工具栏与调色盘
+       宽度与纵向滚动交给 param-panel.js 的 .is-param-panel 控制，
+       这里只负责外观。窄屏时组件会加 .is-narrow，宽度退化为 100%。 */
     .draw-sidebar {
-      width: 220px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -236,7 +259,11 @@
       border-radius: 10px;
       padding: 12px;
       box-sizing: border-box;
+      max-height: 100%;
     }
+    /* 分组收纳后，分区名称由 .pp-group-head 显示，这里隐藏原来的标题避免重复。
+       保留 display 规则以兼容未分组场景。 */
+    .draw-sidebar .sidebar-section-title { display: none; }
     .sidebar-section-title {
       font-size: 12px;
       font-weight: 700;
@@ -491,8 +518,9 @@
         padding: 10px;
         min-height: 240px;
       }
-      .draw-sidebar { width: 100%; padding: 10px; gap: 10px; }
-      .board-workbench.is-fullscreen .draw-sidebar { width: 100%; }
+      /* 窄屏：参数面板宽度不再由 --pp-width 决定，交给 .is-param-panel.is-narrow
+         规则统一处理（flex:1 1 auto; width:100%），这里只保留间距与内边距。 */
+      .draw-sidebar { padding: 10px; gap: 10px; }
 
       /* 手指点按钮，小于 44px 就容易点错 */
       .tools-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -547,14 +575,18 @@
         order: -1;
         padding: 4px;
       }
-      /* 工具区压缩：两列摆放 + 限高可滚动，给画布让出更多空间 */
+      /* 工具区压缩：限高可滚动 + 分组两列，给画布让出更多空间。
+         分组本身已是独立的 .pp-group 块，直接用 grid 排布即可，
+         不再对整个侧栏用 grid（那会打乱 pp-group 的内部结构）。 */
       .board-workbench.is-fullscreen .draw-sidebar {
         width: 100% !important;
         flex: 0 0 auto;
-        max-height: 30vh;
+        max-height: 34vh;
         overflow-y: auto;
         padding: 6px;
         gap: 6px;
+      }
+      .board-workbench.is-fullscreen .pp-body {
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: start;
@@ -633,6 +665,14 @@
       </div>
 
       <!-- 画板全局微调栏 (支持真实色号重映射) -->
+      <!-- 顶部参数面板：与侧栏「画面滤镜」是同一组控件的镜像。
+           这里默认折叠（可展开），把首屏高度让给画布；侧栏里的那份保持可用。 -->
+      <div class="pp-inline" id="wb-top-params">
+      <details class="pp-inline-fold" id="wb-top-params-fold">
+        <summary class="pp-inline-summary">
+          <span class="pp-caret" aria-hidden="true">▸</span>
+          <span>画面参数（板型 / 亮度 / 对比度 / 饱和度）</span>
+        </summary>
       <div class="filter-controls-panel" data-page-node-id="iva6L9ls1uOz33cBrScpcb">
         <div class="slider-item" data-page-node-id="uW0ppqMD5HJ6GdrBPUD5zq">
           <div class="slider-header" data-page-node-id="JU4qqvqqTHT4SkItdiimlr">
@@ -670,6 +710,8 @@
           <button id="btn-reset-filters" class="btn btn-sm" type="button" style="width: 100%;" data-page-node-id="xvGzIoC3VamML13uimyYA4">↺ 重置参数</button>
         </div>
       </div>
+      </details>
+      </div>
 
       <!-- 双工作台主体 -->
       <div class="workbench-row" data-page-node-id="S6dm8cactYaIeR2NoEQtij">
@@ -687,7 +729,7 @@
           <div class="workbench-body" data-page-node-id="0Sx9cH4gWZhE9AYCqd6uYN">
             <!-- 旁边常驻工具栏与调色盘 -->
             <aside class="draw-sidebar" data-page-node-id="sV4bARUVSVM0ICSJfVZerC">
-              <div data-page-node-id="8vS06TNLlmqFXTfBBbXgg5">
+              <div data-pp-group="tools" data-page-node-id="8vS06TNLlmqFXTfBBbXgg5">
                 <div class="sidebar-section-title" data-page-node-id="B8i0Z3QFHh4jIxBfICi0UP">绘画工具</div>
                 <div class="tools-grid" data-page-node-id="pTFrN6ptUYoALUiSMWPhoW">
                   <button id="tool-pen" class="tool-btn active" type="button" data-page-node-id="o72oGMoSgYetuoBxUM8XEc">✏️ 画笔</button>
@@ -711,7 +753,7 @@
               </div>
 
               <!-- 对称绘制：像素画常用左右/上下对称，实时镜像落子 -->
-              <div>
+              <div data-pp-group="ops">
                 <div class="sidebar-section-title">
                   <span>对称绘制</span>
                   <button id="btn-symmetry" class="mini-toggle" type="button" aria-pressed="false">关</button>
@@ -736,7 +778,7 @@
               </div>
 
               <!-- 图片导入：既能转成真实色号，也能作为半透明临摹底图 -->
-              <div>
+              <div data-pp-group="import">
                 <div class="sidebar-section-title">图片导入</div>
                 <div class="tools-grid">
                   <button id="btn-import-grid" class="tool-btn" type="button">🧩 转色号</button>
@@ -759,7 +801,7 @@
               </div>
 
               <!-- 视图开关：网格 / 标尺 / 色号 -->
-              <div>
+              <div data-pp-group="view">
                 <div class="sidebar-section-title">显示设置</div>
                 <div class="tools-grid view-toggles">
                   <button id="btn-toggle-grid" class="tool-btn toggle-on" type="button" aria-pressed="true">🔲 网格</button>
@@ -771,7 +813,7 @@
               <!-- 板型选择：原来只有一个滑块放在页面上方的筛选栏里，
                    全屏后那块区域被覆盖层挡住，导致全屏时改不了板型。
                    这里在侧边栏里加一份，两边实时同步。 -->
-              <div data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
+              <div data-pp-group="board" data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
                 <div class="sidebar-section-title" data-page-node-id="hm9BCDlXJKWjlCC0VwNWmt">
                   <span data-page-node-id="X8h0uAJ6wciSi9ND5UHUUZ">板型（格数）</span>
                 </div>
@@ -790,7 +832,7 @@
 
               <!-- 全屏参数调节：顶部筛选栏在全屏时会被覆盖层遮住，
                    这里提供一组完全同步的控件，全屏下也能改尺寸与画面滤镜。 -->
-              <div data-page-node-id="fs-controls-block">
+              <div data-pp-group="filters" data-page-node-id="fs-controls-block">
                 <div class="sidebar-section-title" data-page-node-id="fs-controls-title">
                   <span>全屏参数调节</span>
                 </div>
@@ -830,7 +872,7 @@
                 <button id="btn-reset-filters-side" class="btn btn-sm" type="button" style="width: 100%; margin-top: 8px;">↺ 重置参数</button>
               </div>
 
-              <div data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
+              <div data-pp-group="current" data-page-node-id="YC0V4DkUs41WKJw3DrS4rj">
                 <div class="sidebar-section-title" data-page-node-id="hm9BCDlXJKWjlCC0VwNWmt">
                   <span data-page-node-id="X8h0uAJ6wciSi9ND5UHUUZ">当前画笔色</span>
                 </div>
@@ -840,7 +882,7 @@
                 </div>
               </div>
 
-              <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;" data-page-node-id="vbT8OE5U8AY02UgLlZtnC1">
+              <div data-pp-group="palette" style="flex: 1; display: flex; flex-direction: column; min-height: 0;" data-page-node-id="vbT8OE5U8AY02UgLlZtnC1">
                 <div class="sidebar-section-title" data-page-node-id="Bk9oaGNcUjRDJrVkhqb1vo">
                   <span data-page-node-id="wfjnLiBv9Tiq9TlFKEh2Io">选择色板库</span>
                   <select id="palette-select" class="wb-select" style="padding: 2px 6px; font-size: 11px;" data-page-node-id="3Qd2FnavPD7DhDQEIGWidh">
@@ -856,6 +898,8 @@
                 <div class="color-swatches-scroll" id="swatches-container" data-page-node-id="DDV4WVZZKcBIYMbe3PAClQ"></div>
               </div>
             </aside>
+            <!-- 参数面板收起后的展开把手（由 param-panel.js 填充按钮） -->
+            <div class="pp-gutter" id="wb-params-gutter" aria-hidden="false"></div>
 
             <!-- 绘制视口 -->
             <div class="viewport-box" data-page-node-id="cyhoXk9B9Ve7EFR7MqmqMU">
@@ -917,6 +961,8 @@
     import { injectChrome } from './assets/js/chrome.js';
     // 白板画板的教程侧边栏：与创作工坊页共用同一个组件，但各自独立实例
     import { initSidebar } from './assets/js/sidebar.js';
+    // 参数面板的分组收纳 / 宽度调节 / 整体收起（只搬 DOM，不改控件）
+    import { initParamPanel } from './assets/js/param-panel.js';
     // 官方色库：55 色含预计算 Lab 值，与「上传转图纸」共用同一份数据源，
     // 保证白板画出来的色号和转图导出的色号完全一致（修掉「写着72色实际29色」的坑）
     import { ARTKAL_55 } from './assets/js/palette.js';
@@ -2015,6 +2061,95 @@
       storageKey: 'whiteboard.sidebar.collapsed',
       otherHref: 'create.html',
     });
+
+    /* ----------------------------------------------------------------
+     * 左侧参数面板：分组收纳 + 宽度调节 + 整体收起
+     *
+     * 之前的 9 个分区纵向平铺，参数一多就把画布挤到需要大量滚动。
+     * 现在按「使用频率」分组：高频组默认展开，低频组折叠；
+     * 面板宽度可拖拽（默认 260px），也可整体收起为一条窄把手。
+     *
+     * 注意：这里只把**已存在的 DOM 块**搬进分组容器，
+     * 控件的 id / min / max / step / value 与事件绑定一律不动。
+     * ----------------------------------------------------------------- */
+    (function initDrawSidebarGroups() {
+      const sidebar = document.querySelector('.draw-sidebar');
+      if (!sidebar) return;
+      const pick = (name) => sidebar.querySelector(`[data-pp-group="${name}"]`);
+
+      // 高频：工具与色板（画图时最常用）；其余默认折叠
+      const groups = [
+        { key: 'tools', title: '绘画工具', hint: '画笔/橡皮/填充/对称', open: true, nodes: [pick('tools')] },
+        { key: 'palette', title: '色板与当前色', hint: '', open: true, nodes: [pick('current'), pick('palette')] },
+        { key: 'board', title: '板型（格数）', hint: '', open: true, nodes: [pick('board')] },
+        { key: 'ops', title: '画板操作', hint: '撤销/重做/翻转', open: false, nodes: [pick('ops')] },
+        { key: 'filters', title: '画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
+        { key: 'import', title: '图片导入', hint: '转色号/临摹底图', open: false, nodes: [pick('import')] },
+        { key: 'view', title: '显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
+      ].filter((g) => g.nodes.every(Boolean));
+
+      // 任何未被分组的块（例如未来新增的分区）保持原样留在面板里
+      initParamPanel({
+        panel: sidebar,
+        gutter: document.getElementById('wb-params-gutter'),
+        title: '参数面板',
+        groups,
+        width: 268,
+        minWidth: 208,
+        maxWidth: 420,
+        widthKey: 'whiteboard.params.width',
+        groupsKey: 'whiteboard.params.groups',
+        collapsedKey: 'whiteboard.params.collapsed',
+        breakpoint: 900,
+      });
+    })();
+    /* ----------------------------------------------------------------
+     * 首屏高度自适应：让主工作台刚好填满视口剩余高度
+     *
+     * CSS 里用 100vh - 150px 只能大致兜底（页头高度、标题卡文案长度、
+     * 折叠条是否展开都会让上方占用在 120~320px 之间浮动）。
+     * 这里在布局后实测「工作台顶部距离视口顶部的距离 + 底部留白」，
+     * 写回 --wb-vh-offset，让画布永远完整落在首屏内、不需要滚动。
+     * ----------------------------------------------------------------- */
+    (function syncWorkbenchHeight() {
+      const wb = document.getElementById('workbench-left');
+      if (!wb) return;
+      const BOTTOM_GAP = 20; // 工作台底部留白
+
+      function sync() {
+        if (window.matchMedia('(max-width: 900px)').matches) {
+          wb.style.removeProperty('--wb-vh-offset');
+          return;
+        }
+        // 用「工作台当前 top + 底部留白」推算需要预留的顶部空间。
+        // 注意：这里读的是 top 而非 bottom —— 若改用 bottom 会与 max-height 形成循环依赖。
+        const rect = wb.getBoundingClientRect();
+        const topOccupied = rect.top + window.scrollY;
+        const offset = Math.max(120, Math.round(topOccupied + BOTTOM_GAP));
+        const next = offset + 'px';
+        if (wb.style.getPropertyValue('--wb-vh-offset') !== next) {
+          wb.style.setProperty('--wb-vh-offset', next);
+        }
+      }
+
+      sync();
+      // 尺寸变化：窗口缩放、侧栏折叠、折叠条展开、字体加载完成
+      window.addEventListener('resize', sync);
+      const topFold = document.getElementById('wb-top-params-fold');
+      if (topFold) topFold.addEventListener('toggle', () => setTimeout(sync, 60));
+      if (window.ResizeObserver) {
+        const obs = new ResizeObserver(() => sync());
+        const shell = document.querySelector('.wb-shell');
+        if (shell) obs.observe(shell);
+        const header = document.getElementById('site-header');
+        if (header) obs.observe(header);
+      }
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => setTimeout(sync, 80)).catch(() => {});
+      }
+      // 首屏后再校正一次，抵消图片/字体引起的重排
+      window.addEventListener('load', () => setTimeout(sync, 120));
+    })();
   </script>
 </body>
 </html>
