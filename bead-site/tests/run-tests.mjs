@@ -1191,36 +1191,25 @@ async function main() {
   });
 
   // ---- 页面集成静态检查 ----
-  await case_('G10-tutorial', 'create.html wires the sidebar: shell, search box, nav, both panes', () => {
+  await case_('G10-tutorial', 'create.html mounts the shared sidebar component (single source of truth)', () => {
     const src = read('create.html');
-    for (const id of ['studio-shell', 'sb-collapse', 'sb-search', 'sb-nav', 'sb-results', 'sb-all-link', 'pane-studio', 'pane-whiteboard']) {
-      assert.ok(src.includes(`id="${id}"`), `missing sidebar element: #${id}`);
+    for (const id of ['studio-shell', 'studio-sidebar', 'pane-studio']) {
+      assert.ok(src.includes(`id="${id}"`), `missing shell element: #${id}`);
     }
-    assert.ok(src.includes("from './assets/js/tutorial-data.js'"), 'must import tutorial-data');
-    assert.ok(src.includes("from './assets/js/tutorial-search.js'"), 'must import tutorial-search');
+    assert.ok(src.includes('class="studio-main"'), 'missing .studio-main wrapper');
+    assert.ok(src.includes("from './assets/js/sidebar.js'"), 'must import the shared sidebar component');
+    assert.ok(src.includes('initSidebar({'), 'must call initSidebar');
+    // 布局细节由 CSS 负责，HTML 不应再内联一堆侧栏样式
+    assert.ok(!src.includes('sb-nav-item'), 'old in-page sidebar CSS should be gone');
+    assert.ok(!src.includes('sb-hideable'), 'old in-page sidebar CSS should be gone');
   });
 
-  await case_('G10-tutorial', 'create.html sidebar starts expanded and collapse state is persisted', () => {
-    const src = read('create.html');
-    assert.ok(src.includes("aria-expanded=\"true\""), 'collapse button should declare expanded=true initially');
-    assert.ok(src.includes('studio.sidebar.collapsed'), 'collapse preference should be persisted');
-    assert.ok(/let sidebarCollapsed = false/.test(src), 'default state must be expanded');
-  });
-
-  await case_('G10-tutorial', 'create.html search results are scoped to the current module only', () => {
-    const src = read('create.html');
-    // 检索入口必须传当前模块的数组，而不是合并后的全集
-    assert.ok(
-      /searchTutorials\(entries, q/.test(src),
-      'sidebar search must query the scoped entries array, not a merged list'
-    );
-    assert.ok(src.includes('TUTORIALS[currentModule]'), 'entries must come from the current module');
-  });
-
-  await case_('G10-tutorial', 'create.html whiteboard pane does not hardcode a pretty URL', () => {
-    const src = read('create.html');
-    assert.ok(!/src="whiteboard"/.test(src), 'iframe must not use the extension-less path (404 on plain static servers)');
-    assert.ok(src.includes('src="whiteboard.html"'), 'iframe must point at whiteboard.html');
+  await case_('G10-tutorial', 'create.html sidebar is expanded by default and persists its own state', () => {
+    const src = read('assets/js/sidebar.js');
+    // 组件内部：默认展开（collapsed=false），状态写入调用方给的 key
+    assert.ok(/let collapsed = false;/.test(src), 'default state must be expanded');
+    assert.ok(src.includes('localStorage.setItem(storageKey'), 'state must persist under the caller key');
+    assert.ok(src.includes("aria-expanded"), 'collapse button must expose aria-expanded');
   });
 
   await case_('G10-tutorial', 'tutorial-guide.html exists with module switch + search', () => {
@@ -1246,6 +1235,177 @@ async function main() {
   await case_('G10-tutorial', 'every page declares a favicon (no more 404 noise)', () => {
     for (const f of ['index.html', 'create.html', 'whiteboard.html', 'inspiration.html', 'tutorial.html', 'tutorial-guide.html']) {
       assert.ok(read(f).includes('rel="icon"'), `${f} is missing a favicon link`);
+    }
+  });
+
+  // ---- 侧边栏组件：两页独立实例 + 图标对齐 ----
+  const sb = await import('../assets/js/sidebar.js');
+  assert.strictEqual(typeof sb.initSidebar, 'function', 'sidebar.js must export initSidebar');
+
+  await case_('G10-sidebar', 'both pages mount their OWN sidebar root with distinct ids', () => {
+    const studio = read('create.html');
+    const wb = read('whiteboard.html');
+    assert.ok(studio.includes('id="studio-sidebar"'), 'create.html needs #studio-sidebar');
+    assert.ok(wb.includes('id="wb-sidebar"'), 'whiteboard.html needs #wb-sidebar');
+    // 两页的容器 id 必须不同，否则会互相接管对方的 DOM
+    assert.notStrictEqual(
+      studio.match(/id="studio-sidebar"/)[0],
+      wb.match(/id="wb-sidebar"/)[0],
+      'sidebar root ids must differ between pages'
+    );
+  });
+
+  await case_('G10-sidebar', 'each page initialises the sidebar with its OWN moduleId', () => {
+    const studio = read('create.html');
+    const wb = read('whiteboard.html');
+    assert.ok(/moduleId:\s*'studio'/.test(studio), 'create.html sidebar must be bound to studio');
+    assert.ok(/moduleId:\s*'whiteboard'/.test(wb), 'whiteboard.html sidebar must be bound to whiteboard');
+  });
+
+  await case_('G10-sidebar', 'collapse state uses DIFFERENT storageKey per page (no cross-talk)', () => {
+    const studio = read('create.html');
+    const wb = read('whiteboard.html');
+    const k1 = studio.match(/storageKey:\s*'([^']+)'/);
+    const k2 = wb.match(/storageKey:\s*'([^']+)'/);
+    assert.ok(k1 && k2, 'both pages must pass an explicit storageKey');
+    assert.notStrictEqual(k1[1], k2[1], `storageKey must differ, both are "${k1[1]}"`);
+  });
+
+  await case_('G10-sidebar', 'neither page hardcodes a tutorial scope (always driven by moduleId)', () => {
+    // 侧栏不得自己写死「创意工坊」或「白板画板」去取数据，只能用 moduleId
+    for (const f of ['create.html', 'whiteboard.html']) {
+      const src = read(f);
+      assert.ok(!/TUTORIALS\[/.test(src), `${f} must not index TUTORIALS directly — use the sidebar component`);
+      assert.ok(!/searchTutorials\(/.test(src), `${f} must not call searchTutorials directly`);
+    }
+  });
+
+  await case_('G10-sidebar', 'whiteboard page no longer embeds an iframe of itself inside create', () => {
+    const studio = read('create.html');
+    // 创作工坊页里不应再有内嵌白板的 iframe：那会让白板页的侧边栏无法独立
+    assert.ok(!/id="whiteboard-frame"/.test(studio), 'iframe of whiteboard must be removed');
+    assert.ok(!/id="pane-whiteboard"/.test(studio), 'in-page whiteboard pane must be removed');
+  });
+
+  // CSS 规则块提取器：不能用 [^}]* —— 注释里可能出现 }，必须按括号配平。
+  // 这是本次写测试时踩到的真实坑。
+  function cssBlock(css, selector) {
+    const re = new RegExp('^' + selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*') + '\\s*\\{', 'm');
+    const i = css.search(re);
+    if (i === -1) return null;
+    const open = css.indexOf('{', i);
+    let depth = 0;
+    for (let j = open; j < css.length; j++) {
+      if (css[j] === '{') depth++;
+      else if (css[j] === '}') {
+        depth--;
+        if (depth === 0) return css.slice(open + 1, j);
+      }
+    }
+    return null;
+  }
+  // padding shorthand 归一为 [top, right, bottom, left]
+  function normPadding(v) {
+    const p = v.trim().split(/\s+/);
+    if (p.length === 1) return [p[0], p[0], p[0], p[0]];
+    if (p.length === 2) return [p[0], p[1], p[0], p[1]];
+    if (p.length === 3) return [p[0], p[1], p[2], p[1]];
+    return [p[0], p[1], p[2], p[3]];
+  }
+
+  await case_('G10-sidebar', 'icon alignment: collapsed state keeps the SAME horizontal padding as expanded', () => {
+    const css = read('assets/css/theme.css');
+    const collapsed = cssBlock(css, '.sb-root.is-collapsed');
+    const base = cssBlock(css, '.sb-root');
+    assert.ok(collapsed, 'missing .sb-root.is-collapsed rule');
+    assert.ok(base, 'missing .sb-root rule');
+    const c = normPadding(collapsed.match(/padding:\s*([^;]+);/)[1]);
+    const b = normPadding(base.match(/padding:\s*([^;]+);/)[1]);
+    // 横向内边距必须一致，否则收起后图标起点会整体偏移
+    assert.strictEqual(c[3], b[3], `collapsed left padding (${c[3]}) must equal base (${b[3]})`);
+    assert.strictEqual(c[1], b[1], `collapsed right padding (${c[1]}) must equal base (${b[1]})`);
+  });
+
+  await case_('G10-sidebar', 'icon alignment: collapsed state must not centre children (causes 1px offset)', () => {
+    const body = cssBlock(read('assets/css/theme.css'), '.sb-root.is-collapsed');
+    assert.ok(!/^\s*align-items:\s*center/m.test(body),
+      'collapsed container must use flex-start, not center — centring shifts the 30px track by 1px');
+  });
+
+  await case_('G10-sidebar', 'icon alignment: the 30px track is fixed in both states', () => {
+    const css = read('assets/css/theme.css');
+    assert.ok(/--sb-track:\s*30px/.test(css), 'track size variable must be defined');
+    const track = cssBlock(css, '.sb-track');
+    assert.ok(track, 'missing .sb-track rule');
+    assert.ok(/width:\s*var\(--sb-track\)/.test(track), 'track must use the fixed width');
+    assert.ok(/height:\s*var\(--sb-track\)/.test(track), 'track must use the fixed height');
+    assert.ok(/align-items:\s*center/.test(track) && /justify-content:\s*center/.test(track),
+      'icon inside the track must be centred both ways');
+    // 收起态不能改变轨道尺寸
+    const collapsed = cssBlock(css, '.sb-root.is-collapsed .sb-collapse-btn');
+    assert.ok(collapsed, 'missing collapsed collapse-button rule');
+    assert.ok(/width:\s*var\(--sb-track\)/.test(collapsed), 'collapsed button must keep the track width');
+    assert.ok(/padding:\s*0/.test(collapsed), 'collapsed button must have zero padding so the track does not shift');
+  });
+
+  await case_('G10-sidebar', 'icon alignment: collapsed column width matches its padding math', () => {
+    // 收起列宽 = 1(边框) + 左内边距 + 30(轨道) + 右内边距 + 1(边框)
+    const pad = normPadding(cssBlock(read('assets/css/theme.css'), '.sb-root.is-collapsed')
+      .match(/padding:\s*([^;]+);/)[1]);
+    const left = parseInt(pad[3], 10);
+    const right = parseInt(pad[1], 10);
+    const expected = 1 + left + 30 + right + 1;
+    for (const f of ['create.html', 'whiteboard.html']) {
+      const m = read(f).match(/:has\(\.sb-root\.is-collapsed\)\s*\{\s*grid-template-columns:\s*(\d+)px/);
+      assert.ok(m, `${f} missing collapsed column width`);
+      assert.strictEqual(Number(m[1]), expected,
+        `${f}: collapsed column should be ${expected}px (1+${left}+30+${right}+1) but is ${m[1]}px`);
+    }
+  });
+
+  await case_('G10-sidebar', 'expand state keeps text layout: brand name + links + collapse label', () => {
+    const src = read('assets/js/sidebar.js');
+    for (const cls of ['sb-brand-name', 'sb-brand-sub', 'sb-search', 'sb-scope', 'sb-results', 'sb-link', 'sb-collapse-label', 'sb-chevron']) {
+      assert.ok(src.includes(cls), `sidebar markup missing .${cls}`);
+    }
+    // 收起态的隐藏清单必须覆盖所有纯文字元素（选择器组形式）
+    const css = read('assets/css/theme.css');
+    const i = css.indexOf('.sb-root.is-collapsed .sb-brand-text');
+    assert.ok(i > -1, 'missing collapsed hide rule group');
+    // 选择器组形如：
+    //   .sb-root.is-collapsed .sb-brand-text,
+    //   .sb-root.is-collapsed .sb-search-wrap, ... { display: none; }
+    // 大括号在最后一行，所以要从选择器起点截到规则体结束。
+    const open = css.indexOf('{', i);
+    let depth = 0, end = open;
+    for (let j = open; j < css.length; j++) {
+      if (css[j] === '{') depth++;
+      else if (css[j] === '}') { depth--; if (depth === 0) { end = j; break; } }
+    }
+    const groupBody = css.slice(i, end + 1);
+    for (const cls of ['.sb-brand-text', '.sb-search-wrap', '.sb-results', '.sb-link', '.sb-collapse-label']) {
+      assert.ok(groupBody.includes(cls), `collapsed hide group must cover ${cls}`);
+    }
+    assert.ok(/display:\s*none/.test(groupBody), 'collapsed group must set display:none');
+  });
+
+  await case_('G10-sidebar', 'search placeholder and scope text are module-specific', () => {
+    const src = read('assets/js/sidebar.js');
+    assert.ok(src.includes('搜索${escapeHtml(m.name)}教程'), 'placeholder must name the current module');
+    assert.ok(src.includes('仅搜索「${escapeHtml(m.name)}」'), 'scope hint must name the current module');
+    assert.ok(/const entries = TUTORIALS\[moduleId\]/.test(src),
+      'component must read entries from its own moduleId (physical isolation)');
+  });
+
+  await case_('G10-sidebar', 'sidebar module scripts parse as valid ESM', () => {
+    for (const f of ['create.html', 'whiteboard.html']) {
+      const src = read(f);
+      const m = src.match(/<script type="module">([\s\S]*?)<\/script>/);
+      assert.ok(m, `${f}: no module script`);
+      assert.ok(m[1].includes("from './assets/js/sidebar.js'"), `${f} must import sidebar.js`);
+      if (typeof vm.SourceTextModule === 'function') {
+        new vm.SourceTextModule(m[1], { identifier: `${f}#module` });
+      }
     }
   });
 

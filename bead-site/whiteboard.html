@@ -13,6 +13,35 @@
       margin: 20px auto;
       padding: 0 16px;
     }
+
+    /* ===== 白板画板：独立侧边栏布局 =====
+       侧栏组件本体样式（.sb-root / .sb-*）在 assets/css/theme.css，
+       与创作工坊页共用同一份代码与样式，保证两页表现完全一致；
+       但这里是**独立实例**：只服务白板画板教程，收起状态用独立 key。 */
+    .wb-shell {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      align-items: start;
+      gap: 20px;
+      max-width: 1440px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    .wb-shell:has(.sb-root.is-collapsed) {
+      grid-template-columns: 60px minmax(0, 1fr);
+    }
+    .wb-main { min-width: 0; }
+
+    @media (max-width: 900px) {
+      .wb-shell,
+      .wb-shell:has(.sb-root.is-collapsed) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .wb-shell .sb-root {
+        position: static;
+        max-height: none;
+      }
+    }
     .wb-card {
       background: var(--bg-card);
       border-radius: 16px;
@@ -588,6 +617,11 @@
 <body data-page-node-id="edSbPVFcI9OEoDTcxOTYEM">
   <div id="site-header" data-page-node-id="DWPrYpQlqbYeXKY60uLF5a"></div>
 
+  <div class="wb-shell" id="wb-shell">
+    <!-- 白板画板自己的教程侧边栏（仅服务 whiteboard 教程，收起状态独立存储） -->
+    <aside class="sb-root" id="wb-sidebar"></aside>
+
+    <div class="wb-main">
   <main class="wb-container" data-page-node-id="EkwRIS5Xg1lu8XET0PZgAZ">
     <!-- 只在手机横屏时显示（由 CSS 控制），建议竖屏使用 -->
     <div class="rotate-hint" role="status">📱 竖屏使用体验更好，建议把手机转回来</div>
@@ -874,11 +908,15 @@
       </div>
     </section>
   </main>
+    </div>
+  </div>
 
   <div id="site-footer" data-page-node-id="iRMNg577yTJfjQjRT5zu8a"></div>
 
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
+    // 白板画板的教程侧边栏：与创作工坊页共用同一个组件，但各自独立实例
+    import { initSidebar } from './assets/js/sidebar.js';
     // 官方色库：55 色含预计算 Lab 值，与「上传转图纸」共用同一份数据源，
     // 保证白板画出来的色号和转图导出的色号完全一致（修掉「写着72色实际29色」的坑）
     import { ARTKAL_55 } from './assets/js/palette.js';
@@ -1964,6 +2002,19 @@
     initPalette();
     applyFiltersAndRender();
     syncHistoryButtons();
+
+    /* ----------------------------------------------------------------
+     * 白板画板自己的教程侧边栏（独立实例）
+     * 与创作工坊页共用 sidebar.js 组件，但：
+     *   - 只服务 whiteboard 教程（搜不到创意工坊的内容）
+     *   - 收起状态存在独立 key，收起/展开互不影响
+     * ----------------------------------------------------------------- */
+    initSidebar({
+      root: document.getElementById('wb-sidebar'),
+      moduleId: 'whiteboard',
+      storageKey: 'whiteboard.sidebar.collapsed',
+      otherHref: 'create.html',
+    });
   </script>
 </body>
 </html>
