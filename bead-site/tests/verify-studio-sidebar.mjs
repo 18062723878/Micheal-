@@ -8,13 +8,16 @@
  */
 import { chromium } from 'file:///C:/Users/18062/.workbuddy/binaries/node/workspace/node_modules/playwright-core/index.mjs';
 
+// 默认跑本地静态服务器；设 BASE_URL=https://pindouwang.pages.dev 即可直接验证线上
+const BASE = (process.env.BASE_URL || 'http://localhost:8099').replace(/\/+$/, '');
+
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const page = await browser.newPage({ viewport: { width: 1500, height: 1000 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 page.on('console', (m) => { if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push('console: ' + m.text()); });
 
-await page.goto('http://localhost:8099/create.html', { waitUntil: 'networkidle' });
+await page.goto(BASE + "/create.html", { waitUntil: 'networkidle' });
 await page.waitForTimeout(400);
 
 /* 1. 初始展开 */
@@ -106,7 +109,7 @@ const isolationBack = await page.evaluate(async () => {
 /* 7. 完整教程目录页：模块切换 + 高亮 + 定位 */
 const guide = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
 guide.on('pageerror', (e) => errors.push('guide pageerror: ' + e.message));
-await guide.goto('http://localhost:8099/tutorial-guide.html', { waitUntil: 'networkidle' });
+await guide.goto(BASE + "/tutorial-guide.html", { waitUntil: 'networkidle' });
 const guideStudio = await guide.evaluate(() => ({
   count: document.getElementById('td-count').textContent.trim(),
   cats: [...document.querySelectorAll('.td-cat > h2')].map((h) => h.textContent.trim()),
@@ -159,7 +162,7 @@ const guideSwitch = await guide.evaluate(() => ({
 await page.evaluate(() => { document.getElementById('sb-search').value = '色号'; document.getElementById('sb-search').dispatchEvent(new Event('input', { bubbles: true })); });
 await page.waitForTimeout(300);
 const jumpHref = await page.evaluate(() => document.getElementById('sb-all-link').getAttribute('href'));
-await page.goto('http://localhost:8099/' + jumpHref, { waitUntil: 'networkidle' });
+await page.goto(BASE + "/" + jumpHref, { waitUntil: 'networkidle' });
 await page.waitForTimeout(300);
 const jumpResult = await page.evaluate(() => ({
   count: document.getElementById('td-count').textContent.trim(),
