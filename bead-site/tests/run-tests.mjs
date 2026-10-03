@@ -983,6 +983,272 @@ async function main() {
     }
   });
 
+  // =====================================================================
+  // GROUP 10 — 创作工坊侧边栏 + 教程检索
+  // 核心约束：创意工坊与白板画板的教程数据源相互独立，检索绝不跨模块。
+  // =====================================================================
+  const td = await import('../assets/js/tutorial-data.js');
+  const ts = await import('../assets/js/tutorial-search.js');
+  const { MODULES, TUTORIALS, categoriesOf, countOf } = td;
+  const { searchTutorials, highlightRanges, renderHighlight, escapeHtml, tokenize, subsequenceMatch } = ts;
+
+  await case_('G10-tutorial', 'two modules declared: studio + whiteboard, with distinct names', () => {
+    assert.ok(MODULES.studio && MODULES.whiteboard, 'both modules must exist');
+    assert.strictEqual(MODULES.studio.name, '创意工坊');
+    assert.strictEqual(MODULES.whiteboard.name, '白板画板');
+    assert.notStrictEqual(MODULES.studio.href, MODULES.whiteboard.href, 'modules must not share a target');
+    assert.ok(MODULES.whiteboard.href.endsWith('.html'), 'whiteboard href must carry an explicit extension');
+  });
+
+  await case_('G10-tutorial', 'each module has entries, and every entry is tagged with its own module', () => {
+    assert.ok(countOf('studio') >= 5, `studio needs >=5 entries, got ${countOf('studio')}`);
+    assert.ok(countOf('whiteboard') >= 5, `whiteboard needs >=5 entries, got ${countOf('whiteboard')}`);
+    for (const id of ['studio', 'whiteboard']) {
+      for (const e of TUTORIALS[id]) {
+        assert.strictEqual(e.module, id, `entry ${e.id} must belong to ${id}`);
+        assert.ok(e.title && e.category, `entry ${e.id} missing title/category`);
+        assert.ok(Array.isArray(e.steps) && Array.isArray(e.controls) && Array.isArray(e.keywords), `entry ${e.id} missing structured fields`);
+      }
+    }
+  });
+
+  await case_('G10-tutorial', 'entry ids are unique across BOTH modules (no shared id collision)', () => {
+    const all = [...TUTORIALS.studio, ...TUTORIALS.whiteboard].map((e) => e.id);
+    assert.strictEqual(new Set(all).size, all.length, 'duplicate entry id found');
+  });
+
+  await case_('G10-tutorial', 'every control declares name / type / action / result', () => {
+    for (const id of ['studio', 'whiteboard']) {
+      for (const e of TUTORIALS[id]) {
+        for (const c of e.controls) {
+          assert.ok(c.name, `${e.id}: control without name`);
+          assert.ok(c.type, `${e.id}/${c.name}: missing type`);
+          assert.ok(c.action, `${e.id}/${c.name}: missing action`);
+          assert.ok(c.result, `${e.id}/${c.name}: missing result`);
+        }
+      }
+    }
+  });
+
+  // ---- 隔离性：本组是这个需求最核心的验收点 ----
+  await case_('G10-tutorial', 'ISOLATION: studio-only keyword returns nothing in whiteboard module', () => {
+    // 「拼豆模式」是创意工坊独有的概念
+    const inStudio = searchTutorials(TUTORIALS.studio, '拼豆模式');
+    const inWb = searchTutorials(TUTORIALS.whiteboard, '拼豆模式');
+    assert.ok(inStudio.length > 0, 'sanity: keyword must match inside studio');
+    assert.strictEqual(inWb.length, 0, `whiteboard must not match studio-only keyword, got ${inWb.length}`);
+  });
+
+  await case_('G10-tutorial', 'ISOLATION: whiteboard-only keyword returns nothing in studio module', () => {
+    // 「对称」是白板画板独有的功能
+    const inWb = searchTutorials(TUTORIALS.whiteboard, '对称');
+    const inStudio = searchTutorials(TUTORIALS.studio, '对称');
+    assert.ok(inWb.length > 0, 'sanity: keyword must match inside whiteboard');
+    assert.strictEqual(inStudio.length, 0, `studio must not match whiteboard-only keyword, got ${inStudio.length}`);
+  });
+
+  await case_('G10-tutorial', 'ISOLATION: shared keyword can match in both modules independently', () => {
+    // 「色号」两套教程都写了，应各自都能搜到，互不影响
+    const a = searchTutorials(TUTORIALS.studio, '色号');
+    const b = searchTutorials(TUTORIALS.whiteboard, '色号');
+    assert.ok(a.length > 0, 'studio should match 色号');
+    assert.ok(b.length > 0, 'whiteboard should match 色号');
+    // 命中结果必须确实是该模块自己的条目
+    const wbIds = new Set(TUTORIALS.whiteboard.map((e) => e.id));
+    for (const r of b) assert.ok(wbIds.has(r.entry.id), 'whiteboard result came from another module');
+  });
+
+  await case_('G10-tutorial', 'ISOLATION: every returned entry belongs to the searched module', () => {
+    for (const id of ['studio', 'whiteboard']) {
+      const ids = new Set(TUTORIALS[id].map((e) => e.id));
+      for (const q of ['色号', '导出', '色板', '画', 'a', '调']) {
+        for (const r of searchTutorials(TUTORIALS[id], q, { limit: 50 })) {
+          assert.ok(ids.has(r.entry.id), `${id} search "${q}" leaked entry ${r.entry.id}`);
+          assert.strictEqual(r.entry.module, id);
+        }
+      }
+    }
+  });
+
+  // ---- 模糊 / 部分匹配 ----
+  await case_('G10-tutorial', 'fuzzy: substring of a title matches (部分匹配)', () => {
+    const r = searchTutorials(TUTORIALS.whiteboard, '橡皮');
+    assert.ok(r.length > 0, 'substring must match');
+    assert.ok(r.some((x) => x.entry.title.includes('橡皮') || (x.entry.keywords || []).includes('橡皮')));
+  });
+
+  await case_('G10-tutorial', 'fuzzy: control name is searchable (搜按钮名能找到所属条目)', () => {
+    const r = searchTutorials(TUTORIALS.whiteboard, '吸管');
+    assert.ok(r.length > 0, 'must find the entry that documents 吸管');
+    const hit = r[0].entry.controls.some((c) => c.name.includes('吸管'));
+    assert.ok(hit, 'matched entry should document the 吸管 control');
+  });
+
+  await case_('G10-tutorial', 'fuzzy: alias keywords work (e.g. 「撤销」via keyword)', () => {
+    const r = searchTutorials(TUTORIALS.whiteboard, '回退');
+    assert.ok(r.length > 0, 'alias keyword 回退 should match 撤销条目');
+  });
+
+  await case_('G10-tutorial', 'fuzzy: english/数字 token works (A07, Ctrl+Z)', () => {
+    assert.ok(searchTutorials(TUTORIALS.whiteboard, 'A07').length > 0, 'A07 should be findable');
+    assert.ok(searchTutorials(TUTORIALS.whiteboard, 'Ctrl').length > 0, 'Ctrl should be findable');
+  });
+
+  await case_('G10-tutorial', 'fuzzy: subsequence match tolerates skipped chars', () => {
+    // 「对」「称」都能在「对称绘制」里按序找到 → 命中下标 [0,1]
+    assert.deepStrictEqual(subsequenceMatch('对称', '对称绘制'), [0, 1]);
+    // 跳字查询：「称绘」在「对称绘制」中按序落在下标 1、2
+    assert.deepStrictEqual(subsequenceMatch('称绘', '对称绘制'), [1, 2]);
+    // 真正跳字的场景：查询里夹一个标题中不存在的字就应失败
+    assert.deepStrictEqual(subsequenceMatch('称X绘', '对称绘制'), [], 'a non-present char must break the match');
+    assert.deepStrictEqual(subsequenceMatch('zzz', '对称'), [], 'non-matching subsequence returns empty');
+    // 端到端：模糊查询也应召回「对称绘制」条目
+    const r = searchTutorials(TUTORIALS.whiteboard, '称绘');
+    assert.ok(r.length > 0, 'fuzzy subsequence query should still return the 对称 entry');
+    assert.ok(r.some((x) => x.entry.title.includes('对称')));
+  });
+
+  await case_('G10-tutorial', 'tokenize handles mixed 中文/英文/数字', () => {
+    const tokens = tokenize('Ctrl+Z 亮度 -40');
+    assert.ok(tokens.includes('ctrl'), 'english lowercased');
+    assert.ok(tokens.includes('z'), 'single letter');
+    assert.ok(tokens.includes('40'), 'digits');
+    assert.ok(tokens.includes('亮'), 'cjk single char');
+    assert.ok(tokens.includes('亮度'), 'cjk bigram');
+  });
+
+  // ---- 高亮 ----
+  await case_('G10-tutorial', 'highlightRanges locates every occurrence of the query', () => {
+    assert.deepStrictEqual(highlightRanges('色号与色号', '色号'), [[0, 2], [3, 5]]);
+    assert.deepStrictEqual(highlightRanges('abc', 'zz'), [], 'no match -> no ranges');
+    assert.deepStrictEqual(highlightRanges('', 'a'), []);
+  });
+
+  await case_('G10-tutorial', 'highlightRanges indexes map back to the original substring', () => {
+    const text = '调节亮度与对比度';
+    for (const [s, e] of highlightRanges(text, '亮度')) {
+      assert.strictEqual(text.slice(s, e), '亮度');
+    }
+  });
+
+  await case_('G10-tutorial', 'renderHighlight wraps hits in <mark> and keeps the rest intact', () => {
+    const html = renderHighlight('调节亮度', [[2, 4]]);
+    assert.ok(html.includes('<mark>亮度</mark>'), `got ${html}`);
+    assert.ok(html.startsWith('调节'), `prefix must be preserved: ${html}`);
+  });
+
+  await case_('G10-tutorial', 'renderHighlight escapes HTML in tutorial text (no injection)', () => {
+    const html = renderHighlight('<img src=x onerror=alert(1)>', [[0, 4]]);
+    assert.ok(!html.includes('<img'), 'raw tag must be escaped');
+    assert.ok(html.includes('&lt;'), 'should be escaped as &lt;');
+  });
+
+  await case_('G10-tutorial', 'escapeHtml covers the five dangerous chars', () => {
+    assert.strictEqual(escapeHtml('<a href="x">&</a>'), '&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;');
+    assert.strictEqual(escapeHtml(null), '');
+  });
+
+  await case_('G10-tutorial', 'every search result carries a snippet with highlight ranges', () => {
+    for (const id of ['studio', 'whiteboard']) {
+      for (const r of searchTutorials(TUTORIALS[id], '色号', { limit: 20 })) {
+        assert.ok(r.snippet && typeof r.snippet.text === 'string', `${r.entry.id} missing snippet text`);
+        assert.ok(Array.isArray(r.snippet.ranges), `${r.entry.id} snippet missing ranges`);
+        assert.ok(r.snippet.label, `${r.entry.id} snippet missing label`);
+      }
+    }
+  });
+
+  await case_('G10-tutorial', 'empty query returns no results (caller shows the idle hint)', () => {
+    assert.strictEqual(searchTutorials(TUTORIALS.studio, '').length, 0);
+    assert.strictEqual(searchTutorials(TUTORIALS.studio, '   ').length, 0);
+  });
+
+  await case_('G10-tutorial', 'nonsense query returns empty so the UI can show an empty state', () => {
+    assert.strictEqual(searchTutorials(TUTORIALS.studio, 'zzzz-not-a-thing').length, 0);
+    assert.strictEqual(searchTutorials(TUTORIALS.whiteboard, 'zzzz-not-a-thing').length, 0);
+  });
+
+  await case_('G10-tutorial', 'results are sorted by score descending', () => {
+    const r = searchTutorials(TUTORIALS.whiteboard, '色号', { limit: 20 });
+    for (let i = 1; i < r.length; i++) {
+      assert.ok(r[i - 1].score >= r[i].score, 'results must be sorted by score');
+    }
+  });
+
+  await case_('G10-tutorial', 'categoriesOf groups entries per module without mixing', () => {
+    const sCats = categoriesOf('studio');
+    const wCats = categoriesOf('whiteboard');
+    assert.ok(sCats.length > 0 && wCats.length > 0);
+    for (const c of sCats) for (const e of c.items) assert.strictEqual(e.module, 'studio');
+    for (const c of wCats) for (const e of c.items) assert.strictEqual(e.module, 'whiteboard');
+    const sTitles = sCats.flatMap((c) => c.items.map((e) => e.title));
+    const wTitles = wCats.flatMap((c) => c.items.map((e) => e.title));
+    assert.strictEqual(sTitles.filter((t) => wTitles.includes(t)).length, 0, 'no duplicated tutorial title across modules');
+  });
+
+  await case_('G10-tutorial', 'limit is respected', () => {
+    assert.ok(searchTutorials(TUTORIALS.studio, '色', { limit: 2 }).length <= 2);
+  });
+
+  // ---- 页面集成静态检查 ----
+  await case_('G10-tutorial', 'create.html wires the sidebar: shell, search box, nav, both panes', () => {
+    const src = read('create.html');
+    for (const id of ['studio-shell', 'sb-collapse', 'sb-search', 'sb-nav', 'sb-results', 'sb-all-link', 'pane-studio', 'pane-whiteboard']) {
+      assert.ok(src.includes(`id="${id}"`), `missing sidebar element: #${id}`);
+    }
+    assert.ok(src.includes("from './assets/js/tutorial-data.js'"), 'must import tutorial-data');
+    assert.ok(src.includes("from './assets/js/tutorial-search.js'"), 'must import tutorial-search');
+  });
+
+  await case_('G10-tutorial', 'create.html sidebar starts expanded and collapse state is persisted', () => {
+    const src = read('create.html');
+    assert.ok(src.includes("aria-expanded=\"true\""), 'collapse button should declare expanded=true initially');
+    assert.ok(src.includes('studio.sidebar.collapsed'), 'collapse preference should be persisted');
+    assert.ok(/let sidebarCollapsed = false/.test(src), 'default state must be expanded');
+  });
+
+  await case_('G10-tutorial', 'create.html search results are scoped to the current module only', () => {
+    const src = read('create.html');
+    // 检索入口必须传当前模块的数组，而不是合并后的全集
+    assert.ok(
+      /searchTutorials\(entries, q/.test(src),
+      'sidebar search must query the scoped entries array, not a merged list'
+    );
+    assert.ok(src.includes('TUTORIALS[currentModule]'), 'entries must come from the current module');
+  });
+
+  await case_('G10-tutorial', 'create.html whiteboard pane does not hardcode a pretty URL', () => {
+    const src = read('create.html');
+    assert.ok(!/src="whiteboard"/.test(src), 'iframe must not use the extension-less path (404 on plain static servers)');
+    assert.ok(src.includes('src="whiteboard.html"'), 'iframe must point at whiteboard.html');
+  });
+
+  await case_('G10-tutorial', 'tutorial-guide.html exists with module switch + search', () => {
+    const src = read('tutorial-guide.html');
+    for (const id of ['td-switch', 'td-search', 'td-body', 'td-count']) {
+      assert.ok(src.includes(`id="${id}"`), `missing guide element: #${id}`);
+    }
+    assert.ok(src.includes("from './assets/js/tutorial-data.js'"));
+    assert.ok(src.includes("from './assets/js/tutorial-search.js'"));
+  });
+
+  await case_('G10-tutorial', 'module scripts parse as valid ESM', () => {
+    for (const f of ['create.html', 'tutorial-guide.html']) {
+      const src = read(f);
+      const m = src.match(/<script type="module">([\s\S]*?)<\/script>/);
+      assert.ok(m, `${f}: no module script`);
+      if (typeof vm.SourceTextModule === 'function') {
+        new vm.SourceTextModule(m[1], { identifier: `${f}#module` });
+      }
+    }
+  });
+
+  await case_('G10-tutorial', 'every page declares a favicon (no more 404 noise)', () => {
+    for (const f of ['index.html', 'create.html', 'whiteboard.html', 'inspiration.html', 'tutorial.html', 'tutorial-guide.html']) {
+      assert.ok(read(f).includes('rel="icon"'), `${f} is missing a favicon link`);
+    }
+  });
+
   // -------------------------------------------------------------------------
   // Report
   // -------------------------------------------------------------------------

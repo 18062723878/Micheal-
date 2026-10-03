@@ -1,6 +1,6 @@
 {
-  "total": 77,
-  "passed": 77,
+  "total": 109,
+  "passed": 109,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -46,6 +46,11 @@
     "G9-wb-core": {
       "total": 36,
       "pass": 36,
+      "fail": 0
+    },
+    "G10-tutorial": {
+      "total": 32,
+      "pass": 32,
       "fail": 0
     }
   },
