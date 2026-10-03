@@ -1409,6 +1409,152 @@ async function main() {
     }
   });
 
+  // =====================================================================
+  // GROUP 11 — 参数面板分组收纳（布局改造，参数必须零改动）
+  // =====================================================================
+  const pp = await import('../assets/js/param-panel.js');
+  assert.strictEqual(typeof pp.initParamPanel, 'function', 'param-panel.js must export initParamPanel');
+
+  // 改造前的基线：这些控件的规格不得被任何人改动
+  const PARAM_BASELINE = {
+    'create.html': {
+      'board-width': ['range', '10', '80', '1', '32'],
+      'bg-tolerance': ['range', '10', '100', '2', '38'],
+      'noise-threshold': ['range', '0', '5', '1', '0'],
+      'brightness-range': ['range', '-100', '100', '1', '0'],
+      'contrast-range': ['range', '-100', '100', '1', '0'],
+      'saturate-range': ['range', '-100', '100', '1', '0'],
+    },
+    'whiteboard.html': {
+      'wb-size-slider': ['range', '10', '60', '1', '29'],
+      'wb-bright-range': ['range', '-100', '100', '1', '0'],
+      'wb-contrast-range': ['range', '-100', '100', '1', '0'],
+      'wb-saturate-range': ['range', '-100', '100', '1', '0'],
+      'ref-alpha': ['range', '10', '90', '5', '45'],
+    },
+  };
+
+  await case_('G11-params', 'parameter specs unchanged after the layout refactor', () => {
+    for (const [file, map] of Object.entries(PARAM_BASELINE)) {
+      const src = read(file);
+      for (const [id, spec] of Object.entries(map)) {
+        const re = new RegExp(`<input[^>]*id="${id}"[^>]*>`);
+        const m = src.match(re);
+        assert.ok(m, `${file}: control #${id} not found`);
+        const tag = m[0];
+        const type = (tag.match(/type="([^"]+)"/) || [])[1] || '';
+        const min = (tag.match(/min="([^"]+)"/) || [])[1] || '';
+        const max = (tag.match(/max="([^"]+)"/) || [])[1] || '';
+        const step = (tag.match(/step="([^"]+)"/) || [])[1] || '';
+        const value = (tag.match(/value="([^"]+)"/) || [])[1] || '';
+        const got = [type, min, max, step, value];
+        assert.deepStrictEqual(got, spec,
+          `${file} #${id}: expected ${JSON.stringify(spec)}, got ${JSON.stringify(got)}`);
+      }
+    }
+  });
+
+  await case_('G11-params', 'select defaults unchanged (first option stays selected)', () => {
+    const src = read('create.html');
+    // 色板下拉第一个 option 仍是 standard72（不限制色数那个仍是 0）
+    const pal = src.match(/<select id="palette-select"[^>]*>([\s\S]*?)<\/select>/);
+    assert.ok(pal, 'palette-select missing');
+    assert.ok(/<option value="standard72"/.test(pal[1]), 'first palette option must stay standard72');
+    const maxc = src.match(/<select id="max-color-select"[^>]*>([\s\S]*?)<\/select>/);
+    assert.ok(/<option value="0"/.test(maxc[1]), 'max-color-select must keep 不限制 as first option');
+    const peg = src.match(/<select id="pegboard-select"[^>]*>([\s\S]*?)<\/select>/);
+    assert.ok(/<option value="0"/.test(peg[1]), 'pegboard-select must keep 不显示分割线 as first option');
+  });
+
+  await case_('G11-params', 'checkboxes keep their checked state', () => {
+    const src = read('create.html');
+    const bg = src.match(/<input[^>]*id="bg-toggle"[^>]*>/);
+    assert.ok(bg, 'bg-toggle missing');
+    assert.ok(/\schecked[\s/>]/.test(bg[0]), 'bg-toggle must stay checked by default');
+    const wb = read('whiteboard.html');
+    const ref = wb.match(/<input[^>]*id="ref-image-toggle"[^>]*>/);
+    assert.ok(ref, 'ref-image-toggle missing');
+    assert.ok(/\schecked[\s/>]/.test(ref[0]), 'ref-image-toggle must stay checked');
+  });
+
+  await case_('G11-params', 'both pages mount the param panel with per-page storage keys', () => {
+    for (const f of ['create.html', 'whiteboard.html']) {
+      const src = read(f);
+      assert.ok(src.includes("from './assets/js/param-panel.js'"), `${f} must import param-panel.js`);
+      assert.ok(src.includes('initParamPanel({'), `${f} must call initParamPanel`);
+      assert.ok(/groupsKey:\s*'/.test(src), `${f} must persist group state`);
+      assert.ok(/collapsedKey:\s*'/.test(src), `${f} must persist collapsed state`);
+    }
+    // 两页的 storageKey 必须不同，否则收起状态会互相串扰
+    const k1 = read('create.html').match(/groupsKey:\s*'([^']+)'/)[1];
+    const k2 = read('whiteboard.html').match(/groupsKey:\s*'([^']+)'/)[1];
+    assert.notStrictEqual(k1, k2, 'param group storage keys must differ');
+  });
+
+  await case_('G11-params', 'whiteboard sidebar blocks are tagged for grouping', () => {
+    const src = read('whiteboard.html');
+    for (const tag of ['tools', 'ops', 'import', 'view', 'board', 'filters', 'current', 'palette']) {
+      assert.ok(src.includes(`data-pp-group="${tag}"`), `missing group marker: ${tag}`);
+    }
+    // 关键控件必须在被标记的块内，不能被漏掉
+    const sidebar = src.slice(src.indexOf('<aside class="draw-sidebar"'), src.indexOf('</aside>', src.indexOf('<aside class="draw-sidebar"')));
+    for (const id of ['tool-pen', 'tool-bucket', 'tool-eraser', 'tool-picker', 'brush-size-btns',
+      'btn-symmetry', 'symmetry-mode', 'btn-undo', 'btn-redo', 'btn-clear', 'btn-rotate',
+      'btn-import-grid', 'btn-import-ref', 'image-input', 'ref-alpha', 'ref-image-toggle',
+      'btn-toggle-grid', 'btn-toggle-ruler', 'btn-toggle-code',
+      'wb-board-size-select', 'wb-bright-side', 'wb-contrast-side', 'wb-saturate-side',
+      'btn-reset-filters-side', 'active-color-dot', 'palette-select', 'palette-search', 'swatches-container']) {
+      assert.ok(sidebar.includes(`id="${id}"`), `control #${id} must stay inside the sidebar block`);
+    }
+  });
+
+  await case_('G11-params', 'the 9 sidebar sections are covered by exactly 7 groups', () => {
+    const src = read('whiteboard.html');
+    const groups = src.match(/data-pp-group="[a-z]+"/g) || [];
+    assert.strictEqual(groups.length, 8, 'expected 8 tagged blocks (current + palette merge into one group)');
+    const init = src.slice(src.indexOf('initDrawSidebarGroups'));
+    for (const key of ['tools', 'palette', 'board', 'ops', 'filters', 'import', 'view']) {
+      assert.ok(init.includes(`key: '${key}'`), `group definition missing: ${key}`);
+    }
+  });
+
+  await case_('G11-params', 'top filter panel is folded by default so the canvas gets first screen', () => {
+    const src = read('whiteboard.html');
+    assert.ok(src.includes('id="wb-top-params-fold"'), 'top params must be a <details> fold');
+    // <details> 不带 open 属性即为默认折叠
+    const tag = src.match(/<details[^>]*id="wb-top-params-fold"[^>]*>/);
+    assert.ok(tag, 'wb-top-params-fold tag missing');
+    assert.ok(!/\sopen[\s>]/.test(tag[0]), 'top params fold must NOT be open by default');
+  });
+
+  await case_('G11-params', 'workbench height is viewport-bounded (canvas no longer pushed down)', () => {
+    const src = read('whiteboard.html');
+    // 工作台受 max-height 约束，且用 min-height:0 才不会反向撑破
+    assert.ok(/--wb-vh-offset/.test(src), 'must use a measured --wb-vh-offset');
+    assert.ok(/max-height:\s*calc\(100vh - var\(--wb-vh-offset/.test(src),
+      'workbench must bound its height with the measured offset');
+    assert.ok(/syncWorkbenchHeight/.test(src), 'must re-measure the offset at runtime');
+  });
+
+  await case_('G11-params', 'param-panel styles live in the shared theme, not page-local CSS', () => {
+    const css = read('assets/css/theme.css');
+    for (const sel of ['.is-param-panel', '.pp-head', '.pp-group-head', '.pp-group-body',
+      '.pp-resize-handle', '.pp-gutter', '.pp-inline-fold']) {
+      assert.ok(css.includes(sel), `theme.css missing ${sel}`);
+    }
+    // 窄屏必须让宽度调节失效，否则手机上拖不动也用不了
+    assert.ok(css.includes('.is-param-panel.is-narrow'), 'narrow-screen override must exist');
+  });
+
+  await case_('G11-params', 'param-panel.js never mutates control values', () => {
+    const src = read('assets/js/param-panel.js');
+    // 组件只做 DOM 搬运与显隐，绝不允许写 value / checked / min / max
+    for (const forbidden of ['.value =', '.checked =', '.min =', '.max =', '.step =', 'setAttribute(\'value']) {
+      assert.ok(!src.includes(forbidden),
+        `param-panel.js must not touch control values (found "${forbidden}")`);
+    }
+  });
+
   // -------------------------------------------------------------------------
   // Report
   // -------------------------------------------------------------------------

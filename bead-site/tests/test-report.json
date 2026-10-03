@@ -1,6 +1,6 @@
 {
-  "total": 119,
-  "passed": 119,
+  "total": 129,
+  "passed": 129,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -56,6 +56,11 @@
     "G10-sidebar": {
       "total": 12,
       "pass": 12,
+      "fail": 0
+    },
+    "G11-params": {
+      "total": 10,
+      "pass": 10,
       "fail": 0
     }
   },
