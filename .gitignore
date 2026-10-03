@@ -4,3 +4,6 @@ node_modules/
 .wrangler/
 .DS_Store
 Thumbs.db
+# 白板端到端验证脚本产出的临时截图（bead-site/assets/images 下的正式资源不受影响）
+bead-site/wb_verify.png
+bead-site/tests/wb_verify.png

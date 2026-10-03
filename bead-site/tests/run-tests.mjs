@@ -611,6 +611,378 @@ async function main() {
     }
   });
 
+  // =====================================================================
+  // GROUP 9 — Whiteboard core logic (whiteboard-core.js)
+  // 重点回归「调亮度/对比度后色号不更新」这个 bug：
+  // 旧实现走离屏 canvas 的 ctx.filter，滤镜不生效时色号保持不变；
+  // 新实现是纯数学变换 + Lab 匹配，必须保证参数一变色号就真的变。
+  // =====================================================================
+  const wb = await import('../assets/js/whiteboard-core.js');
+  const {
+    buildPaletteIndex, matchNearest, remapGrid, adjustPixel, isNeutralAdjust,
+    createEmptyGrid, computeStats, floodFill, rectCells, mirrorTargets,
+    createHistory, pushHistory, canUndo, canRedo, undo, redo,
+    pixelsToBeadGrid, filterPalette, sortByHue,
+  } = wb;
+
+  const wbPalette = ARTKAL_55;
+  const wbIndex = buildPaletteIndex(wbPalette);
+
+  await case_('G9-wb-core', 'buildPaletteIndex covers every palette entry with a finite Lab', () => {
+    assert.strictEqual(wbIndex.length, wbPalette.length);
+    for (const entry of wbIndex) {
+      assert.ok(entry.bead && typeof entry.bead.code === 'string', 'missing normalized bead.code');
+      assert.ok(Array.isArray(entry.lab) && entry.lab.length === 3, 'bad lab');
+      for (const v of entry.lab) assert.ok(Number.isFinite(v), 'non-finite lab value');
+    }
+  });
+
+  await case_('G9-wb-core', 'matchNearest returns an exact palette member for an exact palette color', () => {
+    for (const c of wbPalette) {
+      const got = matchNearest(c.r, c.g, c.b, wbIndex);
+      assert.strictEqual(got.code, c.id, `${c.id} matched to ${got.code}`);
+    }
+  });
+
+  await case_('G9-wb-core', 'adjustPixel: neutral params are identity', () => {
+    const src = { r: 120, g: 60, b: 200 };
+    const out = adjustPixel(src, { brightness: 0, contrast: 0, saturation: 0 });
+    assert.deepStrictEqual(out, src);
+  });
+
+  await case_('G9-wb-core', 'adjustPixel: brightness +100 doubles values and clamps at 255', () => {
+    const out = adjustPixel({ r: 100, g: 50, b: 10 }, { brightness: 100 });
+    assert.strictEqual(out.r, 200);
+    assert.strictEqual(out.g, 100);
+    assert.strictEqual(out.b, 20);
+    const hot = adjustPixel({ r: 200, g: 200, b: 200 }, { brightness: 100 });
+    assert.strictEqual(hot.r, 255, 'must clamp to 255 instead of overflowing');
+  });
+
+  await case_('G9-wb-core', 'adjustPixel: contrast -100 collapses toward mid gray', () => {
+    const out = adjustPixel({ r: 255, g: 255, b: 255 }, { contrast: -100 });
+    // (255-127.5)*0+127.5 = 127.5 -> 128
+    assert.ok(Math.abs(out.r - 128) <= 1, `expected ~128, got ${out.r}`);
+    assert.ok(Math.abs(out.g - 128) <= 1, `expected ~128, got ${out.g}`);
+  });
+
+  await case_('G9-wb-core', 'adjustPixel: saturation -100 yields a neutral gray', () => {
+    const out = adjustPixel({ r: 230, g: 0, b: 18 }, { saturation: -100 });
+    assert.strictEqual(out.r, out.g, 'red channel should equal green at zero saturation');
+    assert.strictEqual(out.g, out.b, 'green channel should equal blue at zero saturation');
+  });
+
+  await case_('G9-wb-core', 'isNeutralAdjust detects all-zero and non-zero param sets', () => {
+    assert.ok(isNeutralAdjust({}), 'empty object is neutral');
+    assert.ok(isNeutralAdjust({ brightness: 0, contrast: 0, saturation: 0 }), 'all zeros are neutral');
+    assert.ok(!isNeutralAdjust({ brightness: 1 }), 'brightness 1 is not neutral');
+    assert.ok(!isNeutralAdjust({ contrast: -30 }), 'contrast -30 is not neutral');
+  });
+
+  // ---- 核心 bug 回归：调滤镜后色号必须真的变 ----
+  function gridWithCodes(codes) {
+    return codes.map((row) => row.map((code) => {
+      const c = wbPalette.find((x) => x.id === code);
+      return { code: c.id, name: c.name, hex: c.hex, r: c.r, g: c.g, b: c.b };
+    }));
+  }
+  function codeOf(grid, x, y) {
+    return grid[y][x] ? grid[y][x].code : null;
+  }
+
+  await case_('G9-wb-core', 'REGRESSION: brightness change actually changes remapped bead codes', () => {
+    // 亮色 A05 (255,179,71) 提亮 +60 后必须跳到更浅的真实色号（实测 → A03）
+    const base = gridWithCodes([['A05', 'A05'], ['A05', 'A05']]);
+    const before = remapGrid(base, { brightness: 0 }, wbIndex);
+    const after = remapGrid(base, { brightness: 60 }, wbIndex);
+    assert.strictEqual(codeOf(before, 0, 0), 'A05');
+    assert.strictEqual(codeOf(after, 0, 0), 'A03', 'brightness +60 on A05 must map to A03');
+    assert.notStrictEqual(codeOf(after, 0, 0), 'A05', 'code must actually change');
+  });
+
+  await case_('G9-wb-core', 'REGRESSION: contrast change actually changes remapped bead codes', () => {
+    // 对比度 +70 会把中间调推向两端：A05 → A04（实测）
+    const base = gridWithCodes([['A05', 'A30'], ['A05', 'A30']]);
+    const before = remapGrid(base, { contrast: 0 }, wbIndex);
+    const after = remapGrid(base, { contrast: 70 }, wbIndex);
+    assert.strictEqual(codeOf(before, 0, 0), 'A05');
+    assert.strictEqual(codeOf(after, 0, 0), 'A04', 'contrast +70 on A05 must map to A04');
+    assert.notStrictEqual(codeOf(after, 0, 0), 'A05', 'code must actually change');
+  });
+
+  await case_('G9-wb-core', 'REGRESSION: negative brightness darkens codes (A05 → A26 measured)', () => {
+    const base = gridWithCodes([['A05']]);
+    const after = remapGrid(base, { brightness: -40 }, wbIndex);
+    assert.strictEqual(codeOf(after, 0, 0), 'A26', 'brightness -40 on A05 must map to A26');
+  });
+
+  await case_('G9-wb-core', 'REGRESSION: every slider direction produces a distinct remap (sweep)', () => {
+    // 逐档扫过亮度区间，确认不是只有极端值才有反应
+    const base = gridWithCodes([['A05']]);
+    const seen = new Set();
+    for (let b = -100; b <= 100; b += 20) {
+      seen.add(codeOf(remapGrid(base, { brightness: b }, wbIndex), 0, 0));
+    }
+    assert.ok(seen.size >= 4, `brightness sweep should hit several codes, got ${seen.size}: ${[...seen]}`);
+  });
+
+  await case_('G9-wb-core', 'remapGrid is deterministic (same input -> same output, twice)', () => {
+    const base = gridWithCodes([['A07', 'A01'], ['A30', 'A03']]);
+    const a = remapGrid(base, { brightness: 25, contrast: 15, saturation: -20 }, wbIndex);
+    const b = remapGrid(base, { brightness: 25, contrast: 15, saturation: -20 }, wbIndex);
+    assert.deepStrictEqual(a, b, 'remap must be deterministic — this is what ctx.filter could not guarantee');
+  });
+
+  await case_('G9-wb-core', 'remapGrid preserves every empty cell as null (no phantom beads)', () => {
+    const base = gridWithCodes([['A07', 'A01']]);
+    base[0][1] = null;
+    const out = remapGrid(base, { brightness: 80, contrast: 80, saturation: 80 }, wbIndex);
+    assert.strictEqual(out[0][1], null, 'empty cell must stay empty after remap');
+    assert.ok(out[0][0], 'filled cell must stay filled');
+  });
+
+  await case_('G9-wb-core', 'remapGrid with neutral params returns the original codes untouched', () => {
+    const base = gridWithCodes([['A07', 'A30', 'A01']]);
+    const out = remapGrid(base, { brightness: 0, contrast: 0, saturation: 0 }, wbIndex);
+    assert.deepStrictEqual(out.map((r) => r.map((c) => c && c.code)), [['A07', 'A30', 'A01']]);
+  });
+
+  await case_('G9-wb-core', 'remapGrid outputs only codes that exist in the target palette', () => {
+    const base = gridWithCodes([['A07', 'A30'], ['A01', 'A03']]);
+    const out = remapGrid(base, { brightness: 40, contrast: 40, saturation: 40 }, wbIndex);
+    const valid = new Set(wbPalette.map((c) => c.id));
+    for (const row of out) {
+      for (const bead of row) {
+        if (!bead) continue;
+        assert.ok(valid.has(bead.code), `remapped code ${bead.code} is not in the palette`);
+      }
+    }
+  });
+  await case_('G9-wb-core', 'REGRESSION: switching palette re-maps codes even with zero filters', () => {
+    // 这是本次修复的另一个真实 bug：过去 remapGrid 对空滤镜短路返回原色，
+    // 导致「Artkal → Perler」后画布上仍显示旧的 A 系列色号。
+    const other = [
+      { code: 'X1', name: 'X White', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
+      { code: 'X2', name: 'X Black', hex: '#000000', r: 0, g: 0, b: 0 },
+    ];
+    const idx = buildPaletteIndex(other);
+    const base = gridWithCodes([['A01', 'A30']]);
+    const out = remapGrid(base, { brightness: 0, contrast: 0, saturation: 0 }, idx);
+    assert.deepStrictEqual(
+      out.map((r) => r.map((c) => c && c.code)),
+      [['X1', 'X2']],
+      'with a zero filter the codes must still be re-mapped onto the new palette'
+    );
+  });
+
+  await case_('G9-wb-core', 'createEmptyGrid builds a square grid of nulls', () => {
+    const g = createEmptyGrid(5);
+    assert.strictEqual(g.length, 5);
+    for (const row of g) {
+      assert.strictEqual(row.length, 5);
+      for (const c of row) assert.strictEqual(c, null);
+    }
+  });
+
+  await case_('G9-wb-core', 'computeStats counts per code and totals (nulls ignored)', () => {
+    const g = [
+      [{ code: 'A07' }, { code: 'A07' }, null],
+      [{ code: 'A30' }, null, { code: 'A07' }],
+    ];
+    const s = computeStats(g);
+    assert.strictEqual(s.total, 4);
+    assert.strictEqual(s.colors, 2);
+    assert.strictEqual(s.list[0].code, 'A07', 'most used color must sort first');
+    assert.strictEqual(s.list[0].count, 3);
+  });
+
+  await case_('G9-wb-core', 'floodFill fills a contiguous region and respects boundaries', () => {
+    const A = { code: 'A07', r: 1, g: 2, b: 3 };
+    const B = { code: 'A30', r: 4, g: 5, b: 6 };
+    // 3x3，被 B 占据 (0,2)(1,2) 两格；左下 2×2 + 底行右侧 = 连通区共 7 格
+    const g = [
+      [null, null, B],
+      [null, null, B],
+      [null, null, null],
+    ];
+    const filled = floodFill(g, 0, 0, A, { size: 3 });
+    assert.strictEqual(filled, 7, 'connected region (7 cells) should be filled');
+    assert.strictEqual(g[0][0].code, 'A07');
+    assert.strictEqual(g[2][2].code, 'A07', 'bottom-right cell belongs to the same region');
+    assert.strictEqual(g[0][2].code, 'A30', 'wall must stay untouched');
+    assert.strictEqual(g[1][2].code, 'A30', 'second wall cell must stay untouched');
+  });
+
+  await case_('G9-wb-core', 'floodFill is a no-op when target color equals fill color', () => {
+    const A = { code: 'A07' };
+    const g = [[A, A], [A, A]];
+    const filled = floodFill(g, 0, 0, A, { size: 2 });
+    assert.strictEqual(filled, 0);
+  });
+
+  await case_('G9-wb-core', 'floodFill can erase to empty (fillBead = null)', () => {
+    const A = { code: 'A07' };
+    const g = [[A, A], [A, null]];
+    const filled = floodFill(g, 0, 0, null, { size: 2 });
+    assert.strictEqual(filled, 3);
+    assert.strictEqual(g[0][0], null);
+    assert.strictEqual(g[1][1], null, 'already-empty cell stays empty');
+  });
+
+  await case_('G9-wb-core', 'rectCells normalizes reverse drags and includes both ends', () => {
+    // 行优先顺序：先走完一行再换行
+    const expected = [[1, 1], [2, 1], [1, 2], [2, 2]];
+    assert.deepStrictEqual(rectCells(1, 1, 2, 2), expected);
+    assert.deepStrictEqual(rectCells(2, 2, 1, 1), expected, 'reverse drag must yield the same set');
+    assert.strictEqual(rectCells(0, 0, 0, 0).length, 1);
+  });
+
+  await case_('G9-wb-core', 'mirrorTargets: none returns empty, vertical mirrors x only', () => {
+    assert.deepStrictEqual(mirrorTargets(1, 5, 10, 'none'), []);
+    assert.deepStrictEqual(mirrorTargets(1, 5, 10, 'vertical'), [[8, 5]]);
+    assert.deepStrictEqual(mirrorTargets(1, 5, 10, 'horizontal'), [[1, 4]]);
+  });
+
+  await case_('G9-wb-core', 'mirrorTargets: quad returns 3 distinct targets, center cell returns none', () => {
+    assert.deepStrictEqual(mirrorTargets(1, 1, 10, 'quad'), [[8, 1], [1, 8], [8, 8]]);
+    // 奇数边长的正中格子镜像到自己，不应产生重复落子
+    assert.deepStrictEqual(mirrorTargets(2, 2, 5, 'quad'), []);
+  });
+
+  await case_('G9-wb-core', 'history: undo restores previous snapshot, redo re-applies it', () => {
+    const h = createHistory(10);
+    assert.ok(!canUndo(h) && !canRedo(h), 'fresh history is empty');
+    pushHistory(h, 'v1');
+    assert.ok(canUndo(h));
+    const back = undo(h, 'v2');
+    assert.strictEqual(back, 'v1');
+    assert.ok(canRedo(h), 'undo must populate the redo stack');
+    const fwd = redo(h, 'v1');
+    assert.strictEqual(fwd, 'v2');
+  });
+
+  await case_('G9-wb-core', 'history: a new action clears the redo stack (standard editor behavior)', () => {
+    const h = createHistory(10);
+    pushHistory(h, 'v1');
+    undo(h, 'v2');
+    assert.ok(canRedo(h));
+    pushHistory(h, 'v2');
+    assert.ok(!canRedo(h), 'redo stack must be cleared after a new edit');
+  });
+
+  await case_('G9-wb-core', 'history: respects the size limit (drops oldest)', () => {
+    const h = createHistory(3);
+    ['a', 'b', 'c', 'd'].forEach((s) => pushHistory(h, s));
+    assert.strictEqual(h.undo.length, 3);
+    assert.strictEqual(h.undo[0], 'b', 'oldest snapshot should have been dropped');
+  });
+
+  await case_('G9-wb-core', 'history: undo/redo on empty stacks return null instead of throwing', () => {
+    const h = createHistory(5);
+    assert.strictEqual(undo(h, 'x'), null);
+    assert.strictEqual(redo(h, 'x'), null);
+  });
+
+  await case_('G9-wb-core', 'pixelsToBeadGrid maps an image down to real bead codes', () => {
+    const w = 4;
+    const h = 4;
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let i = 0; i < w * h; i++) {
+      data[i * 4] = 255; data[i * 4 + 1] = 255; data[i * 4 + 2] = 255; data[i * 4 + 3] = 255;
+    }
+    const out = pixelsToBeadGrid({ data, width: w, height: h }, 2, 2, wbIndex);
+    assert.strictEqual(out.length, 2);
+    assert.strictEqual(out[0].length, 2);
+    for (const row of out) for (const bead of row) assert.ok(bead && bead.code === 'A01', 'white image must map to A01');
+  });
+
+  await case_('G9-wb-core', 'pixelsToBeadGrid treats fully transparent pixels as empty cells', () => {
+    const w = 2;
+    const h = 2;
+    const data = new Uint8ClampedArray(w * h * 4); // all zeros => alpha 0
+    const out = pixelsToBeadGrid({ data, width: w, height: h }, 2, 2, wbIndex);
+    for (const row of out) for (const bead of row) assert.strictEqual(bead, null);
+  });
+
+  await case_('G9-wb-core', 'filterPalette matches code or name, case-insensitive; empty query returns all', () => {
+    assert.strictEqual(filterPalette(wbPalette, '').length, wbPalette.length);
+    assert.ok(filterPalette(wbPalette, 'a07').length >= 1, 'code search must be case-insensitive');
+    const reds = filterPalette(wbPalette, 'red');
+    assert.ok(reds.length >= 1, 'name search must work');
+    assert.ok(reds.every((c) => /red/i.test(c.name)), 'every hit must actually contain the query');
+    assert.strictEqual(filterPalette(wbPalette, 'zzz-not-a-color').length, 0);
+  });
+
+  await case_('G9-wb-core', 'sortByHue returns the same members (pure reordering)', () => {
+    const sorted = sortByHue(wbPalette);
+    assert.strictEqual(sorted.length, wbPalette.length);
+    assert.deepStrictEqual(
+      sorted.map((c) => c.id).slice().sort(),
+      wbPalette.map((c) => c.id).slice().sort(),
+      'sortByHue must not add or drop colors'
+    );
+  });
+  await case_('G9-wb-core', 'whiteboard.html no longer relies on ctx.filter for bead remapping', () => {
+    const src = read('whiteboard.html');
+    assert.ok(
+      !/ctx2?\.filter\s*=/.test(src),
+      'regression: whiteboard.html must not use canvas ctx.filter — it silently no-ops in some browsers'
+    );
+    assert.ok(src.includes('remapGrid'), 'whiteboard.html must remap through whiteboard-core.remapGrid');
+    assert.ok(src.includes("from './assets/js/whiteboard-core.js'"), 'must import the shared core module');
+  });
+
+  await case_('G9-wb-core', 'whiteboard.html every slider input path reaches applyFiltersAndRender', () => {
+    const src = read('whiteboard.html');
+    // 6 个画面滤镜控件（顶部 3 + 侧栏 3）都必须触发重算
+    const handlers = src.match(/addEventListener\('input'/g) || [];
+    assert.ok(handlers.length >= 6, `expected >=6 input listeners, found ${handlers.length}`);
+    // 顶部与侧栏滑块都必须在 input 时调用 applyFiltersAndRender
+    const brightTop = src.indexOf("wbBrightRange.addEventListener('input'");
+    const contrastTop = src.indexOf("wbContrastRange.addEventListener('input'");
+    const brightSide = src.indexOf("wbBrightSide.addEventListener('input'");
+    const contrastSide = src.indexOf("wbContrastSide.addEventListener('input'");
+    for (const [name, idx] of [['brightness(top)', brightTop], ['contrast(top)', contrastTop], ['brightness(side)', brightSide], ['contrast(side)', contrastSide]]) {
+      assert.ok(idx > -1, `missing ${name} listener`);
+      const seg = src.slice(idx, idx + 320);
+      assert.ok(seg.includes('applyFiltersAndRender'), `${name} must call applyFiltersAndRender`);
+    }
+  });
+
+  await case_('G9-wb-core', 'whiteboard.html module script parses as valid ESM', () => {
+    const src = read('whiteboard.html');
+    const m = src.match(/<script type="module">([\s\S]*?)<\/script>/);
+    assert.ok(m, 'no module script found in whiteboard.html');
+    if (typeof vm.SourceTextModule === 'function') {
+      new vm.SourceTextModule(m[1], { identifier: 'whiteboard-inline-module' });
+    } else {
+      nodeCheck('whiteboard.html');
+    }
+  });
+
+  await case_('G9-wb-core', 'whiteboard.html exposes the aligned feature set', () => {
+    const src = read('whiteboard.html');
+    const required = [
+      'btn-redo',            // 重做
+      'tool-rect',           // 矩形
+      'tool-line',           // 直线
+      'tool-move',           // 移动
+      'brush-size-btns',     // 笔刷大小
+      'btn-symmetry',        // 对称
+      'symmetry-mode',
+      'btn-import-grid',     // 图片转色号
+      'btn-import-ref',      // 图片临摹底图
+      'btn-toggle-grid',     // 网格开关
+      'btn-toggle-ruler',    // 标尺开关
+      'btn-toggle-code',     // 色号开关
+      'palette-search',      // 色号搜索
+      'btn-rotate',          // 旋转 90
+    ];
+    for (const id of required) {
+      assert.ok(src.includes(`id="${id}"`), `missing control: #${id}`);
+    }
+  });
+
   // -------------------------------------------------------------------------
   // Report
   // -------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 {
-  "total": 41,
-  "passed": 41,
+  "total": 77,
+  "passed": 77,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -41,6 +41,11 @@
     "G8-hollow-code": {
       "total": 5,
       "pass": 5,
+      "fail": 0
+    },
+    "G9-wb-core": {
+      "total": 36,
+      "pass": 36,
       "fail": 0
     }
   },
