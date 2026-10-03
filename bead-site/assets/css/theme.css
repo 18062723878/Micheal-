@@ -1877,6 +1877,299 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   animation: modeAsideIn 0.34s var(--ease-out, ease-out) 0.12s both;
 }
 
+/* ------------------------------------------------------------------ *
+ * 教程侧边栏组件（创作工坊 / 白板画板各持一个独立实例）
+ *
+ * 图标对齐的核心做法：所有图标都放进 .sb-track —— 一个固定 30×30 的
+ * 方形轨道（flex 居中 + 固定 line-height + font-size）。
+ * 收起态只是隐藏文字，轨道尺寸与位置完全不变，
+ * 因此图标在两种状态下都像素级居中，切换时不会偏移或跳动。
+ * ------------------------------------------------------------------ */
+.sb-root {
+  --sb-track: 30px;
+  --sb-gap: 10px;
+  position: sticky;
+  top: 74px;
+  max-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  overflow: hidden;
+}
+
+/* 固定尺寸图标轨道：水平垂直居中，两种状态共用 */
+.sb-track {
+  flex: none;
+  width: var(--sb-track);
+  height: var(--sb-track);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 15px;
+  text-align: center;
+  color: inherit;
+}
+
+/* --- 顶部：品牌（图标 + 文字） ---
+   品牌图标始终坐在固定 30px 轨道的起点，且头部整体宽度撑满，
+   使图标的水平位置只由「侧栏宽度 + 内边距」决定 ——
+   展开态与收起态的图标中心因此完全相同，切换时不会左右跳动。 */
+.sb-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--sb-track);
+}
+.sb-brand-text {
+  display: block;
+  min-width: 0;
+  flex: 1;
+}
+.sb-brand-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--foreground);
+  line-height: 1.3;
+}
+.sb-brand-sub {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  line-height: 1.3;
+}
+
+/* 折叠按钮：两态结构完全相同（图标轨道 + 文字标签），差别只在文字是否显示。
+   因此图标轨道的起点 = 侧栏左边缘 + 边框 + 内边距，两态完全一致。 */
+.sb-collapse-btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--muted);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.sb-collapse-label {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  line-height: 1;
+}
+.sb-collapse-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.sb-chevron {
+  font-size: 17px;
+  line-height: 1;
+  /* 用 transform 居中，避免不同字体的基线偏移 */
+  display: block;
+  transform: translateY(-1px);
+}
+
+/* --- 搜索框 --- */
+.sb-search-wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--sb-track) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 6px;
+  padding: 0;
+}
+.sb-track--search {
+  position: absolute;
+  left: 8px;
+  font-size: 12px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.sb-search {
+  grid-column: 2;
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  font-size: 12.5px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--muted);
+  color: var(--foreground);
+  box-sizing: border-box;
+}
+.sb-search::placeholder { color: var(--muted-foreground); }
+.sb-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.sb-scope {
+  grid-column: 1 / -1;
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+}
+
+/* --- 结果区 --- */
+.sb-results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sb-count {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+}
+.sb-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.sb-hit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--muted);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.sb-hit:hover { border-color: var(--accent); }
+.sb-hit-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--foreground);
+  line-height: 1.45;
+}
+.sb-hit-cat {
+  align-self: flex-start;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+}
+.sb-hit-snip {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sb-hit mark,
+.sb-empty mark {
+  background: rgba(255, 214, 0, 0.45);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+.sb-empty {
+  padding: 16px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted-foreground);
+  text-align: center;
+}
+.sb-empty b { color: var(--foreground); }
+
+/* --- 底部：目录链接 + 折叠按钮 ---
+   折叠按钮放在底部，收起态下侧栏里只剩两枚图标：品牌（顶部）与折叠（底部），
+   两者都居中于同一条垂直中轴线上。 */
+.sb-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.sb-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.sb-link:hover { border-color: var(--accent); color: var(--accent); }
+.sb-link--muted { font-weight: 400; font-size: 11.5px; }
+
+/* ============ 收起态 ============
+   关键：**左右内边距与展开态保持完全一致**（都是 14px），只隐藏文字、
+   让内容居中。这样图标的起点位置 = 侧栏左边缘 + 边框 + 内边距，
+   在两种状态下算出的是同一个值，因此水平位置零偏移、切换不跳动。
+   收起态宽度 = 1(边框) + 14(左内边距) + 30(轨道) + 14(右内边距) + 1(边框) = 60px。 */
+.sb-root.is-collapsed {
+  padding: 12px 14px;
+  /* 不用 align-items: center —— 居中会让 30px 轨道在 32px 内容区里产生 1px 偏移。
+     flex-start 使子元素一律从内容区起点开始，与展开态像素级一致。 */
+  align-items: flex-start;
+  gap: 10px;
+}
+.sb-root.is-collapsed .sb-brand-text,
+.sb-root.is-collapsed .sb-search-wrap,
+.sb-root.is-collapsed .sb-results,
+.sb-root.is-collapsed .sb-link,
+.sb-root.is-collapsed .sb-collapse-label {
+  display: none;
+}
+/* 收起后：头部只剩品牌图标，底部只剩折叠按钮。
+   两处都靠左对齐（与展开态的内容起点一致），不再居中 ——
+   这样两枚图标的水平位置在两种状态下完全相同。 */
+.sb-root.is-collapsed .sb-head {
+  justify-content: flex-start;
+  width: 100%;
+}
+.sb-root.is-collapsed .sb-foot {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 0;
+  border-top: none;
+  align-items: flex-start;
+}
+/* 收起态的折叠按钮：只剩图标轨道，宽度等于轨道宽度并靠左对齐，
+   这样它的图标起点与展开态完全相同（都是侧栏内容区起点）。 */
+.sb-root.is-collapsed .sb-collapse-btn {
+  width: var(--sb-track);
+  min-height: var(--sb-track);
+  height: var(--sb-track);
+  padding: 0;
+  border-radius: 9px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
