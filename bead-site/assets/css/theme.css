@@ -2170,6 +2170,258 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border-radius: 9px;
 }
 
+/* ------------------------------------------------------------------ *
+ * 参数面板（分组收纳 + 宽度调节 + 整体收起）
+ * 用于白板画板的左侧参数栏与创作工坊的设置区。
+ * 只做「收纳」不做「改造」：控件本身零改动，只是被搬进可折叠的分组里。
+ * ------------------------------------------------------------------ */
+.is-param-panel {
+  --pp-width: 260px;
+  position: relative;
+  flex: 0 0 var(--pp-width);
+  width: var(--pp-width);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 面板头部 */
+.pp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.pp-head-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+  white-space: nowrap;
+}
+.pp-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pp-mini-btn {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+.pp-mini-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.pp-collapse-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* 拖拽把手：贴在面板右缘 */
+.pp-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 5;
+}
+.pp-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 2px;
+  height: 32px;
+  margin-top: -16px;
+  border-radius: 1px;
+  background: var(--border);
+  transition: background 0.15s ease;
+}
+.pp-resize-handle:hover::after { background: var(--accent); }
+
+/* 面板主体：可纵向滚动，避免把整页撑高 */
+.pp-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scrollbar-width: thin;
+}
+
+/* 分组 */
+.pp-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--muted);
+  overflow: hidden;
+}
+.pp-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.pp-group-head:hover { color: var(--accent); }
+.pp-caret {
+  flex: none;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  line-height: 1;
+}
+.pp-group-label { flex: 1; min-width: 0; }
+.pp-group-hint {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+}
+.pp-group-body {
+  display: none;
+  padding: 2px 10px 10px;
+  flex-direction: column;
+  gap: 8px;
+}
+.pp-group.is-open > .pp-group-body { display: flex; }
+/* 展开时用高度过渡，让收纳过程不突兀（不改变布局结果） */
+.pp-group.is-open > .pp-group-body {
+  animation: ppGroupIn 0.16s var(--ease-out, ease-out);
+}
+@keyframes ppGroupIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 收起态：面板本体让位，只留外部把手 */
+.is-param-panel.is-collapsed {
+  flex: 0 0 auto;
+  width: auto;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.is-param-panel.is-collapsed > *:not(.pp-resize-handle) { display: none; }
+.pp-gutter {
+  display: none;
+}
+.pp-gutter.is-open {
+  display: block;
+  flex: 0 0 auto;
+}
+.pp-gutter-btn {
+  writing-mode: vertical-rl;
+  padding: 10px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.pp-gutter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* 窄屏：宽度调节与收起不再适用，参数面板回到常规文档流 */
+.is-param-panel.is-narrow {
+  flex: 1 1 auto;
+  width: 100%;
+}
+.is-param-panel.is-narrow .pp-resize-handle { display: none; }
+.pp-gutter.is-narrow { display: none !important; }
+.is-param-panel.is-narrow.is-collapsed { display: none; }
+
+/* ---- 用于「多列网格」场景（如创作工坊的设置区） ----
+   .settings-grid 本身是 grid，套上组件后要：
+     - 整块跨满所有列（grid-column: 1 / -1）
+     - 自身内部再用一个 grid 还原原来的多列排布
+     - 不用固定宽度与拖拽把手（宽度由列数决定） */
+.settings-grid.is-param-panel {
+  flex: none;
+  width: auto;
+  grid-column: 1 / -1;
+  padding: 0;
+  border: none;
+  background: transparent;
+  max-width: none;
+}
+.settings-grid.is-param-panel .pp-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  overflow: visible;
+}
+.settings-grid.is-param-panel .pp-resize-handle { display: none; }
+.settings-grid.is-param-panel .pp-group { min-width: 0; }
+.settings-grid.is-param-panel.is-collapsed { display: block; }
+.settings-grid.is-param-panel.is-collapsed .pp-body,
+.settings-grid.is-param-panel.is-collapsed .pp-resize-handle { display: none; }
+
+/* 页面内的行内折叠容器（用于顶部参数面板这类「与侧栏镜像」的控件） */
+.pp-inline { margin-bottom: 12px; }
+.pp-inline-fold {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--muted, var(--card));
+  overflow: hidden;
+}
+.pp-inline-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+  user-select: none;
+}
+.pp-inline-summary::-webkit-details-marker { display: none; }
+.pp-inline-summary:hover { color: var(--accent); }
+.pp-inline-fold[open] > .pp-inline-summary .pp-caret { transform: rotate(90deg); }
+.pp-inline-summary .pp-caret {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  transition: transform 0.15s var(--ease-out, ease-out);
+}
+/* 展开时把内边距还给内容区，避免贴边 */
+.pp-inline-fold[open] > .filter-controls-panel { margin: 0 14px 14px; }
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
