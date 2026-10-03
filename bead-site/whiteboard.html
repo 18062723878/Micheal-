@@ -282,6 +282,113 @@
       color: var(--text-main);
     }
 
+    /* ===== 与 pixel-beads 对齐新增的控件样式 =====
+       沿用本文件既有的 --border-color / --bg-secondary / 6~8px 圆角语言，
+       避免新控件看起来像另一个站点。 */
+
+    /* 笔刷大小选择 */
+    .brush-size-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .brush-size-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .brush-size-btns {
+      display: flex;
+      gap: 4px;
+    }
+    .size-btn {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .size-btn:hover { border-color: var(--primary); }
+    .size-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* 对称开关（迷你 toggle） */
+    .mini-toggle {
+      padding: 2px 9px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mini-toggle[aria-pressed="true"] {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+
+    /* 显示设置里的开关态按钮 */
+    .view-toggles .tool-btn.toggle-on {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* 底图（参考图）控制 */
+    .ref-image-row {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .mini-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    /* 色板搜索 */
+    .palette-search {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .palette-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-family: monospace;
+    }
+    .palette-empty {
+      grid-column: 1 / -1;
+      padding: 14px 4px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 移动模式下画布不显示十字光标 */
+    #wb-canvas.tool-move { cursor: grab; }
+    #wb-canvas.tool-move:active { cursor: grabbing; }
+
     /* 全屏专属模式 (跟随深色/浅色主题) */
     .board-workbench.is-fullscreen {
       position: fixed !important;
@@ -552,16 +659,77 @@
                   <button id="tool-bucket" class="tool-btn" type="button" data-page-node-id="xjE9lFe2AOTDLw09x5x7xf">🪣 填充</button>
                   <button id="tool-eraser" class="tool-btn" type="button" data-page-node-id="7rKYzqTLZiqWUEMCdYELKd">🧹 橡皮</button>
                   <button id="tool-picker" class="tool-btn" type="button" data-page-node-id="5PQXHvDQl6L8TLI8JOHSD2">💉 吸管</button>
+                  <button id="tool-rect" class="tool-btn" type="button">▭ 矩形</button>
+                  <button id="tool-line" class="tool-btn" type="button">📏 直线</button>
+                  <button id="tool-move" class="tool-btn" type="button">✋ 移动</button>
                 </div>
+                <div class="brush-size-row">
+                  <span class="brush-size-label">笔刷大小</span>
+                  <div class="brush-size-btns" id="brush-size-btns">
+                    <button class="size-btn active" type="button" data-size="1">1</button>
+                    <button class="size-btn" type="button" data-size="2">2</button>
+                    <button class="size-btn" type="button" data-size="3">3</button>
+                    <button class="size-btn" type="button" data-size="4">4</button>
+                    <button class="size-btn" type="button" data-size="5">5</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 对称绘制：像素画常用左右/上下对称，实时镜像落子 -->
+              <div>
+                <div class="sidebar-section-title">
+                  <span>对称绘制</span>
+                  <button id="btn-symmetry" class="mini-toggle" type="button" aria-pressed="false">关</button>
+                </div>
+                <select id="symmetry-mode" class="wb-select" style="width: 100%; padding: 6px 8px; font-size: 12px;" disabled>
+                  <option value="vertical">左右对称</option>
+                  <option value="horizontal">上下对称</option>
+                  <option value="quad">四向对称</option>
+                </select>
               </div>
 
               <div data-page-node-id="W6bvtXjGOp3CncnmeA8820">
                 <div class="sidebar-section-title" data-page-node-id="7rhnA76I4zGY9VecXQvSIy">画板操作</div>
                 <div class="tools-grid" data-page-node-id="z7yzK6uE5ipj17CjesjjQx">
                   <button id="btn-undo" class="tool-btn" type="button" data-page-node-id="AA8jc4gDtsizZvt9uCBBXe">↩️ 撤销</button>
+                  <button id="btn-redo" class="tool-btn" type="button">↪️ 重做</button>
                   <button id="btn-clear" class="tool-btn" type="button" data-page-node-id="jHQ47mNMFpKWiLxeDwCNHf">🗑️ 清空</button>
                   <button id="btn-hflip" class="tool-btn" type="button" data-page-node-id="nfFI9X8Sl1wTKJb6okEgHT">⇄ 水平</button>
                   <button id="btn-vflip" class="tool-btn" type="button" data-page-node-id="qK1VbuMNbjt68GIt12nO7F">⇅ 垂直</button>
+                  <button id="btn-rotate" class="tool-btn" type="button">🔄 旋转</button>
+                </div>
+              </div>
+
+              <!-- 图片导入：既能转成真实色号，也能作为半透明临摹底图 -->
+              <div>
+                <div class="sidebar-section-title">图片导入</div>
+                <div class="tools-grid">
+                  <button id="btn-import-grid" class="tool-btn" type="button">🧩 转色号</button>
+                  <button id="btn-import-ref" class="tool-btn" type="button">🖼️ 临摹底图</button>
+                </div>
+                <input id="image-input" type="file" accept="image/*" hidden />
+                <div class="ref-image-row" id="ref-image-row" hidden>
+                  <label class="mini-check">
+                    <input type="checkbox" id="ref-image-toggle" checked />
+                    <span>显示底图</span>
+                  </label>
+                  <div class="side-slider" style="margin-top:6px;">
+                    <div class="side-slider-header">
+                      <span>底图透明度</span>
+                      <span id="ref-alpha-val" class="slider-val-box">45%</span>
+                    </div>
+                    <input id="ref-alpha" type="range" min="10" max="90" step="5" value="45" aria-label="底图透明度" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- 视图开关：网格 / 标尺 / 色号 -->
+              <div>
+                <div class="sidebar-section-title">显示设置</div>
+                <div class="tools-grid view-toggles">
+                  <button id="btn-toggle-grid" class="tool-btn toggle-on" type="button" aria-pressed="true">🔲 网格</button>
+                  <button id="btn-toggle-ruler" class="tool-btn toggle-on" type="button" aria-pressed="true">📐 标尺</button>
+                  <button id="btn-toggle-code" class="tool-btn toggle-on" type="button" aria-pressed="true">🔢 色号</button>
                 </div>
               </div>
 
@@ -648,6 +816,8 @@
                     <option value="retro" data-page-node-id="K1bulKlsmiVZXbkj6hMbmO">复古 8色</option>
                   </select>
                 </div>
+                <input id="palette-search" class="wb-select palette-search" type="search" placeholder="搜索色号或名称，如 A07 / Red" aria-label="搜索色号" />
+                <div class="palette-meta" id="palette-meta"></div>
                 <div class="color-swatches-scroll" id="swatches-container" data-page-node-id="DDV4WVZZKcBIYMbe3PAClQ"></div>
               </div>
             </aside>
@@ -711,6 +881,14 @@
     // 官方色库：55 色含预计算 Lab 值，与「上传转图纸」共用同一份数据源，
     // 保证白板画出来的色号和转图导出的色号完全一致（修掉「写着72色实际29色」的坑）
     import { ARTKAL_55 } from './assets/js/palette.js';
+    // 白板核心纯逻辑：滤镜数学变换 / Lab 色号匹配 / 填充 / 对称 / 撤销重做 / 图片转网格。
+    // 抽成独立模块既让本文件保持原有结构，也让这些逻辑能被 Node 回归测试直接覆盖。
+    import {
+      buildPaletteIndex, matchNearest, remapGrid, isNeutralAdjust,
+      createEmptyGrid, computeStats, floodFill, rectCells, mirrorTargets,
+      createHistory, pushHistory, canUndo, canRedo, undo, redo,
+      pixelsToBeadGrid, filterPalette, sortByHue,
+    } from './assets/js/whiteboard-core.js';
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
@@ -768,11 +946,27 @@
     let currentTool = 'pen';
     let boardSize = 29;
 
-    // baseGrid 保存用户绘制的原始色块，grid 保存经滤镜调色并重新匹配色号后的实际豆豆数据
-    let baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-    let grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-    let historyStack = [];
+    // baseGrid 保存用户绘制的原始色块（永远存「原始 bead」），
+    // grid 保存经滤镜调色并重新匹配色号后的实际豆豆数据 —— 右侧图纸与用量清单都读 grid。
+    let baseGrid = createEmptyGrid(boardSize);
+    let grid = createEmptyGrid(boardSize);
+    // 撤销/重做共用一套双栈快照，保证两个方向都能回到任意一步
+    let history = createHistory(40);
     let schematicZoom = 1.0;
+
+    // 笔刷大小（1~5 格）
+    let brushSize = 1;
+    // 对称绘制：'none' | 'vertical' | 'horizontal' | 'quad'
+    let symmetryMode = 'none';
+    // 视图开关
+    let showGrid = true;
+    let showRuler = true;
+    let showCode = true;
+    // 临摹底图
+    let refImage = null;      // HTMLImageElement
+    let refAlpha = 0.45;
+    // 当前色板的 Lab 索引（重建色号时用，保证与上传转图纸同一套色彩科学）
+    let paletteIndex = buildPaletteIndex(activePaletteList);
 
     const canvas = document.getElementById('wb-canvas');
     const ctx = canvas.getContext('2d');
@@ -783,7 +977,62 @@
     const activeColorDot = document.getElementById('active-color-dot');
     const activeColorName = document.getElementById('active-color-name');
     const paletteSelect = document.getElementById('palette-select');
+    const paletteSearch = document.getElementById('palette-search');
+    const paletteMeta = document.getElementById('palette-meta');
     const statsContainer = document.getElementById('stats-container');
+
+    /**
+     * 重建色板 UI：按搜索词过滤 + 按色相排序，让 55 色也好找。
+     * 用 CSS 变量（而不是 filter: hue-rotate）给色块上色，
+     * 这样色块显示的就是豆子本身的颜色，不会被排序时的色相干扰。
+     */
+    function renderPalette() {
+      const q = paletteSearch.value;
+      let list = sortByHue(filterPalette(activePaletteList, q));
+      swatchesContainer.innerHTML = '';
+      if (!list.length) {
+        const empty = document.createElement('div');
+        empty.className = 'palette-empty';
+        empty.textContent = '没有匹配的色号';
+        swatchesContainer.appendChild(empty);
+      }
+      list.forEach(item => {
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch';
+        swatch.style.backgroundColor = item.hex;
+        swatch.title = `${item.code} ${item.name}`;
+        if (item.code === activeColor.code) swatch.classList.add('selected');
+
+        swatch.addEventListener('click', () => {
+          activeColor = item;
+          swatchesContainer.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+          swatch.classList.add('selected');
+          activeColorDot.style.backgroundColor = item.hex;
+          activeColorName.textContent = `${item.code} ${item.name}`;
+          if (currentTool === 'eraser' || currentTool === 'picker') setTool('pen');
+        });
+        swatchesContainer.appendChild(swatch);
+      });
+      paletteMeta.textContent = `${list.length} / ${activePaletteList.length} 色`;
+    }
+
+    function initPalette() {
+      renderPalette();
+    }
+
+    paletteSearch.addEventListener('input', renderPalette);
+
+    paletteSelect.addEventListener('change', (e) => {
+      activePaletteList = PALETTES[e.target.value] || PALETTES.artkal;
+      activeColor = activePaletteList[0];
+      activeColorDot.style.backgroundColor = activeColor.hex;
+      activeColorName.textContent = `${activeColor.code} ${activeColor.name}`;
+      // 换色板 = 换一套真实色号体系，必须重建 Lab 索引，
+      // 否则滤镜重映射会拿旧色板的坐标去匹配新色板。
+      paletteIndex = buildPaletteIndex(activePaletteList);
+      initPalette();
+      applyFiltersAndRender();
+    });
 
     const wbLeft = document.getElementById('workbench-left');
     const wbRight = document.getElementById('workbench-right');
@@ -825,44 +1074,14 @@
       wbSaturateSideVal.textContent = wbSaturateRange.value;
     }
 
-    function initPalette() {
-      swatchesContainer.innerHTML = '';
-      activePaletteList.forEach(item => {
-        const swatch = document.createElement('div');
-        swatch.className = 'swatch';
-        swatch.style.backgroundColor = item.hex;
-        swatch.title = `${item.code} ${item.name}`;
-        if (item.code === activeColor.code) swatch.classList.add('selected');
-
-        swatch.addEventListener('click', () => {
-          activeColor = item;
-          document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
-          swatch.classList.add('selected');
-          activeColorDot.style.backgroundColor = item.hex;
-          activeColorName.textContent = `${item.code} ${item.name}`;
-          if (currentTool === 'eraser' || currentTool === 'picker') setTool('pen');
-        });
-        swatchesContainer.appendChild(swatch);
-      });
-    }
-
-    paletteSelect.addEventListener('change', (e) => {
-      activePaletteList = PALETTES[e.target.value] || PALETTES.artkal;
-      activeColor = activePaletteList[0];
-      activeColorDot.style.backgroundColor = activeColor.hex;
-      activeColorName.textContent = `${activeColor.code} ${activeColor.name}`;
-      initPalette();
-      applyFiltersAndRender();
-    });
-
     const boardSizeSelect = document.getElementById('wb-board-size-select');
 
     // 统一的改板型入口：上方滑块和侧边栏下拉框都走这里
     function resetBoardTo(size) {
       boardSize = size;
-      baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-      grid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
-      historyStack = [];
+      baseGrid = createEmptyGrid(boardSize);
+      grid = createEmptyGrid(boardSize);
+      history = createHistory(40);
       setBoardZoom(1, true);
       applyFiltersAndRender();
     }
@@ -963,101 +1182,99 @@
     btnResetFiltersSide.addEventListener('click', resetAllFilters);
     mirrorFiltersToSide();
 
-    function pushHistory() {
-      if (historyStack.length >= 25) historyStack.shift();
-      historyStack.push(JSON.stringify(baseGrid));
-    }
-
     function setTool(tool) {
       currentTool = tool;
       document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
       const btn = document.getElementById(`tool-${tool}`);
       if (btn) btn.classList.add('active');
+      // 移动工具下画布改为抓取光标，提示用户「拖动是平移不是画」
+      canvas.classList.toggle('tool-move', tool === 'move');
     }
 
     document.getElementById('tool-pen').addEventListener('click', () => setTool('pen'));
     document.getElementById('tool-bucket').addEventListener('click', () => setTool('bucket'));
     document.getElementById('tool-eraser').addEventListener('click', () => setTool('eraser'));
     document.getElementById('tool-picker').addEventListener('click', () => setTool('picker'));
+    document.getElementById('tool-rect').addEventListener('click', () => setTool('rect'));
+    document.getElementById('tool-line').addEventListener('click', () => setTool('line'));
+    document.getElementById('tool-move').addEventListener('click', () => setTool('move'));
 
-    // 颜色欧氏距离计算匹配
-    function findNearestColor(r, g, b, palette) {
-      let minDist = Infinity;
-      let matched = palette[0];
-      for (const item of palette) {
-        const rmean = (r + item.r) / 2;
-        const dr = r - item.r;
-        const dg = g - item.g;
-        const db = b - item.b;
-        const dist = (2 + rmean / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rmean) / 256) * db * db;
-        if (dist < minDist) {
-          minDist = dist;
-          matched = item;
-        }
-      }
-      return matched;
+    // 笔刷大小
+    document.getElementById('brush-size-btns').addEventListener('click', (e) => {
+      const btn = e.target.closest('.size-btn');
+      if (!btn) return;
+      brushSize = parseInt(btn.dataset.size, 10) || 1;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
+    });
+
+    // 对称绘制开关
+    const btnSymmetry = document.getElementById('btn-symmetry');
+    const symmetrySelect = document.getElementById('symmetry-mode');
+    btnSymmetry.addEventListener('click', () => {
+      const on = btnSymmetry.getAttribute('aria-pressed') === 'true';
+      btnSymmetry.setAttribute('aria-pressed', String(!on));
+      btnSymmetry.textContent = on ? '关' : '开';
+      symmetrySelect.disabled = on;
+      symmetryMode = on ? 'none' : symmetrySelect.value;
+    });
+    symmetrySelect.addEventListener('change', (e) => {
+      symmetryMode = btnSymmetry.getAttribute('aria-pressed') === 'true' ? e.target.value : 'none';
+    });
+
+    // 显示设置：网格 / 标尺 / 色号
+    const toggleGridBtn = document.getElementById('btn-toggle-grid');
+    const toggleRulerBtn = document.getElementById('btn-toggle-ruler');
+    const toggleCodeBtn = document.getElementById('btn-toggle-code');
+    toggleGridBtn.addEventListener('click', () => {
+      showGrid = !showGrid;
+      toggleGridBtn.classList.toggle('toggle-on', showGrid);
+      toggleGridBtn.setAttribute('aria-pressed', String(showGrid));
+      renderBoard();
+    });
+    toggleRulerBtn.addEventListener('click', () => {
+      showRuler = !showRuler;
+      toggleRulerBtn.classList.toggle('toggle-on', showRuler);
+      toggleRulerBtn.setAttribute('aria-pressed', String(showRuler));
+      renderBoard();
+    });
+    toggleCodeBtn.addEventListener('click', () => {
+      showCode = !showCode;
+      toggleCodeBtn.classList.toggle('toggle-on', showCode);
+      toggleCodeBtn.setAttribute('aria-pressed', String(showCode));
+      renderBoard();
+    });
+
+    /**
+     * 读取当前三个画面滤镜值。
+     * 顶部筛选栏与侧栏控件是双向同步的（见 mirrorFiltersToSide），
+     * 统一从顶部滑块读，避免两处取值不一致。
+     */
+    function currentAdjust() {
+      return {
+        brightness: parseInt(wbBrightRange.value, 10) || 0,
+        contrast: parseInt(wbContrastRange.value, 10) || 0,
+        saturation: parseInt(wbSaturateRange.value, 10) || 0,
+      };
     }
 
-    // 核心转换：提取像素并对画板每一颗豆子应用真实滤镜变换与色号重映射
+    /**
+     * 核心转换：把用户绘制的原始色块按滤镜做数学变换，再重新匹配真实色号。
+     *
+     * 【修复记录】此前这里走的是「离屏 canvas + ctx.filter」的像素管线：
+     *   offCtx2.filter = `brightness(..) contrast(..) saturate(..)`;
+     *   offCtx2.drawImage(offCanvas1, 0, 0);
+     * 根因有两点：
+     *   1) ctx.filter 并非所有浏览器都支持（Safari / 部分移动端内核直接忽略赋值），
+     *      滤镜没生效 → 重映射后的颜色与原色一致 → 色号看起来「没更新」；
+     *   2) 就算生效，drawImage 还会经过 canvas 的色彩管理与双线性缩放，
+     *      1×1 的采样点被反复量化，色号更新既不稳定也不可测试。
+     * 现在改为纯 JS 逐像素数学变换（whiteboard-core.adjustPixel）+
+     * Lab 最近色匹配（与上传转图纸同一套色彩科学），
+     * 结果确定、跨浏览器一致，并且能被 Node 回归测试覆盖。
+     */
     function applyFiltersAndRender() {
-      const bOffset = parseInt(wbBrightRange.value, 10);
-      const cOffset = parseInt(wbContrastRange.value, 10);
-      const sOffset = parseInt(wbSaturateRange.value, 10);
-
-      // 如果没有任何滤镜，直接使用绘制原色
-      if (bOffset === 0 && cOffset === 0 && sOffset === 0) {
-        grid = baseGrid.map(row => [...row]);
-      } else {
-        // 使用离屏 Canvas 像素管线真实重计算色彩
-        const offCanvas1 = document.createElement('canvas');
-        offCanvas1.width = boardSize;
-        offCanvas1.height = boardSize;
-        const offCtx1 = offCanvas1.getContext('2d');
-
-        for (let y = 0; y < boardSize; y++) {
-          for (let x = 0; x < boardSize; x++) {
-            const bead = baseGrid[y][x];
-            if (bead) {
-              offCtx1.fillStyle = bead.hex || `rgb(${bead.r},${bead.g},${bead.b})`;
-              offCtx1.fillRect(x, y, 1, 1);
-            }
-          }
-        }
-
-        const offCanvas2 = document.createElement('canvas');
-        offCanvas2.width = boardSize;
-        offCanvas2.height = boardSize;
-        const offCtx2 = offCanvas2.getContext('2d');
-        offCtx2.imageSmoothingEnabled = false;
-
-        const bVal = 100 + bOffset;
-        const cVal = 100 + cOffset;
-        const sVal = 100 + sOffset;
-        offCtx2.filter = `brightness(${bVal}%) contrast(${cVal}%) saturate(${sVal}%)`;
-        offCtx2.drawImage(offCanvas1, 0, 0);
-
-        const imgData = offCtx2.getImageData(0, 0, boardSize, boardSize).data;
-        grid = [];
-
-        for (let y = 0; y < boardSize; y++) {
-          const row = [];
-          for (let x = 0; x < boardSize; x++) {
-            const idx = (y * boardSize + x) * 4;
-            const a = imgData[idx + 3];
-            if (a < 50 || !baseGrid[y][x]) {
-              row.push(null);
-            } else {
-              const r = imgData[idx];
-              const g = imgData[idx + 1];
-              const b = imgData[idx + 2];
-              const matched = findNearestColor(r, g, b, activePaletteList);
-              row.push(matched);
-            }
-          }
-          grid.push(row);
-        }
-      }
-
+      const adj = currentAdjust();
+      grid = remapGrid(baseGrid, adj, paletteIndex);
       renderBoard();
       updateStats();
     }
@@ -1076,14 +1293,28 @@
       ctx.fillStyle = canvasBg;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // 临摹底图：先铺在豆子下面，用透明度控制「看得见轮廓但不影响取色」
+      if (refImage && document.getElementById('ref-image-toggle').checked) {
+        ctx.save();
+        ctx.globalAlpha = refAlpha;
+        // 等比铺满画板并居中裁切，避免拉伸变形影响临摹判断
+        const scale = Math.max(canvas.width / refImage.width, canvas.height / refImage.height);
+        const dw = refImage.width * scale;
+        const dh = refImage.height * scale;
+        ctx.drawImage(refImage, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
+        ctx.restore();
+      }
+
       for (let y = 0; y < boardSize; y++) {
         for (let x = 0; x < boardSize; x++) {
           const cx = x * CELL_SIZE;
           const cy = y * CELL_SIZE;
 
-          ctx.strokeStyle = gridLine;
-          ctx.lineWidth = 1;
-          ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+          if (showGrid) {
+            ctx.strokeStyle = gridLine;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+          }
 
           const bead = grid[y][x];
           if (bead) {
@@ -1103,20 +1334,22 @@
       }
 
       // 2. 右侧色号对照图（标尺坐标与编号）
-      const ruler = 28;
+      const ruler = showRuler ? 28 : 0;
       schematicCanvas.width = boardSize * CELL_SIZE + ruler;
       schematicCanvas.height = boardSize * CELL_SIZE + ruler;
       sCtx.fillStyle = canvasBg;
       sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
 
-      sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      sCtx.font = 'bold 10px monospace';
-      sCtx.textAlign = 'center';
-      sCtx.textBaseline = 'middle';
+      if (showRuler) {
+        sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        sCtx.font = 'bold 10px monospace';
+        sCtx.textAlign = 'center';
+        sCtx.textBaseline = 'middle';
 
-      for (let i = 0; i < boardSize; i++) {
-        sCtx.fillText((i + 1).toString(), ruler + i * CELL_SIZE + CELL_SIZE / 2, ruler / 2);
-        sCtx.fillText((i + 1).toString(), ruler / 2, ruler + i * CELL_SIZE + CELL_SIZE / 2);
+        for (let i = 0; i < boardSize; i++) {
+          sCtx.fillText((i + 1).toString(), ruler + i * CELL_SIZE + CELL_SIZE / 2, ruler / 2);
+          sCtx.fillText((i + 1).toString(), ruler / 2, ruler + i * CELL_SIZE + CELL_SIZE / 2);
+        }
       }
 
       for (let y = 0; y < boardSize; y++) {
@@ -1124,9 +1357,11 @@
           const cx = ruler + x * CELL_SIZE;
           const cy = ruler + y * CELL_SIZE;
 
-          sCtx.strokeStyle = gridLine;
-          sCtx.lineWidth = 1;
-          sCtx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+          if (showGrid) {
+            sCtx.strokeStyle = gridLine;
+            sCtx.lineWidth = 1;
+            sCtx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
+          }
 
           const bead = grid[y][x];
           if (bead) {
@@ -1141,10 +1376,15 @@
             sCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
             sCtx.stroke();
 
-            const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
-            sCtx.font = `bold 9px monospace`;
-            sCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
-            sCtx.fillText(bead.code, centerX, centerY);
+            // 色号文字：格子够大才画，否则 26px 的格子里塞 3 个字符会糊成一团
+            if (showCode) {
+              const lum = 0.299 * bead.r + 0.587 * bead.g + 0.114 * bead.b;
+              sCtx.font = `bold 9px monospace`;
+              sCtx.textAlign = 'center';
+              sCtx.textBaseline = 'middle';
+              sCtx.fillStyle = lum > 140 ? '#000000' : '#ffffff';
+              sCtx.fillText(bead.code, centerX, centerY);
+            }
           }
         }
       }
@@ -1247,20 +1487,50 @@
 
     // 交互绘制
     let isDrawing = false;
-    function handleDrawAt(clientX, clientY) {
+    // 形状类工具（矩形/直线）在按下时记住起点，拖动时预览，抬起时落子
+    let shapeStart = null;
+    let shapePreview = null;
+
+    /** 屏幕坐标 → 格子坐标 */
+    function cellFromEvent(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
       const x = Math.floor(((clientX - rect.left) * scaleX) / CELL_SIZE);
       const y = Math.floor(((clientY - rect.top) * scaleY) / CELL_SIZE);
+      if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) return null;
+      return { x, y };
+    }
 
-      if (x < 0 || x >= boardSize || y < 0 || y >= boardSize) return;
+    /**
+     * 以 (x, y) 为中心落子一个笔刷 footprint，并按当前对称设置镜像。
+     * 矩形/直线工具同样复用这里，保证「笔刷大小 + 对称」在所有工具下行为一致。
+     */
+    function stampAt(x, y, bead) {
+      const half = Math.floor(brushSize / 2);
+      for (let dy = 0; dy < brushSize; dy++) {
+        for (let dx = 0; dx < brushSize; dx++) {
+          const px = x - half + dx;
+          const py = y - half + dy;
+          if (px < 0 || px >= boardSize || py < 0 || py >= boardSize) continue;
+          baseGrid[py][px] = bead;
+          for (const [mx, my] of mirrorTargets(px, py, boardSize, symmetryMode)) {
+            baseGrid[my][mx] = bead;
+          }
+        }
+      }
+    }
+
+    function handleDrawAt(clientX, clientY) {
+      const cell = cellFromEvent(clientX, clientY);
+      if (!cell) return;
+      const { x, y } = cell;
 
       if (currentTool === 'picker') {
         const picked = grid[y][x];
         if (picked) {
           activeColor = picked;
-          document.querySelectorAll('.swatch').forEach(s => {
+          swatchesContainer.querySelectorAll('.swatch').forEach(s => {
             s.classList.toggle('selected', s.title.startsWith(picked.code));
           });
           activeColorDot.style.backgroundColor = picked.hex;
@@ -1271,34 +1541,179 @@
       }
 
       if (currentTool === 'bucket') {
-        pushHistory();
-        const targetBead = baseGrid[y][x];
-        const fillBead = activeColor;
-        if ((targetBead ? targetBead.code : null) === fillBead.code) return;
-
-        const queue = [[x, y]];
-        const targetCode = targetBead ? targetBead.code : null;
-
-        while (queue.length) {
-          const [cx, cy] = queue.pop();
-          if (cx < 0 || cx >= boardSize || cy < 0 || cy >= boardSize) continue;
-          const curr = baseGrid[cy][cx];
-          const currCode = curr ? curr.code : null;
-
-          if (currCode === targetCode) {
-            baseGrid[cy][cx] = fillBead;
-            queue.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
-          }
-        }
+        pushHistory(history, JSON.stringify(baseGrid));
+        // 洪水填充直接改 baseGrid 主体，绕过笔刷与对称（区域填充本身已经成块）
+        floodFill(baseGrid, x, y, activeColor, { size: boardSize });
         applyFiltersAndRender();
         return;
       }
 
-      const newVal = currentTool === 'eraser' ? null : activeColor;
-      if (baseGrid[y][x] !== newVal) {
-        baseGrid[y][x] = newVal;
-        applyFiltersAndRender();
+      if (currentTool === 'rect' || currentTool === 'line') {
+        // 拖动过程只更新预览，抬起时才真正落子，避免每帧都写历史
+        shapePreview = shapeCellsFor(currentTool, shapeStart, { x, y });
+        renderBoard();
+        paintPreviewOverlay();
+        return;
       }
+
+      const newVal = currentTool === 'eraser' ? null : activeColor;
+      let dirty = false;
+      const half = Math.floor(brushSize / 2);
+      for (let dy = 0; dy < brushSize; dy++) {
+        for (let dx = 0; dx < brushSize; dx++) {
+          const px = x - half + dx;
+          const py = y - half + dy;
+          if (px < 0 || px >= boardSize || py < 0 || py >= boardSize) continue;
+          if (baseGrid[py][px] !== newVal) {
+            baseGrid[py][px] = newVal;
+            dirty = true;
+          }
+          for (const [mx, my] of mirrorTargets(px, py, boardSize, symmetryMode)) {
+            if (baseGrid[my][mx] !== newVal) {
+              baseGrid[my][mx] = newVal;
+              dirty = true;
+            }
+          }
+        }
+      }
+      if (dirty) applyFiltersAndRender();
+    }
+
+    /** 形状类工具的落子区域：矩形 = 包围盒，直线 = Bresenham */
+    function shapeCellsFor(tool, start, end) {
+      if (!start || !end) return [];
+      if (tool === 'rect') {
+        const cells = rectCells(start.x, start.y, end.x, end.y);
+        // 矩形同样尊重对称：镜像后的矩形一起填
+        const extra = [];
+        for (const [cx, cy] of cells) {
+          for (const [mx, my] of mirrorTargets(cx, cy, boardSize, symmetryMode)) extra.push([mx, my]);
+        }
+        return cells.concat(extra);
+      }
+      // line
+      const cells = [];
+      let x0 = start.x;
+      let y0 = start.y;
+      const x1 = end.x;
+      const y1 = end.y;
+      const dx = Math.abs(x1 - x0);
+      const dy = -Math.abs(y1 - y0);
+      const sx = x0 < x1 ? 1 : -1;
+      const sy = y0 < y1 ? 1 : -1;
+      let err = dx + dy;
+      while (true) {
+        cells.push([x0, y0]);
+        for (const [mx, my] of mirrorTargets(x0, y0, boardSize, symmetryMode)) cells.push([mx, my]);
+        if (x0 === x1 && y0 === y1) break;
+        const e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+      }
+      return cells;
+    }
+
+    /** 形状工具拖动时的半透明预览层 */
+    function paintPreviewOverlay() {
+      if (!shapePreview) return;
+      ctx.save();
+      ctx.globalAlpha = 0.55;
+      for (const [px, py] of shapePreview) {
+        ctx.fillStyle = currentTool === 'eraser' ? '#ffffff' : (activeColor ? activeColor.hex : '#ffffff');
+        ctx.fillRect(px * CELL_SIZE + 2, py * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+      }
+      ctx.restore();
+    }
+
+    function clearPreview() {
+      shapePreview = null;
+    }
+
+    /** 形状工具抬起时真正落子 */
+    function commitShape() {
+      if (!shapePreview || !shapeStart) return;
+      pushHistory(history, JSON.stringify(baseGrid));
+      const bead = currentTool === 'eraser' ? null : activeColor;
+      for (const [px, py] of shapePreview) {
+        if (px < 0 || px >= boardSize || py < 0 || py >= boardSize) continue;
+        baseGrid[py][px] = bead;
+      }
+      clearPreview();
+      shapeStart = null;
+      applyFiltersAndRender();
+    }
+
+    /* ===== 图片导入 =====
+       对齐参考站的两种用法：
+       · 转色号  = 图片直接变成拼豆矩阵（自动均色缩放到当前板型 + Lab 匹配）
+       · 临摹底图 = 图片只作为半透明参考层，不改动任何豆子，方便照着描 */
+    const imageInput = document.getElementById('image-input');
+    const refImageRow = document.getElementById('ref-image-row');
+    const refImageToggle = document.getElementById('ref-image-toggle');
+    const refAlphaRange = document.getElementById('ref-alpha');
+    const refAlphaVal = document.getElementById('ref-alpha-val');
+    let importMode = 'grid';   // 'grid' | 'ref'
+
+    document.getElementById('btn-import-grid').addEventListener('click', () => {
+      importMode = 'grid';
+      imageInput.click();
+    });
+    document.getElementById('btn-import-ref').addEventListener('click', () => {
+      importMode = 'ref';
+      imageInput.click();
+    });
+
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files && imageInput.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (importMode === 'ref') {
+          refImage = img;
+          refImageRow.hidden = false;
+          refImageToggle.checked = true;
+          renderBoard();
+        } else {
+          applyImageAsGrid(img);
+        }
+        // 允许重复选同一个文件
+        imageInput.value = '';
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        alert('图片读取失败，请换一张试试。');
+        imageInput.value = '';
+      };
+      img.src = url;
+    });
+
+    refImageToggle.addEventListener('change', renderBoard);
+    refAlphaRange.addEventListener('input', (e) => {
+      refAlpha = parseInt(e.target.value, 10) / 100;
+      refAlphaVal.textContent = `${e.target.value}%`;
+      renderBoard();
+    });
+
+    /** 把图片按当前板型尺寸转成真实色号矩阵 */
+    function applyImageAsGrid(img) {
+      const n = boardSize;
+      const off = document.createElement('canvas');
+      off.width = n;
+      off.height = n;
+      const octx = off.getContext('2d', { willReadFrequently: true });
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = 'high';
+      octx.drawImage(img, 0, 0, n, n);
+      const imgData = octx.getImageData(0, 0, n, n);
+
+      pushHistory(history, snapshot());
+      // 得到的是「已匹配色号」的网格，直接作为 baseGrid：
+      // 这样之后再调亮度/对比度，仍会基于这批真实色号重新映射，行为与手绘一致。
+      baseGrid = pixelsToBeadGrid({ data: imgData.data, width: n, height: n }, n, n, paletteIndex);
+      applyFiltersAndRender();
+      syncHistoryButtons();
     }
 
     /* ===== 画板缩放与平移 =====
@@ -1356,6 +1771,7 @@
       if (activePointers.size === 2) {
         // 第二根手指落下：立刻取消绘画，进入捏合/平移手势
         isDrawing = false;
+        clearPreview();
         const [p1, p2] = [...activePointers.values()];
         pinchStartDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
         pinchStartZoom = boardZoom;
@@ -1368,8 +1784,18 @@
         canvas.style.transition = 'none';
       } else if (activePointers.size === 1) {
         isDrawing = true;
-        pushHistory();
-        handleDrawAt(e.clientX, e.clientY);
+        if (currentTool === 'move') {
+          // 移动工具：单指拖动即平移，不画任何豆子
+          panStartPos = { mx: e.clientX, my: e.clientY, px: boardPanX, py: boardPanY };
+          canvas.style.transition = 'none';
+        } else if (currentTool === 'rect' || currentTool === 'line') {
+          // 形状工具：先记起点，历史在抬起时才压栈
+          shapeStart = cellFromEvent(e.clientX, e.clientY);
+          shapePreview = null;
+        } else {
+          pushHistory(history, JSON.stringify(baseGrid));
+          handleDrawAt(e.clientX, e.clientY);
+        }
       }
     });
 
@@ -1389,62 +1815,107 @@
           clampBoardPan();
           applyBoardTransform(true);
         }
-      } else if (isDrawing && (currentTool === 'pen' || currentTool === 'eraser')) {
+      } else if (isDrawing && currentTool === 'move' && panStartPos) {
+        // 移动工具下单指平移
+        boardPanX = panStartPos.px + (e.clientX - panStartPos.mx);
+        boardPanY = panStartPos.py + (e.clientY - panStartPos.my);
+        clampBoardPan();
+        applyBoardTransform(true);
+      } else if (isDrawing) {
         handleDrawAt(e.clientX, e.clientY);
       }
     });
 
     function handlePointerEnd(e) {
+      const wasShape = isDrawing && (currentTool === 'rect' || currentTool === 'line');
       activePointers.delete(e.pointerId);
       if (activePointers.size < 2) endBoardGesture();
-      if (activePointers.size === 0) isDrawing = false;
+      if (activePointers.size === 0) {
+        if (wasShape) commitShape();
+        isDrawing = false;
+        panStartPos = null;
+      }
     }
     window.addEventListener('pointerup', handlePointerEnd);
     window.addEventListener('pointercancel', handlePointerEnd);
 
-    document.getElementById('btn-undo').addEventListener('click', () => {
-      if (historyStack.length === 0) return;
-      baseGrid = JSON.parse(historyStack.pop());
+    function snapshot() {
+      return JSON.stringify(baseGrid);
+    }
+
+    function restoreSnapshot(json) {
+      baseGrid = JSON.parse(json);
       applyFiltersAndRender();
+      syncHistoryButtons();
+    }
+
+    function syncHistoryButtons() {
+      document.getElementById('btn-undo').disabled = !canUndo(history);
+      document.getElementById('btn-redo').disabled = !canRedo(history);
+    }
+
+    document.getElementById('btn-undo').addEventListener('click', () => {
+      const prev = undo(history, snapshot());
+      if (prev === null) return;
+      restoreSnapshot(prev);
+    });
+
+    document.getElementById('btn-redo').addEventListener('click', () => {
+      const next = redo(history, snapshot());
+      if (next === null) return;
+      restoreSnapshot(next);
     });
 
     document.getElementById('btn-clear').addEventListener('click', () => {
       if (confirm('确认清空当前画板吗？')) {
-        pushHistory();
-        baseGrid = Array(boardSize).fill(null).map(() => Array(boardSize).fill(null));
+        pushHistory(history, snapshot());
+        baseGrid = createEmptyGrid(boardSize);
         applyFiltersAndRender();
+        syncHistoryButtons();
       }
     });
 
     document.getElementById('btn-hflip').addEventListener('click', () => {
-      pushHistory();
+      pushHistory(history, snapshot());
       baseGrid = baseGrid.map(row => [...row].reverse());
       applyFiltersAndRender();
+      syncHistoryButtons();
     });
 
     document.getElementById('btn-vflip').addEventListener('click', () => {
-      pushHistory();
+      pushHistory(history, snapshot());
       baseGrid = [...baseGrid].reverse();
       applyFiltersAndRender();
+      syncHistoryButtons();
+    });
+
+    // 旋转 90°：顺时针。转置 + 每行反转
+    document.getElementById('btn-rotate').addEventListener('click', () => {
+      pushHistory(history, snapshot());
+      baseGrid = baseGrid[0].map((_, x) => baseGrid.map(row => row[x]).reverse());
+      applyFiltersAndRender();
+      syncHistoryButtons();
+    });
+
+    // 键盘：Ctrl+Z 撤销 / Ctrl+Shift+Z 或 Ctrl+Y 重做
+    window.addEventListener('keydown', (e) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('btn-undo').click();
+      } else if ((k === 'z' && e.shiftKey) || k === 'y') {
+        e.preventDefault();
+        document.getElementById('btn-redo').click();
+      }
     });
 
     function updateStats() {
-      const statsMap = {};
-      let total = 0;
-      grid.forEach(row => row.forEach(b => {
-        if (b) {
-          statsMap[b.code] = statsMap[b.code] || { ...b, count: 0 };
-          statsMap[b.code].count++;
-          total++;
-        }
-      }));
-
-      const items = Object.values(statsMap).sort((a, b) => b.count - a.count);
+      const { list: items, total } = computeStats(grid);
       if (items.length === 0) {
         statsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">画布为空，快用画笔点缀你的作品吧！</p>';
         return;
       }
-
       let html = `
         <table class="stats-table">
           <thead><tr><th>色号</th><th>颜色</th><th>名称</th><th>所需数量</th></tr></thead>
@@ -1491,6 +1962,7 @@
 
     initPalette();
     applyFiltersAndRender();
+    syncHistoryButtons();
   </script>
 </body>
 </html>
