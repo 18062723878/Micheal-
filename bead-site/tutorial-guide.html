@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用教程 · Micheal 的拼豆网</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230052ff'/%3E%3Ccircle cx='11' cy='12' r='4' fill='%23fff'/%3E%3Ccircle cx='21' cy='12' r='4' fill='%23FFD400'/%3E%3Ccircle cx='11' cy='21' r='4' fill='%23E60012'/%3E%3Ccircle cx='21' cy='21' r='4' fill='%2322c55e'/%3E%3C/svg%3E" />
+  <meta name="description" content="创意工坊与白板画板的完整使用教程：整体流程、界面区域说明、每个按钮与快捷键的作用和点击后的行为。" />
+  <link rel="stylesheet" href="assets/css/theme.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <style>
+    .td-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+    .td-head {
+      margin-bottom: 28px;
+    }
+    .td-head h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      font-weight: 400;
+      color: var(--foreground);
+      margin: 0 0 10px;
+    }
+    .td-head p {
+      color: var(--muted-foreground);
+      font-size: 14.5px;
+      margin: 0;
+      max-width: 640px;
+      line-height: 1.7;
+    }
+    .td-switch {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 20px 0 8px;
+    }
+    .td-switch button {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--foreground);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .td-switch button.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .td-search {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 14px;
+      margin: 14px 0 6px;
+    }
+    .td-search-note {
+      font-size: 12px;
+      color: var(--muted-foreground);
+      margin-bottom: 26px;
+    }
+    .td-count {
+      font-size: 12.5px;
+      color: var(--muted-foreground);
+      font-family: var(--font-mono);
+      margin-bottom: 18px;
+    }
+    .td-cat {
+      margin-bottom: 30px;
+    }
+    .td-cat > h2 {
+      font-size: 15px;
+      color: var(--foreground);
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .td-entry {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+    }
+    .td-entry h3 {
+      font-size: 15.5px;
+      margin: 0 0 6px;
+      color: var(--foreground);
+    }
+    .td-entry .td-sum {
+      font-size: 13.5px;
+      color: var(--muted-foreground);
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+    .td-sub {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin: 14px 0 6px;
+    }
+    .td-entry ol,
+    .td-entry ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13.5px;
+      line-height: 1.8;
+      color: var(--muted-foreground);
+    }
+    .td-entry li { margin-bottom: 4px; }
+    .td-ctrl-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .td-ctrl-table th {
+      text-align: left;
+      font-size: 11.5px;
+      letter-spacing: 0.05em;
+      color: var(--muted-foreground);
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .td-ctrl-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted-foreground);
+      vertical-align: top;
+      line-height: 1.65;
+    }
+    .td-ctrl-table td:first-child {
+      color: var(--foreground);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .td-ctrl-table tr:last-child td { border-bottom: none; }
+    .td-chip {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--muted);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--muted-foreground);
+    }
+    .td-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--muted-foreground);
+      font-size: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+    }
+    .td-empty b { color: var(--foreground); }
+    mark {
+      background: rgba(255, 214, 0, 0.42);
+      color: inherit;
+      border-radius: 3px;
+      padding: 0 1px;
+    }
+    .td-entry.is-hit {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="td-container">
+    <div class="td-head">
+      <span class="section-label">Guide</span>
+      <h1 id="td-title">使用教程</h1>
+      <p id="td-desc">创意工坊与白板画板的完整操作手册：整体流程、界面区域说明，以及每一个按钮、工具与快捷键的作用和点击后的结果。</p>
+    </div>
+
+    <div class="td-switch" id="td-switch"></div>
+    <input id="td-search" class="form-input td-search" type="search" placeholder="搜索教程内容，例如「对称」「色号」「导出」…" aria-label="搜索教程" />
+    <div class="td-search-note" id="td-note">搜索范围仅限当前模块，创意工坊与白板画板的教程数据彼此独立。</div>
+    <div class="td-count" id="td-count"></div>
+
+    <div id="td-body"></div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import { injectChrome } from './assets/js/chrome.js';
+    import { MODULES, TUTORIALS, categoriesOf } from './assets/js/tutorial-data.js';
+    import { searchTutorials, renderHighlight, escapeHtml } from './assets/js/tutorial-search.js';
+
+    // 与创作工坊侧栏保持一致的模块顺序
+    const ORDER = ['studio', 'whiteboard'];
+    const params = new URLSearchParams(location.search);
+    let moduleId = params.get('module') === 'whiteboard' ? 'whiteboard' : 'studio';
+    let query = params.get('q') || '';
+    let focusId = params.get('id') || '';
+
+    const $ = (id) => document.getElementById(id);
+    const bodyEl = $('td-body');
+    const searchEl = $('td-search');
+    const countEl = $('td-count');
+    const noteEl = $('td-note');
+    const descEl = $('td-desc');
+
+    if (query) searchEl.value = query;
+
+    function buildSwitch() {
+      const box = $('td-switch');
+      box.innerHTML = '';
+      for (const id of ORDER) {
+        const m = MODULES[id];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = `${m.icon} ${m.name}`;
+        btn.className = id === moduleId ? 'active' : '';
+        btn.addEventListener('click', () => {
+          moduleId = id;
+          focusId = '';
+          render();
+        });
+        box.appendChild(btn);
+      }
+    }
+
+    function entryHTML(entry, hitMap) {
+      const hit = hitMap ? hitMap.get(entry.id) : null;
+      const sum = hit && hit.snippet.label === 'summary'
+        ? renderHighlight(entry.summary, hit.snippet.ranges)
+        : escapeHtml(entry.summary);
+
+      let html = `
+        <article class="td-entry${hit ? ' is-hit' : ''}" id="t-${escapeHtml(entry.id)}">
+          <h3>${hit ? renderHighlight(entry.title, highlightTitle(entry.title, query)) : escapeHtml(entry.title)}</h3>
+          <p class="td-sum">${sum}</p>
+      `;
+
+      if (entry.steps.length) {
+        html += `<div class="td-sub">操作步骤</div><ol>${entry.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>`;
+      }
+
+      if (entry.controls.length) {
+        html += `
+          <div class="td-sub">界面按钮 / 工具 / 快捷键</div>
+          <table class="td-ctrl-table">
+            <thead><tr><th>名称</th><th>类型</th><th>作用</th><th>点击后的结果</th></tr></thead>
+            <tbody>
+        `;
+        for (const c of entry.controls) {
+          const nameHtml = hit ? renderHighlight(c.name, titleRanges(c.name)) : escapeHtml(c.name);
+          const actHtml = hit ? renderHighlight(c.action, titleRanges(c.action)) : escapeHtml(c.action);
+          const resHtml = hit ? renderHighlight(c.result, titleRanges(c.result)) : escapeHtml(c.result);
+          html += `<tr><td>${nameHtml}</td><td><span class="td-chip">${escapeHtml(c.type)}</span></td><td>${actHtml}</td><td>${resHtml}</td></tr>`;
+        }
+        html += '</tbody></table>';
+      }
+
+      if (entry.tips.length) {
+        html += `<div class="td-sub">常见问题与技巧</div><ul>${entry.tips.map((t) => `<li>${escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</li>`).join('')}</ul>`;
+      }
+
+      html += '</article>';
+      return html;
+    }
+
+    function titleRanges(text) {
+      // 复用 search 模块的高亮区间计算
+      const q = String(query || '').trim();
+      const src = String(text || '');
+      const lower = src.toLowerCase();
+      const ql = q.toLowerCase();
+      const ranges = [];
+      if (!ql) return ranges;
+      let from = 0;
+      while (from <= lower.length - ql.length) {
+        const i = lower.indexOf(ql, from);
+        if (i === -1) break;
+        ranges.push([i, i + ql.length]);
+        from = i + 1;
+      }
+      return ranges;
+    }
+    function highlightTitle(text) {
+      return titleRanges(text);
+    }
+
+    function render() {
+      const m = MODULES[moduleId];
+      document.title = `${m.name}使用教程 · Micheal 的拼豆网`;
+      $('td-title').textContent = `${m.icon} ${m.name} · 使用教程`;
+      descEl.textContent = m.id === 'studio'
+        ? '从上传图片到导出图纸的完整链路：参数含义、拼豆模式核对、导出格式。'
+        : '手绘像素画的完整链路：工具说明、画面调整、图片导入、视图与导出。';
+      noteEl.textContent = `搜索范围仅限「${m.name}」，两个模块的教程数据彼此独立，不会互相混入。`;
+
+      buildSwitch();
+
+      const entries = TUTORIALS[moduleId] || [];
+      const q = query.trim();
+      let hitMap = null;
+      let html = '';
+
+      if (q) {
+        const results = searchTutorials(entries, q, { limit: 50 });
+        hitMap = new Map(results.map((r) => [r.entry.id, r]));
+        countEl.textContent = `找到 ${results.length} 条与「${q}」相关的教程（仅搜索 ${m.name}）`;
+        if (!results.length) {
+          html = `
+            <div class="td-empty">
+              <p>在 <b>${escapeHtml(m.name)}</b> 里没有找到与「${escapeHtml(q)}」相关的内容。</p>
+              <p style="font-size:13px;margin-top:8px;">可以试试更短的关键词，比如「色号」「导出」「对称」；或切换到另一个模块再搜。</p>
+            </div>`;
+        } else {
+          html = results.map((r) => entryHTML(r.entry, hitMap)).join('');
+        }
+      } else {
+        const cats = categoriesOf(moduleId);
+        countEl.textContent = `共 ${entries.length} 条教程，分 ${cats.length} 个分类`;
+        html = cats.map((c) => `
+          <section class="td-cat">
+            <h2>${escapeHtml(c.name)}</h2>
+            ${c.items.map((e) => entryHTML(e, null)).join('')}
+          </section>
+        `).join('');
+      }
+
+      bodyEl.innerHTML = html;
+
+      if (focusId) {
+        const target = document.getElementById(`t-${focusId}`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          target.classList.add('is-hit');
+        }
+      }
+    }
+
+    let timer = null;
+    searchEl.addEventListener('input', (e) => {
+      query = e.target.value;
+      clearTimeout(timer);
+      timer = setTimeout(render, 120);
+    });
+
+    render();
+    injectChrome();
+  </script>
+</body>
+</html>

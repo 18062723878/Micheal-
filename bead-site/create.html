@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>创作工坊 · Micheal 的拼豆网</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230052ff'/%3E%3Ccircle cx='11' cy='12' r='4' fill='%23fff'/%3E%3Ccircle cx='21' cy='12' r='4' fill='%23FFD400'/%3E%3Ccircle cx='11' cy='21' r='4' fill='%23E60012'/%3E%3Ccircle cx='21' cy='21' r='4' fill='%2322c55e'/%3E%3C/svg%3E" />
   <meta name="description" content="上传图片，实时转换为标准色号拼豆图纸，支持拼豆模式全屏核对、逐色高亮与 PNG / CSV 导出。" />
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
@@ -102,12 +103,292 @@
     .bead-mode-stage-wrap canvas {
       max-height: calc(100vh - 150px);
     }
+
+    /* ===== 创作工坊：可收缩侧边栏布局 =====
+       初始保持展开（宽 248px），与「白板画板」页侧栏的既有惯例一致；
+       收起后仅留一条竖向把手，不遮挡主内容区。 */
+    .studio-shell {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      align-items: start;
+      gap: 20px;
+      transition: grid-template-columns 0.24s var(--ease-out, ease-out);
+    }
+    .studio-shell.is-collapsed {
+      grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .studio-sidebar {
+      position: sticky;
+      top: 74px;
+      max-height: calc(100vh - 96px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      overflow: hidden;
+    }
+    .studio-shell.is-collapsed .studio-sidebar {
+      padding: 10px 6px;
+      align-items: center;
+    }
+
+    /* 收起时把文字内容藏起来，只留下把手与图标 */
+    .studio-sidebar .sb-hideable {
+      display: block;
+      width: 100%;
+    }
+    .studio-shell.is-collapsed .studio-sidebar .sb-hideable {
+      display: none;
+    }
+    .studio-shell.is-collapsed .studio-sidebar .sb-icon-only {
+      display: grid;
+    }
+    .sb-icon-only { display: none; }
+
+    .sb-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sb-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+    .sb-collapse-btn {
+      flex: none;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--muted);
+      color: var(--foreground);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sb-collapse-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .sb-search-wrap { position: relative; }
+    .sb-search {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 12.5px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--muted);
+      color: var(--foreground);
+    }
+    .sb-search::placeholder { color: var(--muted-foreground); }
+    .sb-search-scope {
+      margin-top: 6px;
+      font-size: 10.5px;
+      color: var(--muted-foreground);
+      font-family: var(--font-mono);
+    }
+
+    .sb-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sb-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--foreground);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sb-nav-item:hover { background: var(--muted); }
+    .sb-nav-item.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .sb-nav-item .sb-nav-icon { font-size: 15px; flex: none; }
+    .sb-nav-item .sb-nav-sub {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 400;
+      color: var(--muted-foreground);
+      margin-top: 1px;
+    }
+    .studio-shell.is-collapsed .sb-nav-item { justify-content: center; padding: 9px 4px; }
+
+    .sb-results {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sb-results-head {
+      font-size: 11px;
+      color: var(--muted-foreground);
+      font-family: var(--font-mono);
+    }
+    .sb-hit {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sb-hit:hover { border-color: var(--accent); }
+    .sb-hit-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--foreground);
+      line-height: 1.45;
+    }
+    .sb-hit-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+      font-size: 10.5px;
+      color: var(--muted-foreground);
+    }
+    .sb-hit-cat {
+      padding: 0 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+    .sb-hit-snip {
+      margin-top: 5px;
+      font-size: 11.5px;
+      line-height: 1.6;
+      color: var(--muted-foreground);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .sb-hit mark {
+      background: rgba(255, 214, 0, 0.45);
+      color: inherit;
+      border-radius: 3px;
+      padding: 0 1px;
+    }
+    .sb-empty {
+      padding: 16px 10px;
+      border: 1px dashed var(--border);
+      border-radius: 9px;
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--muted-foreground);
+      text-align: center;
+    }
+    .sb-empty b { color: var(--foreground); }
+
+    .sb-foot {
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .sb-link-all {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--muted);
+      color: var(--foreground);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .sb-link-all:hover { border-color: var(--accent); color: var(--accent); }
+
+    .studio-main { min-width: 0; }
+    .studio-pane { display: block; }
+    .studio-pane[hidden] { display: none; }
+
+    .sb-switch-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--muted-foreground);
+    }
+
+    @media (max-width: 900px) {
+      .studio-shell,
+      .studio-shell.is-collapsed {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .studio-sidebar {
+        position: static;
+        max-height: none;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="site-header"></div>
 
   <main class="create-container">
+    <div class="studio-shell" id="studio-shell">
+      <!-- ===== 可收缩侧边栏：模块切换 + 教程检索 ===== -->
+      <aside class="studio-sidebar" id="studio-sidebar">
+        <div class="sb-head">
+          <div class="sb-title sb-hideable"><span>🧭</span><span>创作工坊</span></div>
+          <div class="sb-icon-only" aria-hidden="true">🧭</div>
+          <button id="sb-collapse" class="sb-collapse-btn" type="button"
+                  aria-expanded="true" aria-controls="studio-sidebar" title="收起侧边栏">⟨</button>
+        </div>
+
+        <!-- 搜索框：只检索当前模块的教程 -->
+        <div class="sb-search-wrap sb-hideable">
+          <input id="sb-search" class="sb-search" type="search"
+                 placeholder="搜索本模块教程…" aria-label="搜索教程" autocomplete="off" />
+          <div class="sb-search-scope" id="sb-scope">搜索范围：创意工坊</div>
+        </div>
+
+        <!-- 两个工作区导航 -->
+        <nav class="sb-nav sb-hideable" id="sb-nav" aria-label="工作区切换"></nav>
+        <div class="sb-icon-only" id="sb-nav-collapsed"></div>
+
+        <!-- 搜索结果 -->
+        <div class="sb-results sb-hideable" id="sb-results" aria-live="polite"></div>
+
+        <div class="sb-foot sb-hideable">
+          <a class="sb-link-all" id="sb-all-link" href="tutorial-guide.html">查看完整教程目录 →</a>
+        </div>
+      </aside>
+
+      <!-- ===== 主内容区 ===== -->
+      <div class="studio-main">
+        <!-- 工作区一：创意工坊（原有内容） -->
+        <div class="studio-pane" id="pane-studio">
     <section class="panel">
       <div class="panel-header">
         <div>
@@ -362,6 +643,40 @@
         <button id="export-csv" class="btn btn-outline" type="button">导出色号矩阵 (CSV)</button>
       </div>
     </section>
+        </div>
+
+        <!-- 工作区二：白板画板（内嵌 whiteboard 页，保持同一套视觉与交互） -->
+        <div class="studio-pane" id="pane-whiteboard" hidden>
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <span class="section-label">Pixel Board</span>
+                <h2 class="panel-title" style="margin-top:12px;">白板画板</h2>
+                <p class="panel-subtitle">逐颗手绘像素画 → 实时校色 → 导出图纸</p>
+              </div>
+              <a class="btn btn-outline btn-sm" href="whiteboard.html">在新标签页打开完整白板</a>
+            </div>
+
+            <div class="stage-toolbar" style="margin-bottom:12px;">
+              <div class="toolbar-group">
+                <span class="stage-hint" style="margin:0;">下面是白板画板的完整工作区，功能与独立页面一致。</span>
+              </div>
+            </div>
+
+            <iframe
+              id="whiteboard-frame"
+              src="whiteboard.html"
+              title="白板画板工作区"
+              loading="lazy"
+              style="width:100%;height:calc(100vh - 210px);min-height:620px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--background);display:block;"></iframe>
+
+            <p class="stage-hint" style="margin-top:12px;">
+              提示：白板画板内的画布支持双指缩放与拖动平移；若嵌入视图过窄，可点右上角「在新标签页打开完整白板」获得更大操作空间。
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- 拼豆模式（全屏） -->
@@ -448,6 +763,10 @@
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS, PALETTES } from './assets/js/patterns-data.js';
     import { BeadViewer, buildLegend, computeStats, renderPattern } from './assets/js/bead-viewer.js';
+    // 侧栏的模块切换与教程检索：教程数据与搜索逻辑抽成共享模块，
+    // 保证侧栏、完整教程页与 Node 回归测试读的是同一份真相。
+    import { MODULES, TUTORIALS, countOf } from './assets/js/tutorial-data.js';
+    import { searchTutorials, renderHighlight, escapeHtml } from './assets/js/tutorial-search.js';
 
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
@@ -485,6 +804,158 @@
 
     /* ============================ DOM ============================ */
     const $ = id => document.getElementById(id);
+
+    /* ----------------------------------------------------------------
+     * 侧边栏：模块切换 + 教程检索
+     * ------------------------------------------------------------- */
+    const shell = $('studio-shell');
+    const btnCollapse = $('sb-collapse');
+    const searchInput = $('sb-search');
+    const scopeEl = $('sb-scope');
+    const navEl = $('sb-nav');
+    const navCollapsedEl = $('sb-nav-collapsed');
+    const resultsEl = $('sb-results');
+    const allLinkEl = $('sb-all-link');
+    const paneStudio = $('pane-studio');
+    const paneWhiteboard = $('pane-whiteboard');
+    const wbFrame = $('whiteboard-frame');
+
+    // 当前模块：默认「创意工坊」（初始保持展开，与白板页侧栏惯例一致）
+    const MODULE_ORDER = ['studio', 'whiteboard'];
+    let currentModule = 'studio';
+    let searchQuery = '';
+
+    // 侧栏收缩状态：默认展开，写入 localStorage 以便下次保持用户选择
+    const COLLAPSE_KEY = 'studio.sidebar.collapsed';
+    let sidebarCollapsed = false;
+    try {
+      sidebarCollapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+    } catch (e) { /* 隐私模式下忽略 */ }
+
+    function applyCollapse() {
+      shell.classList.toggle('is-collapsed', sidebarCollapsed);
+      btnCollapse.setAttribute('aria-expanded', String(!sidebarCollapsed));
+      btnCollapse.title = sidebarCollapsed ? '展开侧边栏' : '收起侧边栏';
+      btnCollapse.textContent = sidebarCollapsed ? '⟩' : '⟨';
+    }
+
+    btnCollapse.addEventListener('click', () => {
+      sidebarCollapsed = !sidebarCollapsed;
+      try { localStorage.setItem(COLLAPSE_KEY, sidebarCollapsed ? '1' : '0'); } catch (e) { /* noop */ }
+      applyCollapse();
+    });
+
+    function renderNav() {
+      navEl.innerHTML = '';
+      navCollapsedEl.innerHTML = '';
+      for (const id of MODULE_ORDER) {
+        const m = MODULES[id];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sb-nav-item' + (id === currentModule ? ' active' : '');
+        btn.innerHTML = `
+          <span class="sb-nav-icon">${m.icon}</span>
+          <span>
+            ${escapeHtml(m.name)}
+            <span class="sb-nav-sub">${escapeHtml(m.subtitle)}</span>
+          </span>`;
+        btn.addEventListener('click', () => switchModule(id));
+        navEl.appendChild(btn);
+
+        // 收起态下只留一列图标
+        const mini = document.createElement('button');
+        mini.type = 'button';
+        mini.className = 'sb-nav-item' + (id === currentModule ? ' active' : '');
+        mini.title = m.name;
+        mini.style.marginBottom = '6px';
+        mini.innerHTML = `<span class="sb-nav-icon">${m.icon}</span>`;
+        mini.addEventListener('click', () => switchModule(id));
+        navCollapsedEl.appendChild(mini);
+      }
+    }
+
+    function switchModule(id) {
+      if (!TUTORIALS[id]) return;
+      currentModule = id;
+      paneStudio.hidden = id !== 'studio';
+      paneWhiteboard.hidden = id !== 'whiteboard';
+      scopeEl.textContent = `搜索范围：${MODULES[id].name}`;
+      allLinkEl.href = `tutorial-guide.html?module=${id}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`;
+      // 切到白板时把 iframe 拉起来（懒加载属性在隐藏容器里可能不触发）
+      if (id === 'whiteboard' && wbFrame && !wbFrame.dataset.loaded) {
+        wbFrame.dataset.loaded = '1';
+        wbFrame.src = MODULES[id].href;
+      }
+      renderNav();
+      renderResults();
+      // 创意工坊的 canvas 在隐藏时无法测量，显示回来需要重绘一次
+      if (id === 'studio') {
+        try { renderStage(); } catch (e) { /* 尚未导入图片时忽略 */ }
+      }
+    }
+
+    function renderResults() {
+      // 关键：每次都只传当前模块的条目数组，物理上不可能检索到另一个模块的内容
+      const entries = TUTORIALS[currentModule] || [];
+      const q = searchQuery.trim();
+      allLinkEl.href = `tutorial-guide.html?module=${currentModule}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+
+      if (!q) {
+        resultsEl.innerHTML = `
+          <div class="sb-results-head">${escapeHtml(MODULES[currentModule].name)} · ${countOf(currentModule)} 条教程</div>
+          <div class="sb-switch-hint">
+            在上方输入框检索本模块教程。创意工坊与白板画板的教程数据彼此独立，搜索结果不会混在一起。
+          </div>`;
+        return;
+      }
+
+      const results = searchTutorials(entries, q, { limit: 20 });
+      if (!results.length) {
+        resultsEl.innerHTML = `
+          <div class="sb-results-head">0 条结果</div>
+          <div class="sb-empty">
+            在 <b>${escapeHtml(MODULES[currentModule].name)}</b> 里没找到「<b>${escapeHtml(q)}</b>」。<br />
+            换个关键词试试，或点下方进入完整教程目录。
+          </div>`;
+        return;
+      }
+
+      resultsEl.innerHTML =
+        `<div class="sb-results-head">${results.length} 条结果 · 仅「${escapeHtml(MODULES[currentModule].name)}」</div>` +
+        results.map((r) => `
+          <a class="sb-hit" href="tutorial-guide.html?module=${currentModule}&amp;q=${encodeURIComponent(q)}&amp;id=${encodeURIComponent(r.entry.id)}">
+            <div class="sb-hit-title">${renderHighlight(r.entry.title, r.snippet.ranges && r.snippet.label === 'title' ? r.snippet.ranges : titleRangesOf(r.entry.title))}</div>
+            <div class="sb-hit-meta"><span class="sb-hit-cat">${escapeHtml(r.entry.category)}</span></div>
+            <div class="sb-hit-snip">${renderHighlight(r.snippet.text, r.snippet.ranges)}</div>
+          </a>`).join('');
+    }
+
+    // 标题的连续子串高亮区间（结果条目未必命中在标题上，这里单独算一次）
+    function titleRangesOf(text) {
+      const q = searchQuery.trim().toLowerCase();
+      const lower = String(text || '').toLowerCase();
+      if (!q) return [];
+      const out = [];
+      let from = 0;
+      while (from <= lower.length - q.length) {
+        const i = lower.indexOf(q, from);
+        if (i === -1) break;
+        out.push([i, i + q.length]);
+        from = i + 1;
+      }
+      return out;
+    }
+
+    let searchTimer = null;
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(renderResults, 120);
+    });
+
+    applyCollapse();
+    renderNav();
+    switchModule('studio');
 
     const uploadInput = $('upload-input');
     const bgToggle = $('bg-toggle');
