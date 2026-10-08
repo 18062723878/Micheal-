@@ -1493,18 +1493,25 @@ async function main() {
 
   await case_('G11-params', 'whiteboard sidebar blocks are tagged for grouping', () => {
     const src = read('whiteboard.html');
-    for (const tag of ['tools', 'ops', 'import', 'view', 'board', 'filters', 'current', 'palette']) {
+    // 阶段三：命令区 ops 已移出侧栏，改名 symmetry（对称绘制）
+    for (const tag of ['tools', 'symmetry', 'import', 'view', 'board', 'filters', 'current', 'palette']) {
       assert.ok(src.includes(`data-pp-group="${tag}"`), `missing group marker: ${tag}`);
     }
     // 关键控件必须在被标记的块内，不能被漏掉
     const sidebar = src.slice(src.indexOf('<aside class="draw-sidebar"'), src.indexOf('</aside>', src.indexOf('<aside class="draw-sidebar"')));
     for (const id of ['tool-pen', 'tool-bucket', 'tool-eraser', 'tool-picker', 'brush-size-btns',
-      'btn-symmetry', 'symmetry-mode', 'btn-undo', 'btn-redo', 'btn-clear', 'btn-rotate',
+      'btn-symmetry', 'symmetry-mode',
       'btn-import-grid', 'btn-import-ref', 'image-input', 'ref-alpha', 'ref-image-toggle',
       'btn-toggle-grid', 'btn-toggle-ruler', 'btn-toggle-code',
       'wb-board-size-select', 'wb-bright-side', 'wb-contrast-side', 'wb-saturate-side',
       'btn-reset-filters-side', 'active-color-dot', 'palette-select', 'palette-search', 'swatches-container']) {
       assert.ok(sidebar.includes(`id="${id}"`), `control #${id} must stay inside the sidebar block`);
+    }
+    // 阶段三：命令按钮已移到工作台顶栏工具条（不再挤在侧栏参数里）
+    for (const id of ['btn-undo', 'btn-redo', 'btn-clear', 'btn-rotate']) {
+      assert.ok(src.includes(`id="${id}"`), `command #${id} must exist somewhere`);
+      assert.ok(!sidebar.includes(`id="${id}"`), `command #${id} must NOT stay in the sidebar`);
+      assert.ok(src.includes('workbench-tools'), 'commands must live in the top toolbar');
     }
   });
 
@@ -1513,9 +1520,13 @@ async function main() {
     const groups = src.match(/data-pp-group="[a-z]+"/g) || [];
     assert.strictEqual(groups.length, 8, 'expected 8 tagged blocks (current + palette merge into one group)');
     const init = src.slice(src.indexOf('initDrawSidebarGroups'));
-    for (const key of ['tools', 'palette', 'board', 'ops', 'filters', 'import', 'view']) {
+    // 分组 key 清单：阶段三把命令区移出侧栏后，ops 拆为「对称绘制 symmetry」，
+    // 撤销/重做/清空/镜像/旋转等命令已移到工作台顶栏工具条。
+    for (const key of ['tools', 'palette', 'board', 'symmetry', 'filters', 'import', 'view']) {
       assert.ok(init.includes(`key: '${key}'`), `group definition missing: ${key}`);
     }
+    // 命令按钮不应残留在侧栏分组里
+    assert.ok(!/data-pp-group="ops"/.test(src), 'ops block must be gone from the sidebar');
   });
 
   await case_('G11-params', 'top filter panel is folded by default so the canvas gets first screen', () => {

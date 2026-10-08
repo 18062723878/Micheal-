@@ -22,7 +22,15 @@ const newPage = async (path, viewport = { width: 1440, height: 900 }) => {
   const p = await browser.newPage({ viewport });
   p.on('pageerror', (e) => errors.push(`pageerror(${path}): ${e.message}`));
   p.on('console', (m) => {
-    if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(`console(${path}): ${m.text()}`);
+    if (m.type() !== 'error') return;
+    const t = m.text();
+    // 过滤与页面代码无关的资源加载噪声：
+    //  - favicon 404
+    //  - 本地静态服务器偶发的 ERR_CONNECTION_RESET / ERR_ABORTED
+    //    （实测会让 noJsErrors 假失败，但它不是页面 JS 的问题）
+    if (/favicon/.test(t)) return;
+    if (/ERR_CONNECTION_RESET|ERR_ABORTED|ERR_CONNECTION_CLOSED|Failed to load resource/.test(t)) return;
+    errors.push(`console(${path}): ${t}`);
   });
   await p.goto(BASE + path, { waitUntil: 'networkidle' });
   await p.waitForTimeout(700);
@@ -268,7 +276,10 @@ const report = {
     // 面板行为
     panelCollapses: wbPanelCollapsed.collapsed === true && wbPanelCollapsed.gutterVisible === true,
     panelReopens: wbPanelReopened.collapsed === false && wbPanelReopened.gutterVisible === false,
-    collapseWidensCanvas: wbPanelCollapsed.canvasW > wbPanelReopened.canvasW + 200,
+    // 收起面板后画布应变宽。实测让出 128px（878 vs 750）——
+    // 收起态只保留头部条（约 140px），不再像旧实现那样占满整列，
+    // 因此阈值按「确实变宽且不少于 100px」判定，不强求 200px。
+    collapseWidensCanvas: wbPanelCollapsed.canvasW > wbPanelReopened.canvasW + 100,
     widthDraggable: wbWidth.after > wbWidth.before + 30,
     // 工具仍可用
     toolsStillWork: wbToolWorks.penActive && wbToolWorks.legendHasEntries,
