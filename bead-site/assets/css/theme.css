@@ -1262,7 +1262,9 @@ input[type='range']:focus-visible {
 }
 
 .bead-stage--fit canvas {
-  max-height: min(70vh, 720px);
+  /* 高度预算由 create.html 的 stageHeightBudget() 实测视口剩余空间后写入
+     --stage-max-h；这里用 min() 保留一个 70vh 的上限，避免超宽屏上画布过大。 */
+  max-height: min(var(--stage-max-h, 70vh), 760px);
 }
 
 .bead-stage--interactive canvas {
@@ -2265,6 +2267,19 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   flex-direction: column;
   gap: 6px;
   scrollbar-width: thin;
+  /* 滚动时才出现的细滚动条样式：让「下面还有内容」这件事可见，
+     避免用户把「被面板边界裁掉」误认为「内容丢失 / 点不动」。 */
+  scrollbar-color: var(--border) transparent;
+}
+.pp-body::-webkit-scrollbar { width: 8px; }
+.pp-body::-webkit-scrollbar-track { background: transparent; }
+.pp-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.pp-body::-webkit-scrollbar-thumb:hover { background-color: var(--muted-foreground); background-clip: content-box; }
 }
 
 /* 分组 */
@@ -2273,6 +2288,10 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border-radius: 8px;
   background: var(--muted);
   overflow: hidden;
+  /* 关键：分组不允许被 flex 压缩。
+     之前缺少 flex:none 时，空间不足会把每个分组压到 10px，
+     而标题仍有 32px，于是多个折叠标题互相重叠。 */
+  flex: none;
 }
 .pp-group-head {
   display: flex;
@@ -2328,8 +2347,40 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   padding: 0;
   border: none;
   background: transparent;
+  /* 关键修复：面板是 .workbench-body 的 flex 子项，
+     默认 align-items:normal(=stretch) 会把它拉满容器高度。
+     结果是 .pp-body 虽然 display:none 了，面板占位仍是满高 548px，
+     展开态与折叠态看起来一模一样（内容藏了但空间没让出来）。
+     收起态改为 align-self:flex-start，让高度只由头部决定。 */
+  align-self: flex-start;
 }
-.is-param-panel.is-collapsed > *:not(.pp-resize-handle) { display: none; }
+/* 关键修复：**头部必须保留**。
+   之前用 `> *:not(.pp-resize-handle) { display: none }` 把 .pp-head 一起藏了，
+   而「展开参数面板」的 ⟩ 按钮恰恰就在 .pp-head 里 ——
+   结果一点收起，面板进入无法再展开的死锁（实测 ⟩ 按钮 visible=false）。
+   现在只隐藏分组体与拖拽把手，保留头部作为唯一的展开入口。 */
+.is-param-panel.is-collapsed > .pp-body,
+.is-param-panel.is-collapsed > .pp-resize-handle { display: none; }
+/* 收起态的头部：压成一条标题栏，宽度按内容收缩（不再占满 --pp-width） */
+.is-param-panel.is-collapsed {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+.is-param-panel.is-collapsed > .pp-head {
+  display: flex;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: 6px 8px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--muted);
+  overflow: hidden;
+}
+/* 收起态不再需要「全部展开」（没有可展开的组），隐藏它避免误导 */
+.is-param-panel.is-collapsed > .pp-head .pp-mini-btn:not(.pp-collapse-btn) { display: none; }
 .pp-gutter {
   display: none;
 }
@@ -2359,6 +2410,14 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
 .is-param-panel.is-narrow {
   flex: 1 1 auto;
   width: 100%;
+  /* 关键修复（窄屏横向溢出）：
+     grid 场景下 width:100% 是相对 .pp-inline-fold 的内容盒，
+     但内部的 .pp-body 仍按 minmax(320px,1fr) 撑出 320px ——
+     实测 390px 视口下 grid 宽 286px 而分组宽 320px，超出 34px。
+     min-width:0 允许 flex/grid 子项收缩到内容盒以内。 */
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .is-param-panel.is-narrow .pp-resize-handle { display: none; }
 .pp-gutter.is-narrow { display: none !important; }
@@ -2367,8 +2426,16 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
 /* ---- 用于「多列网格」场景（如创作工坊的设置区） ----
    .settings-grid 本身是 grid，套上组件后要：
      - 整块跨满所有列（grid-column: 1 / -1）
+     - **头部与分组容器都必须跨满所有列**（见下方修复）
      - 自身内部再用一个 grid 还原原来的多列排布
-     - 不用固定宽度与拖拽把手（宽度由列数决定） */
+     - 不用固定宽度与拖拽把手（宽度由列数决定）
+
+   修复记录（展开/折叠表现一致 + 内部元素点不动的根因）：
+   组件会把 .pp-head 插到 panel.firstChild、把 .pp-body 追加到末尾。
+   而 .settings-grid 是 grid 容器，于是这两个新节点各自成为一个 grid item，
+   被 auto-fit 分配到**不同的列**——头部孤零零停在左边、分组被挤到右边，
+   视觉上像是「布局错乱」，实际是两个节点没有跨列。
+   下面让它们各自 grid-column: 1 / -1，恢复「头部在上、分组在下」的预期结构。 */
 .settings-grid.is-param-panel {
   flex: none;
   width: auto;
@@ -2378,15 +2445,37 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   background: transparent;
   max-width: none;
 }
+/* 关键修复：头部与分组容器跨满所有列，不参与 auto-fit 分列 */
+.settings-grid.is-param-panel > .pp-head,
+.settings-grid.is-param-panel > .pp-body {
+  grid-column: 1 / -1;
+}
 .settings-grid.is-param-panel .pp-body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 18px;
   overflow: visible;
 }
+/* 窄屏：让整个网格单列化。
+   关键：`320px` 这个列下限其实来自**父级** .settings-grid 自身的
+   grid-template-columns: repeat(auto-fit, minmax(320px,1fr))（定义在 layout.css），
+   只改 .pp-body 不够 —— 390px 视口下 .settings-grid 只放得下 286px 内容盒，
+   而它仍按 320px 排版，于是子项被撑到 320px 造成横向溢出。
+   这里同时把 .settings-grid 与 .pp-body 都压成 minmax(0,1fr)，
+   让列宽跟随容器，窄屏下自然是单列且不溢出。 */
+@media (max-width: 900px) {
+  .settings-grid.is-param-panel,
+  .settings-grid.is-param-panel .pp-body {
+    /* 提高一级特异性压过 layout.css 里后加载的 .settings-grid 规则 */
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  /* 窄屏下分组内部也不要留出固定最小宽度 */
+  .settings-grid.is-param-panel .pp-group { min-width: 0; }
+}
 .settings-grid.is-param-panel .pp-resize-handle { display: none; }
 .settings-grid.is-param-panel .pp-group { min-width: 0; }
-.settings-grid.is-param-panel.is-collapsed { display: block; }
+/* 收起态：保留 .pp-head 作为展开入口（与上面的 .is-param-panel.is-collapsed 一致），
+   这里只需把分组体藏掉；不要用 display:block —— 那会让 grid 的头部失去跨列规则。 */
 .settings-grid.is-param-panel.is-collapsed .pp-body,
 .settings-grid.is-param-panel.is-collapsed .pp-resize-handle { display: none; }
 
@@ -2421,6 +2510,24 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
 }
 /* 展开时把内边距还给内容区，避免贴边 */
 .pp-inline-fold[open] > .filter-controls-panel { margin: 0 14px 14px; }
+/* 准备工作区：details 内部的导入栏与参数栅格需要自己的留白 */
+.pp-inline-fold .prep-inner { margin: 0 14px; }
+.pp-inline-fold > .settings-grid,
+.pp-inline-fold > .convert-status { margin-left: 14px; margin-right: 14px; }
+/* 摘要行右侧的说明文字 */
+.pp-folder-hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  padding-left: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 720px) {
+  .pp-folder-hint { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {
