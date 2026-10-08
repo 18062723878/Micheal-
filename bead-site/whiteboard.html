@@ -182,6 +182,57 @@
       gap: 8px;
     }
 
+    /* ===== 工作台顶栏工具条 =====
+       命令类操作（撤销/重做/镜像/旋转/清空）放这里，
+       左侧参数面板只留真正需要「设值」的参数。
+       命令按钮横向排布，纵向只占一行，不再挤占参数面板空间。 */
+    .workbench-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .workbench-tools-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border-color);
+      margin: 0 3px;
+      flex: none;
+    }
+    .tool-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border: 1px solid var(--border-color);
+      border-radius: 7px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .tool-chip:hover:not(:disabled) {
+      border-color: var(--primary, #0052ff);
+      color: var(--primary, #0052ff);
+    }
+    .tool-chip:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+    .tool-chip--danger:hover:not(:disabled) {
+      border-color: #dc2626;
+      color: #dc2626;
+    }
+    /* 窄屏时只留图标，省横向空间 */
+    @media (max-width: 1180px) {
+      .tool-chip span { display: none; }
+      .tool-chip { padding: 5px 7px; }
+    }
+
     .workbench-body {
       display: flex;
       gap: 14px;
@@ -260,6 +311,14 @@
       padding: 12px;
       box-sizing: border-box;
       max-height: 100%;
+      /* 关键修复（内部元素被遮挡点不动的根因）：
+         .draw-sidebar 是 .workbench-body 的 flex 子项，缺 min-height:0 时
+         它会被 .pp-body 的内容撑高，max-height:100% 因循环基准而形同虚设，
+         分组内容直接溢出面板、压在画布上——命中测试实测「板型」分组
+         中心点命中的是 CANVAS 而不是分组标题，看起来就像「点不动」。
+         min-height:0 允许它被压缩，内部的 .pp-body（overflow-y:auto）
+         才会真正接管滚动，内容不再溢出面板。 */
+      min-height: 0;
     }
     /* 分组收纳后，分区名称由 .pp-group-head 显示，这里隐藏原来的标题避免重复。
        保留 display 规则以兼容未分组场景。 */
@@ -721,7 +780,17 @@
             <div class="workbench-label" data-page-node-id="g9gUZ5k9GuA56uyVdp2dyL">
               <span data-page-node-id="oKEh7SAfwRLc5yJLKXEPvi">🖌️ 自由画板（纯色实体豆豆）</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;" data-page-node-id="1JclozCOtvYHdlNEa3wA8i">
+            <div class="workbench-tools" role="toolbar" aria-label="画板命令">
+              <!-- 命令类操作（撤销/翻转/旋转等）放在顶栏工具条：
+                   它们是「动作」而不是「参数」，不该占用左侧参数面板的纵向空间。 -->
+              <button id="btn-undo" class="tool-chip" type="button" title="撤销 (Ctrl+Z)">↩️<span>撤销</span></button>
+              <button id="btn-redo" class="tool-chip" type="button" title="重做 (Ctrl+Y)">↪️<span>重做</span></button>
+              <span class="workbench-tools-sep" aria-hidden="true"></span>
+              <button id="btn-hflip" class="tool-chip" type="button" title="左右镜像">⇄<span>水平</span></button>
+              <button id="btn-vflip" class="tool-chip" type="button" title="上下镜像">⇅<span>垂直</span></button>
+              <button id="btn-rotate" class="tool-chip" type="button" title="顺时针旋转 90°">🔄<span>旋转</span></button>
+              <span class="workbench-tools-sep" aria-hidden="true"></span>
+              <button id="btn-clear" class="tool-chip tool-chip--danger" type="button" title="清空画布">🗑️<span>清空</span></button>
               <button id="btn-fullscreen-left" class="btn btn-sm" type="button" data-page-node-id="u4FcYkLfrX7uz0UdCkBjGT">⛶ 全屏编辑</button>
             </div>
           </div>
@@ -753,7 +822,7 @@
               </div>
 
               <!-- 对称绘制：像素画常用左右/上下对称，实时镜像落子 -->
-              <div data-pp-group="ops">
+              <div data-pp-group="symmetry">
                 <div class="sidebar-section-title">
                   <span>对称绘制</span>
                   <button id="btn-symmetry" class="mini-toggle" type="button" aria-pressed="false">关</button>
@@ -763,18 +832,6 @@
                   <option value="horizontal">上下对称</option>
                   <option value="quad">四向对称</option>
                 </select>
-              </div>
-
-              <div data-page-node-id="W6bvtXjGOp3CncnmeA8820">
-                <div class="sidebar-section-title" data-page-node-id="7rhnA76I4zGY9VecXQvSIy">画板操作</div>
-                <div class="tools-grid" data-page-node-id="z7yzK6uE5ipj17CjesjjQx">
-                  <button id="btn-undo" class="tool-btn" type="button" data-page-node-id="AA8jc4gDtsizZvt9uCBBXe">↩️ 撤销</button>
-                  <button id="btn-redo" class="tool-btn" type="button">↪️ 重做</button>
-                  <button id="btn-clear" class="tool-btn" type="button" data-page-node-id="jHQ47mNMFpKWiLxeDwCNHf">🗑️ 清空</button>
-                  <button id="btn-hflip" class="tool-btn" type="button" data-page-node-id="nfFI9X8Sl1wTKJb6okEgHT">⇄ 水平</button>
-                  <button id="btn-vflip" class="tool-btn" type="button" data-page-node-id="qK1VbuMNbjt68GIt12nO7F">⇅ 垂直</button>
-                  <button id="btn-rotate" class="tool-btn" type="button">🔄 旋转</button>
-                </div>
               </div>
 
               <!-- 图片导入：既能转成真实色号，也能作为半透明临摹底图 -->
@@ -2077,13 +2134,15 @@
       if (!sidebar) return;
       const pick = (name) => sidebar.querySelector(`[data-pp-group="${name}"]`);
 
-      // 高频：工具与色板（画图时最常用）；其余默认折叠
+      // 高频：工具与色板（画图时最常用）；其余默认折叠。
+      // 注意：撤销/重做/清空/镜像/旋转等「命令」已移到工作台顶栏工具条，
+      // 这里只留需要设值的参数。
       const groups = [
-        { key: 'tools', title: '绘画工具', hint: '画笔/橡皮/填充/对称', open: true, nodes: [pick('tools')] },
+        { key: 'tools', title: '绘画工具', hint: '画笔/橡皮/填充', open: true, nodes: [pick('tools')] },
         { key: 'palette', title: '色板与当前色', hint: '', open: true, nodes: [pick('current'), pick('palette')] },
         { key: 'board', title: '板型（格数）', hint: '', open: true, nodes: [pick('board')] },
-        { key: 'ops', title: '画板操作', hint: '撤销/重做/翻转', open: false, nodes: [pick('ops')] },
         { key: 'filters', title: '画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
+        { key: 'symmetry', title: '对称绘制', hint: '左右/上下/四向', open: false, nodes: [pick('symmetry')] },
         { key: 'import', title: '图片导入', hint: '转色号/临摹底图', open: false, nodes: [pick('import')] },
         { key: 'view', title: '显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
       ].filter((g) => g.nodes.every(Boolean));

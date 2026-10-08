@@ -34,11 +34,20 @@
       border: 1px solid var(--border);
       background: var(--muted);
     }
+    /* 宽屏时压缩纵向占用：分组本身保持不换行，整条工具条只在放不下时才折行。
+       之前的 min-width 较大导致 1280px 下也要占 3 行、把图纸挤到屏幕外。 */
     .toolbar-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       min-width: 0;
+      flex-wrap: nowrap;
+    }
+    /* 标签与控件同处一行，标签不单独占位 */
+    .toolbar-group > .field-label {
+      flex: none;
+      white-space: nowrap;
+      font-size: 11.5px;
     }
     .toolbar-sep {
       width: 1px;
@@ -104,6 +113,70 @@
       max-height: calc(100vh - 150px);
     }
 
+    /* ===== 标题区压缩 =====
+       原来「Design Studio 标签 + 大标题 + 副标题 + 按钮」竖排占 123px，
+       现在标题与副标题横排、标签与按钮并到右侧，整块压到一行高度，
+       把省下的空间让给下面的图纸展示台。 */
+    .studio-header {
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+    }
+    .studio-header-text .panel-title { margin: 0; }
+    .studio-header-text .panel-subtitle {
+      margin: 4px 0 0;
+      font-size: 12.5px;
+    }
+    .studio-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: none;
+    }
+    @media (max-width: 640px) {
+      .studio-header { flex-direction: column; align-items: stretch; }
+      .studio-header-actions { justify-content: space-between; }
+    }
+
+    /* ===== 空状态引导 =====
+    .stage-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 18px;
+      margin-bottom: 14px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--muted);
+    }
+    .stage-empty.is-hidden { display: none; }
+    .stage-empty-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+    }
+    .stage-empty-icon { font-size: 26px; line-height: 1; }
+    .stage-empty-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--foreground);
+    }
+    .stage-empty-sub {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--muted-foreground);
+    }
+    .stage-empty-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
     /* ===== 创作工坊：侧栏布局 =====
        侧栏组件本体样式（.sb-root / .sb-*）在 assets/css/theme.css，
        与白板画板页共用同一份，这里只负责本页的栅格与响应式。 */
@@ -146,17 +219,29 @@
         <!-- 工作区：创意工坊（图片转图纸） -->
         <div class="studio-pane" id="pane-studio">
     <section class="panel">
-      <div class="panel-header">
-        <div>
-          <span class="section-label">Design Studio</span>
-          <h2 class="panel-title" style="margin-top:12px;">拼豆设计工坊</h2>
-          <p class="panel-subtitle">导入图片 → 校准参数 → 拼豆模式核对 → 导出图纸</p>
+      <div class="panel-header studio-header">
+        <div class="studio-header-text">
+          <h2 class="panel-title">拼豆设计工坊</h2>
+          <p class="panel-subtitle">上传图片 → 校准参数 → 逐色核对 → 导出图纸</p>
         </div>
-        <button id="btn-reset-filters" class="btn btn-outline btn-sm" type="button">重置所有参数</button>
+        <div class="studio-header-actions">
+          <span class="section-label">Design Studio</span>
+          <button id="btn-reset-filters" class="btn btn-outline btn-sm" type="button">重置所有参数</button>
+        </div>
       </div>
 
+      <!-- ===== 准备工作区：导入 + 参数 =====
+           默认**收起**：首屏先给图纸展示台；
+           需要调参时点标题行展开，生成图纸后也会自动收起。 -->
+      <details class="pp-inline-fold" id="studio-prep-fold">
+        <summary class="pp-inline-summary">
+          <span class="pp-caret" aria-hidden="true">▾</span>
+          <span>① 导入图片与参数设置</span>
+          <span class="pp-folder-hint" id="studio-prep-hint">上传图片后可校准板宽、色板与画面参数</span>
+        </summary>
+
       <!-- 图像导入栏 -->
-      <div class="import-bar">
+      <div class="import-bar prep-inner">
         <div class="import-actions">
           <label class="btn btn-primary" style="cursor:pointer;">
             上传本地图片
@@ -288,11 +373,29 @@
             </div>
           </div>
         </div>
+      </details>
       </div>
 
       <p id="convert-status" class="convert-status">请先上传图片或载入精选图纸。</p>
 
-      <!-- 图纸展示台 -->
+      <!-- 空状态引导：把「上传图片」这个最高频动作放在画布正上方，
+           而不是藏在上面的参数区里。用户进来第一眼就能开始操作。 -->
+      <div class="stage-empty" id="stage-empty">
+        <div class="stage-empty-inner">
+          <span class="stage-empty-icon" aria-hidden="true">🖼️</span>
+          <p class="stage-empty-title">先上传一张图片，开始生成拼豆图纸</p>
+          <p class="stage-empty-sub">支持 JPG / PNG / GIF · 也可在下方展开参数区微调板宽与色板</p>
+          <div class="stage-empty-actions">
+            <label class="btn btn-primary" style="cursor:pointer;">
+              选择图片开始
+              <input id="upload-input-empty" type="file" accept="image/*,.gif" hidden />
+            </label>
+            <button id="btn-open-params" class="btn btn-outline" type="button">先调参数</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 画布区（首屏主角）===== -->
       <div class="stage-head">
         <div>
           <h3>拼豆图纸展示台</h3>
@@ -557,6 +660,8 @@
      * ----------------------------------------------------------------- */
     (function initStudioParams() {
       const grid = $('studio-params');
+      const prepFold = $('studio-prep-fold');
+      if (prepFold) prepFold.addEventListener('toggle', syncPrepCaret);
       if (!grid) return;
       const pick = (name) => grid.querySelector(`[data-pp-group="${name}"]`);
       initParamPanel({
@@ -639,12 +744,33 @@
       fitHeightEl: modeWrapEl,
     });
 
-    /** 展示台高度预算，与 CSS 中 .bead-stage--fit canvas 的 max-height 保持一致 */
+    /** 展示台高度预算：让画布尽量占满「视口剩余空间」。
+     *
+     * 测量基准取 .bead-stage 容器的 top —— 它在文档流里位于所有上方区块之后，
+     * 因此「视口高 - 容器 top - 底部留白」就是画布能拿到的最大高度。
+     * 注意不能读容器自身的 bottom（会与 max-height 形成循环依赖）。
+     */
     function stageHeightBudget() {
-      return Math.min(Math.round(window.innerHeight * 0.7), 720);
+      const canvas = document.getElementById('stage-canvas');
+      const wrap = canvas ? canvas.closest('.bead-stage') : null;
+      const MIN = 240;
+      const MAX = 760;
+      const BOTTOM_GAP = 24;
+      if (!wrap) return Math.min(Math.round(window.innerHeight * 0.7), MAX);
+      // 用 offsetTop（相对 offsetParent 的文档偏移）而不是 getBoundingClientRect：
+      // 后者会受祖先滚动影响，且在 canvas 已有 max-height 时会自我收窄。
+      const top = wrap.offsetTop;
+      const avail = Math.round(window.innerHeight - top - BOTTOM_GAP);
+      return Math.max(MIN, Math.min(avail, MAX));
     }
 
     function pushOptionsToViewers() {
+      // 展示台可用高度同时写进 CSS 变量，让 canvas 的 max-height 跟随视口剩余空间，
+      // 避免固定 70vh 在短屏上把图纸顶到屏幕之外。
+      const budget = stageHeightBudget();
+      const stage = document.querySelector('.panel .bead-stage');
+      if (stage) stage.style.setProperty('--stage-max-h', budget + 'px');
+
       stageViewer.setOptions({
         beadStyle: viewOptions.beadStyle,
         gap: viewOptions.gap,
@@ -653,7 +779,7 @@
         showRuler: viewOptions.showRuler,
         fit: viewOptions.fit,
         zoom: viewOptions.zoom,
-        maxFitHeight: stageHeightBudget(),
+        maxFitHeight: budget,
         highlightCode: activeHighlightCode,
         checked: checkedBeadCoords,
         excluded: excludedColorCodes,
@@ -872,8 +998,8 @@
       }
     }
 
-    uploadInput.addEventListener('change', e => {
-      const file = e.target.files[0];
+    /** 处理选中的图片文件（上传栏与空状态引导共用同一套逻辑） */
+    function handleUploadFile(file) {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = event => {
@@ -882,7 +1008,32 @@
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
-    });
+    }
+
+    uploadInput.addEventListener('change', e => handleUploadFile(e.target.files[0]));
+
+    // 空状态引导里的上传入口：转发到同一个 hidden input，保证只有一套处理逻辑
+    const emptyUpload = $('upload-input-empty');
+    if (emptyUpload) {
+      emptyUpload.addEventListener('change', e => {
+        handleUploadFile(e.target.files[0]);
+        uploadInput.value = '';
+        e.target.value = '';
+      });
+    }
+
+    // 「先调参数」：展开准备工作区并把焦点给到它
+    const btnOpenParams = $('btn-open-params');
+    if (btnOpenParams) {
+      btnOpenParams.addEventListener('click', () => {
+        const fold = $('studio-prep-fold');
+        if (fold && !fold.open) {
+          fold.open = true;
+          syncPrepCaret();
+        }
+        if (fold) fold.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
 
     /* ============================ 参数联动 ============================ */
     boardWidthInput.addEventListener('input', e => {
@@ -1178,6 +1329,40 @@
 
       syncUI();
       statusText.textContent = `生成成功：${targetWidth} × ${targetHeight} 网格`;
+      // 图纸已就绪：自动收起「导入与参数」工作区，把首屏让给展示台。
+      // 用户随时可以点标题行再展开回来调参数。
+      autoCollapsePrep();
+    }
+
+    /** 图纸生成后自动收起准备工作区（仅首次，避免打断后续反复调参） */
+    let prepAutoCollapsed = false;
+    function autoCollapsePrep() {
+      const fold = $('studio-prep-fold');
+      if (!fold) return;
+      // 已经收起时也要同步一次（提示语 / 空状态需要跟着图纸状态更新）
+      if (prepAutoCollapsed) { syncPrepCaret(); return; }
+      if (fold.open) {
+        prepAutoCollapsed = true;
+        fold.open = false;
+      }
+      syncPrepCaret();
+    }
+
+    /** 同步折叠标题的箭头方向与提示语 */
+    function syncPrepCaret() {
+      const fold = $('studio-prep-fold');
+      if (!fold) return;
+      const caret = fold.querySelector('.pp-caret');
+      if (caret) caret.textContent = fold.open ? '▾' : '▸';
+      const hint = $('studio-prep-hint');
+      if (hint) {
+        hint.textContent = gridData.length
+          ? `图纸已生成（${gridData[0].length}×${gridData.length} 网格），点此重新调参`
+          : '板宽、色板、抠背景与画面微调都在这里';
+      }
+      // 有图纸后隐藏空状态引导，把画布让出来
+      const empty = $('stage-empty');
+      if (empty) empty.classList.toggle('is-hidden', gridData.length > 0);
     }
 
     /* ============================ 渲染与同步 ============================ */
@@ -1655,6 +1840,7 @@
     });
 
     syncUI();
+    syncPrepCaret();
     renderStatsTable({ list: [], total: 0, colors: 0 });
   </script>
 </body>
