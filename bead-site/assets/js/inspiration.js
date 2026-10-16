@@ -3,6 +3,7 @@
 import { renderGrid } from './convert.js';
 import { exportPNG, exportCSV, exportPDF } from './exporter.js';
 import { decodeGrid } from './home.js';
+import { cropToContent } from './bead-viewer.js';
 
 let _data = null;
 
@@ -40,6 +41,9 @@ export async function initInspirationCategory(categoryId) {
     wrap.innerHTML = '';
     cat.examples.forEach((ex) => {
       const grid = decodeGrid(ex);
+      // 缩略图去掉四周空白，让图案真正铺满外框；
+      // dataset.grid 仍存**完整**网格，供灯箱展示与导出使用。
+      const thumbGrid = cropToContent(grid);
       const card = document.createElement('article');
       card.className = 'card example-card';
       card.dataset.grid = JSON.stringify(grid);
@@ -49,7 +53,7 @@ export async function initInspirationCategory(categoryId) {
       thumb.className = 'example-thumb';
       const cv = document.createElement('canvas');
       cv.className = 'example-canvas';
-      renderGrid(cv, grid, Math.max(4, Math.floor(150 / grid[0].length)), { labels: false });
+      renderGrid(cv, thumbGrid, Math.max(4, Math.floor(150 / thumbGrid[0].length)), { labels: false });
       thumb.appendChild(cv);
       const body = document.createElement('div');
       body.className = 'example-body';

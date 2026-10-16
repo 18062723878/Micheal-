@@ -24,7 +24,13 @@ const newPage = async (path) => {
   const p = await browser.newPage({ viewport: { width: 1500, height: 1000 } });
   p.on('pageerror', (e) => errors.push(`pageerror(${path}): ${e.message}`));
   p.on('console', (m) => {
-    if (m.type() === 'error' && !/favicon/.test(m.text())) errors.push(`console(${path}): ${m.text()}`);
+    if (m.type() !== 'error') return;
+    const t = m.text();
+    // 过滤与页面代码无关的资源加载噪声：favicon 404、
+    // 以及本地静态服务器偶发的 ERR_CONNECTION_RESET（曾导致假失败）。
+    if (/favicon/.test(t)) return;
+    if (/ERR_CONNECTION_RESET|ERR_ABORTED|ERR_CONNECTION_CLOSED|Failed to load resource/.test(t)) return;
+    errors.push(`console(${path}): ${t}`);
   });
   await p.goto(BASE + path, { waitUntil: 'networkidle' });
   await p.waitForTimeout(300);

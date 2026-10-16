@@ -492,3 +492,51 @@ export function aspectForMatrix(cols, rows, min = 0.78, max = 1.28) {
   const ratio = cols / Math.max(1, rows);
   return Math.min(max, Math.max(min, ratio));
 }
+
+/**
+ * 求图纸内容的边界框（忽略四周的空白格）。
+ *
+ * 为什么需要：
+ *   站点里的图纸基本都画在 32×32 方格上，但四周留了空白边距
+ *   —— 实测 62 个图纸里 **61 个有边距**，平均只占满 83%（横）×77%（纵），
+ *   最夸张的「原神派蒙应急食品」内容只有 18×22，仅占 56%×69%。
+ *   按整幅渲染就会出现「外框很大、图案很小」，而且每张留白还不一样，
+ *   摆在网格里大小参差 —— 这正是「没铺满 + 比例不协调」的根因。
+ *
+ * @param {Array<Array<object|null>>} matrix
+ * @returns {{x0:number,y0:number,x1:number,y1:number,cols:number,rows:number}|null}
+ *          整幅全空时返回 null
+ */
+export function contentBounds(matrix) {
+  if (!Array.isArray(matrix) || !matrix.length) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+  for (let y = 0; y < matrix.length; y++) {
+    const row = matrix[y] || [];
+    for (let x = 0; x < row.length; x++) {
+      if (!row[x]) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x1 < 0) return null;
+  return { x0, y0, x1, y1, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
+}
+
+/**
+ * 按内容边界裁剪图纸 —— 缩略图专用（去四周空白，让图案真正铺满外框）。
+ * 已经是紧贴内容或整幅全空时原样返回，调用方无需判空。
+ *
+ * 注意：只用于**展示用的缩略图**，不要拿它替换图纸本体数据 ——
+ * 编辑器与导出仍应保留原始画幅。
+ */
+export function cropToContent(matrix) {
+  const b = contentBounds(matrix);
+  if (!b) return matrix;
+  const fullW = matrix[0] ? matrix[0].length : 0;
+  if (b.cols === fullW && b.rows === matrix.length) return matrix;
+  const out = [];
+  for (let y = b.y0; y <= b.y1; y++) out.push(matrix[y].slice(b.x0, b.x1 + 1));
+  return out;
+}

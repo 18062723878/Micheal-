@@ -63,7 +63,7 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS } from './assets/js/patterns-data.js';
-    import { BeadViewer, buildLegend, computeStats, renderPattern, fitCellToBox, aspectForMatrix } from './assets/js/bead-viewer.js';
+    import { BeadViewer, buildLegend, computeStats, renderPattern, fitCellToBox, aspectForMatrix, cropToContent } from './assets/js/bead-viewer.js';
 
     try { injectChrome('inspiration'); } catch (e) { console.warn(e); }
 
@@ -121,9 +121,13 @@
         card.addEventListener('click', () => openModal(p));
         gridContainer.appendChild(card);
 
-        // 外框贴合图纸比例：留白更少、图纸更醒目
+        // 外框仍按整幅比例（网格整齐），框内图案用裁剪后的内容，真正贴边铺满
         const box = card.querySelector('.pattern-preview-box');
         box.style.aspectRatio = String(aspectForMatrix(cols, rows));
+
+        const content = cropToContent(p.matrix);
+        const cRows = content.length;
+        const cCols = content[0].length;
 
         const canvas = card.querySelector('canvas');
         const viewer = new BeadViewer(canvas, {
@@ -134,8 +138,8 @@
           showCode: false,
           showRuler: false,
         });
-        viewer.setMatrix(p.matrix);
-        thumbs.push({ viewer, box, cols, rows });
+        viewer.setMatrix(content);
+        thumbs.push({ viewer, box, cols: cCols, rows: cRows });
 
         setTimeout(() => card.classList.add('is-visible'), Math.min(i, 10) * 40);
       });

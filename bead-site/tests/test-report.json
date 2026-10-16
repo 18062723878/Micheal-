@@ -1,6 +1,6 @@
 {
-  "total": 131,
-  "passed": 131,
+  "total": 138,
+  "passed": 138,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -61,6 +61,11 @@
     "G11-params": {
       "total": 10,
       "pass": 10,
+      "fail": 0
+    },
+    "G12-thumb": {
+      "total": 7,
+      "pass": 7,
       "fail": 0
     }
   },

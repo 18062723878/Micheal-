@@ -150,7 +150,7 @@
   <script type="module">
     import { injectChrome } from './assets/js/chrome.js';
     import { ALL_PATTERNS, PALETTES } from './assets/js/patterns-data.js';
-    import { BeadViewer, fitCellToBox, aspectForMatrix } from './assets/js/bead-viewer.js';
+    import { BeadViewer, fitCellToBox, aspectForMatrix, cropToContent } from './assets/js/bead-viewer.js';
 
     try { injectChrome('home'); } catch (e) { console.warn(e); }
 
@@ -189,6 +189,11 @@
       featuredList.forEach(p => {
         const rows = p.matrix.length;
         const cols = p.matrix[0].length;
+        // 缩略图按内容裁剪：图纸四周普遍留了空白（实测 62 个里 61 个有边距），
+        // 不裁的话图案会缩在外框中间显得「没铺满」，且各图留白不同导致大小参差。
+        const content = cropToContent(p.matrix);
+        const cRows = content.length;
+        const cCols = content[0].length;
 
         const card = document.createElement('article');
         card.className = 'featured-card reveal';
@@ -210,7 +215,8 @@
         grid.appendChild(card);
 
         const box = card.querySelector('.featured-preview');
-        // 外框贴合图纸比例，避免留白过多导致图片显小
+        // 外框仍按**整幅**比例（图纸都是 32×32 ⇒ 正方形），保证网格整齐；
+        // 框内的图案用裁剪后的内容，从而真正贴边铺满。
         box.style.aspectRatio = String(aspectForMatrix(cols, rows));
 
         const canvas = card.querySelector('canvas');
@@ -222,8 +228,8 @@
           showCode: false,
           showRuler: false,
         });
-        viewer.setMatrix(p.matrix);
-        thumbs.push({ viewer, box, cols, rows });
+        viewer.setMatrix(content);
+        thumbs.push({ viewer, box, cols: cCols, rows: cRows });
       });
 
       requestAnimationFrame(() => {

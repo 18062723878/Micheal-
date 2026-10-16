@@ -1604,6 +1604,72 @@ async function main() {
     }
   });
 
+  // =====================================================================
+  // GROUP 12 — 缩略图按内容裁剪
+  //   修「缩略图没铺满 + 各图大小参差」：站点图纸普遍在四周留了空白
+  //   （实测 62 个里 61 个有边距，平均只占满 83%×77%），
+  //   缩略图必须裁掉空白才能真正撑满外框。
+  // =====================================================================
+  const { contentBounds, cropToContent } = await import('../assets/js/bead-viewer.js');
+
+  await case_('G12-thumb', 'contentBounds 找出内容边界（忽略四周空白）', () => {
+    const m = [
+      [null, null, null, null],
+      [{ code: 'MA8' }, null, { code: 'MA8' }, null],
+      [null, null, { code: 'MA8' }, null],
+      [null, null, null, null],
+    ];
+    assert.deepStrictEqual(contentBounds(m), { x0: 0, y0: 1, x1: 2, y1: 2, cols: 3, rows: 2 });
+  });
+
+  await case_('G12-thumb', 'contentBounds 对全空图纸返回 null', () => {
+    assert.strictEqual(contentBounds([[null, null], [null, null]]), null);
+  });
+
+  await case_('G12-thumb', 'cropToContent 裁掉空白且内容不变', () => {
+    const m = [
+      [null, null, null],
+      [null, { code: 'MF4' }, null],
+      [null, null, null],
+    ];
+    const c = cropToContent(m);
+    assert.strictEqual(c.length, 1, '应只剩 1 行');
+    assert.strictEqual(c[0].length, 1, '应只剩 1 列');
+    assert.strictEqual(c[0][0].code, 'MF4');
+  });
+
+  await case_('G12-thumb', 'cropToContent 对已贴边图纸原样返回（同一引用）', () => {
+    const m = [[{ code: 'MH7' }, { code: 'MH1' }], [{ code: 'MH1' }, { code: 'MH7' }]];
+    assert.strictEqual(cropToContent(m), m);
+  });
+
+  await case_('G12-thumb', 'cropToContent 不破坏全空图纸', () => {
+    const m = [[null, null], [null, null]];
+    assert.strictEqual(cropToContent(m), m);
+  });
+
+  await case_('G12-thumb', '所有图纸裁剪后内容都紧贴边界', async () => {
+    const { ALL_PATTERNS } = await import('../assets/js/patterns-data.js');
+    let checked = 0;
+    for (const p of ALL_PATTERNS) {
+      const c = cropToContent(p.matrix);
+      const b = contentBounds(c);
+      if (!b) continue;
+      assert.strictEqual(b.x0, 0, `${p.id}: 裁剪后仍有左边距`);
+      assert.strictEqual(b.y0, 0, `${p.id}: 裁剪后仍有上边距`);
+      assert.strictEqual(b.x1, c[0].length - 1, `${p.id}: 裁剪后仍有右边距`);
+      assert.strictEqual(b.y1, c.length - 1, `${p.id}: 裁剪后仍有下边距`);
+      checked++;
+    }
+    assert.ok(checked >= 60, `应覆盖绝大多数图纸，实际只检查了 ${checked} 个`);
+  });
+
+  await case_('G12-thumb', '三个缩略图入口都接入了 cropToContent', () => {
+    for (const f of ['index.html', 'inspiration.html', 'assets/js/inspiration.js']) {
+      assert.ok(read(f).includes('cropToContent'), `${f} 必须对缩略图做内容裁剪`);
+    }
+  });
+
   // -------------------------------------------------------------------------
   // Report
   // -------------------------------------------------------------------------
