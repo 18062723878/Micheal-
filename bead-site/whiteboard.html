@@ -7,11 +7,12 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230052ff'/%3E%3Ccircle cx='11' cy='12' r='4' fill='%23fff'/%3E%3Ccircle cx='21' cy='12' r='4' fill='%23FFD400'/%3E%3Ccircle cx='11' cy='21' r='4' fill='%23E60012'/%3E%3Ccircle cx='21' cy='21' r='4' fill='%2322c55e'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="assets/css/theme.css" data-page-node-id="LQMYIFXbaTuScz8A4mJtiE" />
   <link rel="stylesheet" href="assets/css/layout.css" data-page-node-id="G6VWeQ28yBThYvxkNxu77B" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <style>
     .wb-container {
-      max-width: 1440px;
-      margin: 20px auto;
-      padding: 0 16px;
+      max-width: none;
+      margin: 0;
+      padding: 0;
     }
 
     /* ===== 白板画板：独立侧边栏布局 =====
@@ -23,7 +24,7 @@
       grid-template-columns: 248px minmax(0, 1fr);
       align-items: start;
       gap: 20px;
-      max-width: 1440px;
+      max-width: 1680px;
       margin: 20px auto;
       padding: 0 16px;
     }
@@ -133,14 +134,73 @@
       width: 100%;
     }
 
-    /* 双工作台排版 */
+    /* 双工作台排版
+       ------------------------------------------------------------------
+       之前这里是 flex + flex-wrap，两个 .board-workbench 各 flex:1 1 580px。
+       问题：容器可用宽度只要小于 580×2+20=1180px 就会换行 ——
+       而 1600px 视口下（shell 上限 1440 − 侧栏 248 − 间距）只剩约 1140px，
+       于是两块工作台在宽屏上**上下堆叠**，画布被压到第二屏，白费半屏横向空间。
+       改成 grid 显式分列：左画布弹性、右对照图固定宽度，永远不会意外换行。 */
     .workbench-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+      gap: 18px;
+      align-items: start;
+      /* 首屏预留高度的默认值。脚本会在布局后把实测值写到这里（行容器）——
+         必须写在行容器上而不是 .board-workbench 自己身上：
+         元素自身声明的自定义属性会遮蔽从父级继承来的值，写在子元素上会让脚本失效。 */
+      --wb-vh-offset: 150px;
+    }
+    /* 收起侧栏：画布独占整行 */
+    .workbench-row.is-schematic-hidden {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .workbench-row.is-schematic-hidden .wb-side-col {
+      display: none;
+    }
+
+    /* 右侧栏：色号对照图 + 材料用量清单
+       高度跟着左侧画布一起卡在视口内，内容超出时在栏内滚动，
+       于是桌面端「画布 + 对照图 + 用量清单」一屏装得下。 */
+    .wb-side-col {
       display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      max-height: calc(100vh - var(--wb-vh-offset, 150px));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    .wb-side-col > .wb-card {
+      margin-bottom: 0;
+      flex: none;
+    }
+    .wb-side-col > #workbench-right {
+      flex: none;
+      max-height: none;
+    }
+    /* 中等宽度：对照图收窄，把宽度让给画布 */
+    @media (max-width: 1439px) {
+      .workbench-row {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+      }
+    }
+    /* 再窄就回到上下堆叠，并给对照图一个限高，避免它把画布顶出屏幕 */
+    @media (max-width: 1149px) {
+      .workbench-row,
+      .workbench-row.is-schematic-hidden {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .wb-side-col {
+        max-height: none;
+        overflow: visible;
+      }
+      .board-workbench:nth-of-type(2) {
+        max-height: 380px;
+      }
     }
     .board-workbench {
-      flex: 1 1 580px;
       display: flex;
       flex-direction: column;
       background: var(--bg-secondary);
@@ -155,15 +215,7 @@
          150px 为页头 + 标题区 + 折叠条的预估占用；下方脚本会用实测值
          覆盖这个 CSS 兜底值，保证不同浏览器下都刚好填满首屏。 */
       min-height: 0;
-      max-height: calc(100vh - 150px);
-      --wb-vh-offset: 150px;
-    }
-    .board-workbench {
       max-height: calc(100vh - var(--wb-vh-offset, 150px));
-    }
-    /* 第二个工作台（色板图纸）内容较少，允许更矮 */
-    .board-workbench:nth-of-type(2) {
-      max-height: none;
     }
     .workbench-header {
       display: flex;
@@ -559,13 +611,14 @@
        画布只剩一百多像素，还会把页面撑出横向滚动条。
        这里改成：上下堆叠 + 画布在上 + 工具条在下（方便拇指点）。 */
     @media (max-width: 720px) {
-      .wb-container { padding: 0 12px; margin: 12px auto; }
+      .wb-shell { padding: 0 12px; margin: 12px auto; gap: 14px; }
       .wb-card { padding: 14px; border-radius: 12px; }
       .wb-header { flex-direction: column; align-items: flex-start; gap: 10px; }
 
       /* 左右两个工作台改成上下堆叠，不再互相抢宽度 */
       .workbench-row { gap: 14px; }
-      .board-workbench { flex: 1 1 100%; padding: 12px; }
+      .board-workbench { padding: 12px; }
+      .board-workbench:nth-of-type(2) { max-height: 320px; }
 
       .workbench-body {
         flex-direction: column;
@@ -792,6 +845,7 @@
               <span class="workbench-tools-sep" aria-hidden="true"></span>
               <button id="btn-clear" class="tool-chip tool-chip--danger" type="button" title="清空画布">🗑️<span>清空</span></button>
               <button id="btn-fullscreen-left" class="btn btn-sm" type="button" data-page-node-id="u4FcYkLfrX7uz0UdCkBjGT">⛶ 全屏编辑</button>
+              <button id="btn-toggle-side" class="tool-chip" type="button" title="收起右侧对照图与用量清单" aria-pressed="false">⇥<span>收起侧栏</span></button>
             </div>
           </div>
 
@@ -973,7 +1027,8 @@
           </div>
         </div>
 
-        <!-- 2. 右侧色号对照图纸 -->
+        <!-- 2. 右侧：色号对照图 + 材料用量清单（同一个可收起侧栏） -->
+        <div class="wb-side-col">
         <div class="board-workbench" id="workbench-right" data-page-node-id="2raQL3a2CHhVy3Ld22c64d">
           <div class="workbench-header" data-page-node-id="x7UIs30B4UtGqENZrxjxPY">
             <div class="workbench-label" data-page-node-id="Fjg4ig6NBfVqUqmXCRistQ">
@@ -998,14 +1053,15 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 材料用量清单 -->
-    <section class="wb-card" data-page-node-id="DH66egS0cE0iXkNuM3YFgJ">
-      <h3 style="margin-top: 0; color: var(--text-main);" data-page-node-id="9piZ6Uif6Kym5AdncKPYC3">📋 所需材料用量清单 (实时统计)</h3>
-      <div id="stats-container" data-page-node-id="vgmanDfAffqpaFfhlbtsFb">
-        <p style="color: var(--text-muted); font-size: 13px;" data-page-node-id="RnBQIlQCJ8ga7Btqmo6rx7">画布为空，快用画笔点缀你的作品吧！</p>
+        <!-- 材料用量清单：并入右侧栏，桌面端不必再往下滚一屏才看得到 -->
+        <section class="wb-card wb-stats-card" data-page-node-id="DH66egS0cE0iXkNuM3YFgJ">
+          <h3 style="margin-top: 0; color: var(--text-main);" data-page-node-id="9piZ6Uif6Kym5AdncKPYC3">📋 所需材料用量清单 (实时统计)</h3>
+          <div id="stats-container" data-page-node-id="vgmanDfAffqpaFfhlbtsFb">
+            <p style="color: var(--text-muted); font-size: 13px;" data-page-node-id="RnBQIlQCJ8ga7Btqmo6rx7">画布为空，快用画笔点缀你的作品吧！</p>
+          </div>
+        </section>
+        </div>
       </div>
     </section>
   </main>
@@ -2153,13 +2209,45 @@
         gutter: document.getElementById('wb-params-gutter'),
         title: '参数面板',
         groups,
-        width: 268,
+        width: 244,
         minWidth: 208,
         maxWidth: 420,
         widthKey: 'whiteboard.params.width',
         groupsKey: 'whiteboard.params.groups',
         collapsedKey: 'whiteboard.params.collapsed',
         breakpoint: 900,
+      });
+    })();
+    /* ----------------------------------------------------------------
+     * 收起 / 展开右侧栏（色号对照图 + 材料用量清单）
+     *
+     * 宽屏下两栏并排；把右侧栏收起来后画布独占整行，适合放大逐格核对。
+     * 收起状态记住，下次打开还是你上次的选择。
+     * ----------------------------------------------------------------- */
+    (function initSideCollapse() {
+      const row = document.querySelector('.workbench-row');
+      const btn = document.getElementById('btn-toggle-side');
+      if (!row || !btn) return;
+      const KEY = 'whiteboard.side.collapsed';
+      const label = btn.querySelector('span');
+      const icon = btn.firstChild;
+
+      function apply(collapsed) {
+        row.classList.toggle('is-schematic-hidden', collapsed);
+        btn.setAttribute('aria-pressed', String(collapsed));
+        if (label) label.textContent = collapsed ? '展开侧栏' : '收起侧栏';
+        if (icon && icon.nodeType === 3) icon.nodeValue = collapsed ? '⇤' : '⇥';
+        btn.title = collapsed ? '展开右侧对照图与用量清单' : '收起右侧对照图与用量清单';
+      }
+
+      let collapsed = false;
+      try { collapsed = localStorage.getItem(KEY) === '1'; } catch (e) { /* 隐私模式忽略 */ }
+      apply(collapsed);
+
+      btn.addEventListener('click', () => {
+        collapsed = !collapsed;
+        apply(collapsed);
+        try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch (e) { /* 忽略 */ }
       });
     })();
     /* ----------------------------------------------------------------
@@ -2172,12 +2260,13 @@
      * ----------------------------------------------------------------- */
     (function syncWorkbenchHeight() {
       const wb = document.getElementById('workbench-left');
-      if (!wb) return;
+      const row = document.querySelector('.workbench-row');
+      if (!wb || !row) return;
       const BOTTOM_GAP = 20; // 工作台底部留白
 
       function sync() {
         if (window.matchMedia('(max-width: 900px)').matches) {
-          wb.style.removeProperty('--wb-vh-offset');
+          row.style.removeProperty('--wb-vh-offset');
           return;
         }
         // 用「工作台当前 top + 底部留白」推算需要预留的顶部空间。
@@ -2186,8 +2275,10 @@
         const topOccupied = rect.top + window.scrollY;
         const offset = Math.max(120, Math.round(topOccupied + BOTTOM_GAP));
         const next = offset + 'px';
-        if (wb.style.getPropertyValue('--wb-vh-offset') !== next) {
-          wb.style.setProperty('--wb-vh-offset', next);
+        if (row.style.getPropertyValue('--wb-vh-offset') !== next) {
+          // 写在 .workbench-row 上而不是左侧工作台自己身上：
+          // 自定义属性只向下继承，写在行容器上左右两栏才能共用同一个高度基准。
+          row.style.setProperty('--wb-vh-offset', next);
         }
       }
 

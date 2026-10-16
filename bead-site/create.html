@@ -8,6 +8,7 @@
   <meta name="description" content="上传图片，实时转换为标准色号拼豆图纸，支持拼豆模式全屏核对、逐色高亮与 PNG / CSV 导出。" />
   <link rel="stylesheet" href="assets/css/theme.css" />
   <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
     /* 创作页专属：仅保留设计系统未覆盖的结构性样式 */
@@ -139,6 +140,10 @@
     }
 
     /* ===== 空状态引导 =====
+       注意：这一行的注释必须闭合。之前漏了 `*/`，导致从这里到下面
+       「创作工坊：侧栏布局」那段注释的结尾 `*/` 之间的**全部 CSS 被当成注释吞掉** ——
+       .stage-empty 及其 is-hidden 一直是死代码，所以载入图纸后空状态引导
+       既没有居中排版、也不会隐藏，白占着画布上方一大块高度。 */
     .stage-empty {
       display: flex;
       align-items: center;
@@ -193,6 +198,64 @@
     .studio-main { min-width: 0; }
     .studio-pane { display: block; }
     .studio-pane[hidden] { display: none; }
+
+    /* ===== 图纸展示台 / 材料栏 分栏 =====
+       窄屏单列（保持原样）；≥1240px 时把「色号图例 + 用色明细 + 导出」
+       挪到右侧常驻栏，画布独占左列。之前三块都在画布下面，
+       核对图纸时每次都要往下滚一屏才能看到材料清单。 */
+    .studio-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .studio-stage-col { min-width: 0; }
+    .studio-side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    /* 栏内已有 gap 统一控距，清掉这几块自带的顶边距，避免上下留白不一致 */
+    .studio-side-col .stats-block,
+    .studio-side-col .export-row { margin-top: 0; }
+
+    /* 用量清单在窄栏里要压紧：.stats-table 默认 min-width 560px（为整页宽度设计的），
+       直接放进 340px 的侧栏会横向溢出、操作列被裁掉。 */
+    .studio-side-col .stats-table {
+      min-width: 0;
+      font-size: 12px;
+    }
+    .studio-side-col .stats-table th,
+    .studio-side-col .stats-table td {
+      padding: 6px 5px;
+    }
+    .studio-side-col .stats-table .btn-sm {
+      padding: 3px 6px;
+      font-size: 11px;
+    }
+    .studio-side-col .stats-block-header h3 { font-size: 15px; }
+
+    @media (min-width: 1240px) {
+      .studio-body {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      }
+      .studio-side-col {
+        position: sticky;
+        top: 84px;
+        max-height: calc(100vh - 104px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+      }
+    }
+    /* 收起材料栏：图纸展示台独占整行，方便放大逐格核对 */
+    .studio-body.is-rail-hidden {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .studio-body.is-rail-hidden .studio-side-col {
+      display: none;
+    }
 
     @media (max-width: 900px) {
       .studio-shell,
@@ -395,7 +458,11 @@
         </div>
       </div>
 
-      <!-- ===== 画布区（首屏主角）===== -->
+      <!-- ===== 画布区（首屏主角）=====
+           宽屏下拆成两列：左列画布 + 工具，右列色号图例 / 用量明细 / 导出。
+           核对图纸时不必再来回滚动找材料清单。 -->
+      <div class="studio-body">
+        <div class="studio-stage-col">
       <div class="stage-head">
         <div>
           <h3>拼豆图纸展示台</h3>
@@ -403,6 +470,7 @@
         </div>
         <div class="row">
           <button id="btn-fit-toggle" class="btn btn-outline btn-sm is-active" type="button">适合屏幕</button>
+          <button id="btn-toggle-rail" class="btn btn-outline btn-sm" type="button" aria-pressed="false">收起材料栏</button>
           <button id="btn-bead-mode" class="btn btn-primary btn-sm" type="button">进入拼豆模式</button>
         </div>
       </div>
@@ -482,7 +550,9 @@
           <span class="bead-stat-value" id="stat-highlight">无</span>
         </div>
       </div>
+        </div>
 
+        <aside class="studio-side-col">
       <!-- 色卡图例 -->
       <div class="stage-legend-wrap">
         <div class="stage-legend-head">
@@ -500,6 +570,8 @@
       <div class="export-row">
         <button id="export-png" class="btn btn-primary" type="button">导出超清图纸 (PNG)</button>
         <button id="export-csv" class="btn btn-outline" type="button">导出色号矩阵 (CSV)</button>
+      </div>
+        </aside>
       </div>
     </section>
         </div>
@@ -1842,6 +1914,36 @@
     syncUI();
     syncPrepCaret();
     renderStatsTable({ list: [], total: 0, colors: 0 });
+
+    /* ============================ 材料栏收起 / 展开 ============================
+       宽屏下「色号图例 + 用色明细 + 导出」常驻在图纸展示台右侧；
+       收起后展示台独占整行，方便放大逐格核对。收起状态会被记住。 */
+    (function initRailCollapse() {
+      const body = document.querySelector('.studio-body');
+      const btn = document.getElementById('btn-toggle-rail');
+      if (!body || !btn) return;
+      const KEY = 'create.rail.collapsed';
+
+      function apply(collapsed) {
+        body.classList.toggle('is-rail-hidden', collapsed);
+        btn.setAttribute('aria-pressed', String(collapsed));
+        btn.textContent = collapsed ? '展开材料栏' : '收起材料栏';
+        // 展示台宽度变了，重算一次图纸缩放，避免留白或溢出
+        if (typeof gridData !== 'undefined' && gridData.length) {
+          requestAnimationFrame(() => renderStage());
+        }
+      }
+
+      let collapsed = false;
+      try { collapsed = localStorage.getItem(KEY) === '1'; } catch (e) { /* 隐私模式忽略 */ }
+      apply(collapsed);
+
+      btn.addEventListener('click', () => {
+        collapsed = !collapsed;
+        apply(collapsed);
+        try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch (e) { /* 忽略 */ }
+      });
+    })();
   </script>
 </body>
 </html>

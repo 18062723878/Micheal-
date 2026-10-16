@@ -1,4 +1,5 @@
 .workbuddy/
+.workbuddy-ai/
 .check/
 node_modules/
 .wrangler/

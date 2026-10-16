@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Liquid Glass 验收夹具</title>
+<link rel="stylesheet" href="../assets/css/theme.css" />
+<link rel="stylesheet" href="../assets/css/liquid-glass.css" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  /* 可滚动的背景：玻璃卡片固定不动，滚动时背景从玻璃下面经过，
+     用来验证「折射内容跟着变，而不是贴着一张固定纹理」。 */
+  #stage { position: relative; height: 2600px; }
+  #grid { position: absolute; left: 0; top: 0; width: 1400px; height: 2600px; }
+  /* 被测玻璃：固定定位，尺寸与圆角固定，方便逐像素比对 */
+  #card {
+    position: fixed;
+    left: 120px; top: 120px;
+    width: 420px; height: 300px;
+    border-radius: 26px;
+  }
+  #probe { position: fixed; right: 20px; top: 20px; color: #cbd5e1; font: 11px/1.6 monospace; white-space: pre; }
+</style>
+</head>
+<body>
+  <div id="stage"><canvas id="grid" width="1400" height="2600"></canvas></div>
+  <div class="panel" id="card"></div>
+  <pre id="probe"></pre>
+
+  <script>
+    /* 背景纹理：确定性伪随机噪点 + 稀疏网格线。
+       为什么不用纯网格：20px 周期与 6~10px 的折射位移接近半周期，
+       互相关会出现周期混叠，位移量测不准。
+       噪点是非周期的，互相关只有一个尖峰 —— 位移量可以被唯一确定。
+       网格线保留下来，是为了肉眼能直接看到「线被掰弯了」。 */
+    (function paintBackdrop() {
+      const cv = document.getElementById('grid');
+      const ctx = cv.getContext('2d');
+      const W = cv.width, H = cv.height;
+      let seed = 20261016;
+      const rnd = () => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      const cell = 5;
+      for (let y = 0; y < H; y += cell) {
+        for (let x = 0; x < W; x += cell) {
+          const v = 18 + rnd() * 96;
+          // 掺一点横向色相变化，便于肉眼看清楚背景在动
+          ctx.fillStyle = `rgb(${Math.round(v * 0.9)},${Math.round(v)},${Math.round(v * 1.25)})`;
+          ctx.fillRect(x, y, cell, cell);
+        }
+      }
+      // 稀疏网格线（每 20px 一条），用于肉眼核对弯曲
+      ctx.strokeStyle = 'rgba(160, 225, 255, 0.55)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= W; x += 20) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); ctx.stroke(); }
+      for (let y = 0; y <= H; y += 20) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); ctx.stroke(); }
+    })();
+  </script>
+  <script type="module">
+    import { initLiquidGlass } from '../assets/js/liquid-glass.js';
+
+    const log = [];
+    const write = () => { document.getElementById('probe').textContent = log.join('\n'); };
+
+    let api = null;
+    try {
+      api = initLiquidGlass();
+    } catch (e) {
+      log.push('init 失败: ' + e.message);
+      write();
+    }
+
+    // 让测试脚本可以精确控制折射开关（不依赖 IntersectionObserver 的时机）
+    window.__lg = {
+      api,
+      setRefract(on) {
+        const card = document.getElementById('card');
+        const s = api && api.targets().find(t => t.el === card);
+        if (!s) return 'no-target';
+        on ? s.attach() : s.detach();
+        return s.attached;
+      },
+      stats: () => api && api.stats(),
+      sheen() {
+        const cs = getComputedStyle(document.getElementById('card'));
+        return {
+          mx: cs.getPropertyValue('--lg-mx').trim(),
+          my: cs.getPropertyValue('--lg-my').trim(),
+          backdrop: cs.backdropFilter || cs.webkitBackdropFilter,
+          beforeBg: getComputedStyle(document.getElementById('card'), '::before').backgroundImage.slice(0, 60),
+        };
+      },
+    };
+
+    requestAnimationFrame(() => {
+      // 确保卡片进入视口判定，并强制挂上折射
+      window.__lg.setRefract(true);
+      log.push('ready, stats=' + JSON.stringify(window.__lg.stats()));
+      write();
+      window.__ready = true;
+    });
+  </script>
+</body>
+</html>
