@@ -4,7 +4,7 @@
 //
 // Groups:
 //   1) Color algorithm fidelity (srgbToLab / nearestColorId vs Python reference)
-//   2) Palette integrity (ARTKAL_55)
+//   2) Palette integrity (ARTKAL_COLORS)
 //   3) Data grid decode (featured.json / inspiration.json)
 //   4) Module dependency: no cycle / resolvable (node --check + graph + import)
 //   5) DOM id consistency (HTML id="..." vs JS getElementById)
@@ -106,8 +106,9 @@ async function main() {
   // =====================================================================
   const { srgbToLab } = await import('../assets/js/lab.js');
   const { nearestColorId } = await import('../assets/js/color.js');
-  const { ARTKAL_55, PALETTE_LAB } = await import('../assets/js/palette.js');
-  const validIds = new Set(ARTKAL_55.map((c) => c.id));
+  const { ARTKAL_COLORS, PALETTE, PALETTE_LAB } = await import('../assets/js/palette.js');
+  // 色号从旧的 A01..A55 改为真实 Artkal 色号（MA1…MM15），字段名 id → code
+  const validIds = new Set(ARTKAL_COLORS.map((c) => c.code));
 
   const REF = {
     '255,255,255': [100, 0, 0],
@@ -127,11 +128,18 @@ async function main() {
     });
   }
 
-  await case_('G1-color', 'nearestColorId(255,255,255) === A01', () => {
-    assert.strictEqual(nearestColorId([255, 255, 255]), 'A01');
+  // 断言改为「意图驱动」而非硬编码色号：换色板后仍然成立。
+  await case_('G1-color', 'nearestColorId(纯白) 命中的确实是白色', () => {
+    const id = nearestColorId([255, 255, 255]);
+    const c = PALETTE[id];
+    assert.ok(c, `返回了未知色号 ${id}`);
+    assert.strictEqual(c.hex, '#FFFFFF', `纯白应命中白色，实际 ${id} ${c.hex}`);
   });
-  await case_('G1-color', 'nearestColorId(26,26,26) === A30', () => {
-    assert.strictEqual(nearestColorId([26, 26, 26]), 'A30');
+  await case_('G1-color', 'nearestColorId(近黑) 命中的确实是暗色', () => {
+    const id = nearestColorId([26, 26, 26]);
+    const lab = PALETTE_LAB[id];
+    assert.ok(lab, `返回了未知色号 ${id}`);
+    assert.ok(lab[0] < 30, `近黑应命中暗色，实际 ${id} 的 L*=${lab[0].toFixed(1)}`);
   });
 
   // Re-implement the same brute-force nearest (sRGB->Lab + min Euclidean dist)
@@ -151,7 +159,7 @@ async function main() {
     return best;
   }
   function familyOk(id, rgb) {
-    const c = ARTKAL_55.find((x) => x.id === id);
+    const c = ARTKAL_COLORS.find((x) => x.code === id);
     const [r, g, b] = rgb;
     if (r >= g && r >= b && r > 0) return true; // reddish
     if (g >= r && g >= b && g > 0) return true; // greenish
@@ -174,48 +182,59 @@ async function main() {
   // =====================================================================
   // GROUP 2 — Palette integrity
   // =====================================================================
-  await case_('G2-palette', 'ARTKAL_55 has exactly 55 entries', () => {
-    assert.strictEqual(ARTKAL_55.length, 55);
+  await case_('G2-palette', 'ARTKAL_COLORS 是完整的 Artkal Mini 221 色', () => {
+    assert.strictEqual(ARTKAL_COLORS.length, 221);
   });
-  await case_('G2-palette', 'ARTKAL_55 ids unique and sequential A01..A55', () => {
+  await case_('G2-palette', '色号为 MA/MB/…/MM 两字母 + 数字，且无重复', () => {
     const seen = new Set();
-    for (let i = 0; i < ARTKAL_55.length; i++) {
-      const c = ARTKAL_55[i];
-      assert.ok(/^A\d{2}$/.test(c.id), `bad id format: ${c.id}`);
-      assert.ok(!seen.has(c.id), `duplicate id ${c.id}`);
-      seen.add(c.id);
-      const expected = 'A' + String(i + 1).padStart(2, '0');
-      assert.strictEqual(c.id, expected, `expected sequential ${expected}, got ${c.id}`);
+    for (const c of ARTKAL_COLORS) {
+      assert.ok(/^(MA|MB|MC|MD|ME|MF|MG|MH|MM)\d{1,2}$/.test(c.code), `bad code format: ${c.code}`);
+      assert.ok(!seen.has(c.code), `duplicate code ${c.code}`);
+      seen.add(c.code);
     }
-    assert.strictEqual(seen.size, 55);
+    assert.strictEqual(seen.size, 221);
+  });
+  await case_('G2-palette', '九个系列各自的数量正确', () => {
+    const expect = { MA: 26, MB: 32, MC: 29, MD: 26, ME: 24, MF: 25, MG: 21, MH: 23, MM: 15 };
+    for (const [k, n] of Object.entries(expect)) {
+      const got = ARTKAL_COLORS.filter((c) => c.series === k).length;
+      assert.strictEqual(got, n, `${k} 应有 ${n} 色，实际 ${got}`);
+    }
   });
   await case_('G2-palette', 'every entry has legal #RRGGBB hex', () => {
-    for (const c of ARTKAL_55) {
-      assert.match(c.hex, /^#[0-9A-Fa-f]{6}$/, `bad hex for ${c.id}: ${c.hex}`);
+    for (const c of ARTKAL_COLORS) {
+      assert.match(c.hex, /^#[0-9A-Fa-f]{6}$/, `bad hex for ${c.code}: ${c.hex}`);
     }
   });
   await case_('G2-palette', 'every entry has rgb[3] ints in 0..255', () => {
-    for (const c of ARTKAL_55) {
-      assert.ok(Array.isArray(c.rgb) || (typeof c.r === 'number'), 'rgb shape');
+    for (const c of ARTKAL_COLORS) {
       for (const v of [c.r, c.g, c.b]) {
-        assert.ok(Number.isInteger(v) && v >= 0 && v <= 255, `rgb out of range for ${c.id}: ${v}`);
+        assert.ok(Number.isInteger(v) && v >= 0 && v <= 255, `rgb out of range for ${c.code}: ${v}`);
       }
     }
   });
-  await case_('G2-palette', 'PALETTE_LAB precomputed for all 55 ids', () => {
+  await case_('G2-palette', 'hex 与 rgb 完全自洽（旧版 E14 芭比粉就栽在这里）', () => {
+    for (const c of ARTKAL_COLORS) {
+      const R = parseInt(c.hex.slice(1, 3), 16);
+      const G = parseInt(c.hex.slice(3, 5), 16);
+      const B = parseInt(c.hex.slice(5, 7), 16);
+      assert.ok(R === c.r && G === c.g && B === c.b, `${c.code} hex=${c.hex} 但 rgb=${c.r},${c.g},${c.b}`);
+    }
+  });
+  await case_('G2-palette', 'PALETTE_LAB precomputed for all 221 codes', () => {
     const keys = Object.keys(PALETTE_LAB);
-    assert.strictEqual(keys.length, 55);
+    assert.strictEqual(keys.length, 221);
     for (const id of validIds) {
       assert.ok(Array.isArray(PALETTE_LAB[id]) && PALETTE_LAB[id].length === 3, `lab missing/invalid for ${id}`);
       for (const v of PALETTE_LAB[id]) assert.ok(Number.isFinite(v), `lab value not finite for ${id}`);
     }
   });
   await case_('G2-palette', 'PALETTE_LAB matches srgbToLab(rgb)', () => {
-    for (const c of ARTKAL_55) {
+    for (const c of ARTKAL_COLORS) {
       const computed = srgbToLab([c.r, c.g, c.b]);
-      const stored = PALETTE_LAB[c.id];
+      const stored = PALETTE_LAB[c.code];
       for (let i = 0; i < 3; i++) {
-        assert.ok(Math.abs(computed[i] - stored[i]) < 1e-9, `lab mismatch for ${c.id} idx ${i}`);
+        assert.ok(Math.abs(computed[i] - stored[i]) < 1e-9, `lab mismatch for ${c.code} idx ${i}`);
       }
     }
   });
@@ -236,7 +255,7 @@ async function main() {
         const idx = parseInt(ch, 36);
         assert.ok(idx >= 0 && idx < ex.colors.length, `${where}: char '${ch}' -> index ${idx} out of colors range [0,${ex.colors.length})`);
         const id = ex.colors[idx];
-        assert.ok(validIds.has(id), `${where}: decoded id '${id}' (char '${ch}') not in ARTKAL_55`);
+        assert.ok(validIds.has(id), `${where}: decoded id '${id}' (char '${ch}') not in ARTKAL_COLORS`);
       }
     }
   }
@@ -472,9 +491,9 @@ async function main() {
   await case_('G7-export', 'exportCSV: row count = grid height, col count = grid width', () => {
     lastBlobContent = null;
     const grid = [
-      ['A01', 'A30', 'A22'],
-      ['A22', null, 'A07'],
-      ['A07', 'A07', 'A01'],
+      ['MH1', 'MH7', 'MB8'],
+      ['MB8', null, 'MF4'],
+      ['MF4', 'MF4', 'MH1'],
     ];
     exportCSV(grid, { filename: 't.csv' });
     assert.ok(lastBlobContent, 'no blob content captured');
@@ -487,12 +506,12 @@ async function main() {
     }
   });
   await case_('G7-export', 'exportCSV: each non-null cell is a valid Artkal id string, null -> empty', () => {
-    const grid = [['A01', null], [null, 'A55']];
+    const grid = [['MH1', null], [null, 'MM3']];
     exportCSV(grid, { filename: 't2.csv' });
     const body = lastBlobContent.replace(/^﻿/, '');
     const rows = body.split('\r\n');
-    assert.strictEqual(rows[0], 'A01,', 'row0 mismatch');
-    assert.strictEqual(rows[1], ',A55', 'row1 mismatch');
+    assert.strictEqual(rows[0], 'MH1,', 'row0 mismatch');
+    assert.strictEqual(rows[1], ',MM3', 'row1 mismatch');
     for (const row of rows) {
       for (const cell of row.split(',')) {
         if (cell === '') continue;
@@ -502,8 +521,8 @@ async function main() {
   });
   await case_('G7-export', 'exportCSV: Excel-friendly BOM + CRLF line endings', () => {
     const grid = [
-      ['A01', 'A02'],
-      ['A03', 'A04'],
+      ['MH1', 'MG16'],
+      ['MB1', 'MA8'],
     ];
     exportCSV(grid, { filename: 't3.csv' });
     assert.ok(lastBlobContent.startsWith('﻿'), 'missing UTF-8 BOM');
@@ -625,7 +644,7 @@ async function main() {
     pixelsToBeadGrid, filterPalette, sortByHue,
   } = wb;
 
-  const wbPalette = ARTKAL_55;
+  const wbPalette = ARTKAL_COLORS;
   const wbIndex = buildPaletteIndex(wbPalette);
 
   await case_('G9-wb-core', 'buildPaletteIndex covers every palette entry with a finite Lab', () => {
@@ -637,10 +656,14 @@ async function main() {
     }
   });
 
-  await case_('G9-wb-core', 'matchNearest returns an exact palette member for an exact palette color', () => {
+  await case_('G9-wb-core', 'matchNearest 对调色板里已有的颜色能精确命中', () => {
+    // 注意：色板里存在数值完全相同的色（如 MH1 透明 与 MH2 极白 都是 #FFFFFF），
+    // 所以断言「命中的颜色值一致」而不是「色号字符串一致」。
     for (const c of wbPalette) {
       const got = matchNearest(c.r, c.g, c.b, wbIndex);
-      assert.strictEqual(got.code, c.id, `${c.id} matched to ${got.code}`);
+      assert.strictEqual(got.r, c.r, `${c.code} 的 R 通道未精确命中`);
+      assert.strictEqual(got.g, c.g, `${c.code} 的 G 通道未精确命中`);
+      assert.strictEqual(got.b, c.b, `${c.code} 的 B 通道未精确命中`);
     }
   });
 
@@ -680,45 +703,56 @@ async function main() {
   });
 
   // ---- 核心 bug 回归：调滤镜后色号必须真的变 ----
+  // 测试色全部改用真实 Artkal 色号，并按「亮度大小关系」断言，
+  // 而不是硬编码某个具体色号 —— 换色板后这些测试仍然成立。
+  const C_MID = 'MA8';    // 柔和橙 #EAC431，中间调
+  const C_DARK = 'MH7';   // 黑色
+  const C_WHITE = 'MH1';  // 白
+  const C_RED = 'MF4';    // 亮红
+  const C_GREEN = 'MB8';  // 深绿
+
   function gridWithCodes(codes) {
     return codes.map((row) => row.map((code) => {
-      const c = wbPalette.find((x) => x.id === code);
-      return { code: c.id, name: c.name, hex: c.hex, r: c.r, g: c.g, b: c.b };
+      const c = wbPalette.find((x) => x.code === code);
+      return { code: c.code, name: c.name, hex: c.hex, r: c.r, g: c.g, b: c.b };
     }));
   }
   function codeOf(grid, x, y) {
     return grid[y][x] ? grid[y][x].code : null;
   }
+  /** 色号在调色板里的 L*（越大越亮） */
+  function lightOf(code) {
+    const c = wbPalette.find((x) => x.code === code);
+    return srgbToLab([c.r, c.g, c.b])[0];
+  }
 
-  await case_('G9-wb-core', 'REGRESSION: brightness change actually changes remapped bead codes', () => {
-    // 亮色 A05 (255,179,71) 提亮 +60 后必须跳到更浅的真实色号（实测 → A03）
-    const base = gridWithCodes([['A05', 'A05'], ['A05', 'A05']]);
+  await case_('G9-wb-core', 'REGRESSION: 提亮后色号必须跳到更亮的真实色号', () => {
+    const base = gridWithCodes([[C_MID, C_MID], [C_MID, C_MID]]);
     const before = remapGrid(base, { brightness: 0 }, wbIndex);
     const after = remapGrid(base, { brightness: 60 }, wbIndex);
-    assert.strictEqual(codeOf(before, 0, 0), 'A05');
-    assert.strictEqual(codeOf(after, 0, 0), 'A03', 'brightness +60 on A05 must map to A03');
-    assert.notStrictEqual(codeOf(after, 0, 0), 'A05', 'code must actually change');
+    assert.strictEqual(codeOf(before, 0, 0), C_MID);
+    assert.notStrictEqual(codeOf(after, 0, 0), C_MID, '提亮后色号必须真的改变');
+    assert.ok(lightOf(codeOf(after, 0, 0)) > lightOf(C_MID), '提亮后的色号应更亮');
   });
 
-  await case_('G9-wb-core', 'REGRESSION: contrast change actually changes remapped bead codes', () => {
-    // 对比度 +70 会把中间调推向两端：A05 → A04（实测）
-    const base = gridWithCodes([['A05', 'A30'], ['A05', 'A30']]);
+  await case_('G9-wb-core', 'REGRESSION: 对比度变化必须真的改变色号', () => {
+    const base = gridWithCodes([[C_MID, C_DARK], [C_MID, C_DARK]]);
     const before = remapGrid(base, { contrast: 0 }, wbIndex);
     const after = remapGrid(base, { contrast: 70 }, wbIndex);
-    assert.strictEqual(codeOf(before, 0, 0), 'A05');
-    assert.strictEqual(codeOf(after, 0, 0), 'A04', 'contrast +70 on A05 must map to A04');
-    assert.notStrictEqual(codeOf(after, 0, 0), 'A05', 'code must actually change');
+    assert.strictEqual(codeOf(before, 0, 0), C_MID);
+    assert.notStrictEqual(codeOf(after, 0, 0), C_MID, '对比度 +70 后色号必须改变');
   });
 
-  await case_('G9-wb-core', 'REGRESSION: negative brightness darkens codes (A05 → A26 measured)', () => {
-    const base = gridWithCodes([['A05']]);
+  await case_('G9-wb-core', 'REGRESSION: 压暗后色号必须跳到更暗的真实色号', () => {
+    const base = gridWithCodes([[C_MID]]);
     const after = remapGrid(base, { brightness: -40 }, wbIndex);
-    assert.strictEqual(codeOf(after, 0, 0), 'A26', 'brightness -40 on A05 must map to A26');
+    assert.notStrictEqual(codeOf(after, 0, 0), C_MID, '压暗后色号必须改变');
+    assert.ok(lightOf(codeOf(after, 0, 0)) < lightOf(C_MID), '压暗后的色号应更暗');
   });
 
   await case_('G9-wb-core', 'REGRESSION: every slider direction produces a distinct remap (sweep)', () => {
     // 逐档扫过亮度区间，确认不是只有极端值才有反应
-    const base = gridWithCodes([['A05']]);
+    const base = gridWithCodes([[C_MID]]);
     const seen = new Set();
     for (let b = -100; b <= 100; b += 20) {
       seen.add(codeOf(remapGrid(base, { brightness: b }, wbIndex), 0, 0));
@@ -727,14 +761,14 @@ async function main() {
   });
 
   await case_('G9-wb-core', 'remapGrid is deterministic (same input -> same output, twice)', () => {
-    const base = gridWithCodes([['A07', 'A01'], ['A30', 'A03']]);
+    const base = gridWithCodes([[C_RED, C_WHITE], [C_DARK, C_GREEN]]);
     const a = remapGrid(base, { brightness: 25, contrast: 15, saturation: -20 }, wbIndex);
     const b = remapGrid(base, { brightness: 25, contrast: 15, saturation: -20 }, wbIndex);
     assert.deepStrictEqual(a, b, 'remap must be deterministic — this is what ctx.filter could not guarantee');
   });
 
   await case_('G9-wb-core', 'remapGrid preserves every empty cell as null (no phantom beads)', () => {
-    const base = gridWithCodes([['A07', 'A01']]);
+    const base = gridWithCodes([[C_RED, C_WHITE]]);
     base[0][1] = null;
     const out = remapGrid(base, { brightness: 80, contrast: 80, saturation: 80 }, wbIndex);
     assert.strictEqual(out[0][1], null, 'empty cell must stay empty after remap');
@@ -742,15 +776,15 @@ async function main() {
   });
 
   await case_('G9-wb-core', 'remapGrid with neutral params returns the original codes untouched', () => {
-    const base = gridWithCodes([['A07', 'A30', 'A01']]);
+    const base = gridWithCodes([[C_RED, C_DARK, C_WHITE]]);
     const out = remapGrid(base, { brightness: 0, contrast: 0, saturation: 0 }, wbIndex);
-    assert.deepStrictEqual(out.map((r) => r.map((c) => c && c.code)), [['A07', 'A30', 'A01']]);
+    assert.deepStrictEqual(out.map((r) => r.map((c) => c && c.code)), [[C_RED, C_DARK, C_WHITE]]);
   });
 
   await case_('G9-wb-core', 'remapGrid outputs only codes that exist in the target palette', () => {
-    const base = gridWithCodes([['A07', 'A30'], ['A01', 'A03']]);
+    const base = gridWithCodes([[C_RED, C_DARK], [C_WHITE, C_GREEN]]);
     const out = remapGrid(base, { brightness: 40, contrast: 40, saturation: 40 }, wbIndex);
-    const valid = new Set(wbPalette.map((c) => c.id));
+    const valid = new Set(wbPalette.map((c) => c.code));
     for (const row of out) {
       for (const bead of row) {
         if (!bead) continue;
@@ -760,17 +794,17 @@ async function main() {
   });
   await case_('G9-wb-core', 'REGRESSION: switching palette re-maps codes even with zero filters', () => {
     // 这是本次修复的另一个真实 bug：过去 remapGrid 对空滤镜短路返回原色，
-    // 导致「Artkal → Perler」后画布上仍显示旧的 A 系列色号。
+    // 导致「Artkal → Perler」后画布上仍显示旧的色号。
     const other = [
-      { code: 'X1', name: 'X White', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
-      { code: 'X2', name: 'X Black', hex: '#000000', r: 0, g: 0, b: 0 },
+      { code: 'P99', name: 'X White', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
+      { code: 'P98', name: 'X Black', hex: '#000000', r: 0, g: 0, b: 0 },
     ];
     const idx = buildPaletteIndex(other);
-    const base = gridWithCodes([['A01', 'A30']]);
+    const base = gridWithCodes([[C_WHITE, C_DARK]]);
     const out = remapGrid(base, { brightness: 0, contrast: 0, saturation: 0 }, idx);
     assert.deepStrictEqual(
       out.map((r) => r.map((c) => c && c.code)),
-      [['X1', 'X2']],
+      [['P99', 'P98']],
       'with a zero filter the codes must still be re-mapped onto the new palette'
     );
   });
@@ -893,7 +927,9 @@ async function main() {
     const out = pixelsToBeadGrid({ data, width: w, height: h }, 2, 2, wbIndex);
     assert.strictEqual(out.length, 2);
     assert.strictEqual(out[0].length, 2);
-    for (const row of out) for (const bead of row) assert.ok(bead && bead.code === 'A01', 'white image must map to A01');
+    for (const row of out) for (const bead of row) {
+      assert.ok(bead && bead.hex === '#FFFFFF', '白色像素必须映射到白色色号（got ' + (bead && bead.code) + '）');
+    }
   });
 
   await case_('G9-wb-core', 'pixelsToBeadGrid treats fully transparent pixels as empty cells', () => {
@@ -906,10 +942,12 @@ async function main() {
 
   await case_('G9-wb-core', 'filterPalette matches code or name, case-insensitive; empty query returns all', () => {
     assert.strictEqual(filterPalette(wbPalette, '').length, wbPalette.length);
-    assert.ok(filterPalette(wbPalette, 'a07').length >= 1, 'code search must be case-insensitive');
-    const reds = filterPalette(wbPalette, 'red');
+    // 色号搜索需大小写不敏感：用真实色号 MH7 的小写形式验证
+    assert.ok(filterPalette(wbPalette, 'mh7').length >= 1, 'code search must be case-insensitive');
+    // 名称搜索：色库用的是中文色名（如「深红」「砖红」），按「红」检索
+    const reds = filterPalette(wbPalette, '红');
     assert.ok(reds.length >= 1, 'name search must work');
-    assert.ok(reds.every((c) => /red/i.test(c.name)), 'every hit must actually contain the query');
+    assert.ok(reds.every((c) => c.name.includes('红')), 'every hit must actually contain the query');
     assert.strictEqual(filterPalette(wbPalette, 'zzz-not-a-color').length, 0);
   });
 

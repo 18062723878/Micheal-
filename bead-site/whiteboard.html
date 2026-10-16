@@ -943,7 +943,7 @@
                 <div class="sidebar-section-title" data-page-node-id="Bk9oaGNcUjRDJrVkhqb1vo">
                   <span data-page-node-id="wfjnLiBv9Tiq9TlFKEh2Io">选择色板库</span>
                   <select id="palette-select" class="wb-select" style="padding: 2px 6px; font-size: 11px;" data-page-node-id="3Qd2FnavPD7DhDQEIGWidh">
-                    <option value="artkal" data-page-node-id="rL8HooyTW8Z7I0IumMoaQG">Artkal 55色</option>
+                    <option value="artkal" data-page-node-id="rL8HooyTW8Z7I0IumMoaQG">Artkal 221色</option>
                     <option value="perler" data-page-node-id="EzU9aEkNloy5FFHs8AzKCi">Perler 基础 12色</option>
                     <option value="pastel" data-page-node-id="pUw08rNLGFUqzTAWD8BKnJ">马卡龙 8色</option>
                     <option value="morandi" data-page-node-id="uEA8kaTwt3FWrSS7NXJAdf">莫兰迪 8色</option>
@@ -1020,9 +1020,9 @@
     import { initSidebar } from './assets/js/sidebar.js';
     // 参数面板的分组收纳 / 宽度调节 / 整体收起（只搬 DOM，不改控件）
     import { initParamPanel } from './assets/js/param-panel.js';
-    // 官方色库：55 色含预计算 Lab 值，与「上传转图纸」共用同一份数据源，
-    // 保证白板画出来的色号和转图导出的色号完全一致（修掉「写着72色实际29色」的坑）
-    import { ARTKAL_55 } from './assets/js/palette.js';
+    // 官方色库：Artkal Mini 真实色卡 221 色。与「上传转图纸」共用同一份数据源
+    // （bead-colors.js 是唯一真源），保证白板画出来的色号和转图导出的色号完全一致。
+    import { BEAD_COLORS } from './assets/js/bead-colors.js';
     // 白板核心纯逻辑：滤镜数学变换 / Lab 色号匹配 / 填充 / 对称 / 撤销重做 / 图片转网格。
     // 抽成独立模块既让本文件保持原有结构，也让这些逻辑能被 Node 回归测试直接覆盖。
     import {
@@ -1035,7 +1035,7 @@
     try { injectChrome('create'); } catch (e) { console.warn(e); }
 
     const PALETTES = {
-      artkal: ARTKAL_55.map(c => ({ code: c.id, name: c.name, hex: c.hex, r: c.r, g: c.g, b: c.b })),
+      artkal: BEAD_COLORS.map(c => ({ code: c.code, name: c.name, hex: c.hex, r: c.r, g: c.g, b: c.b })),
       perler: [
         { code: 'P01', name: 'White', hex: '#FFFFFF', r: 255, g: 255, b: 255 },
         { code: 'P02', name: 'Black', hex: '#141414', r: 20, g: 20, b: 20 },

@@ -33,7 +33,7 @@ const controls = await page.evaluate(() => {
   };
 });
 
-/* ---------- 2. 在干净画布上只画一格 A05，扫三个滤镜 ---------- */
+/* ---------- 2. 在干净画布上只画一格 MA8（柔和橙），扫三个滤镜 ---------- */
 const filterTrace = await page.evaluate(async () => {
   const wait = (t = 80) => new Promise((res) => setTimeout(res, t));
   const codes = () => [...document.querySelectorAll('#stats-container tbody tr')]
@@ -43,9 +43,9 @@ const filterTrace = await page.evaluate(async () => {
   document.getElementById('btn-clear').click();
   await wait();
 
-  // 选中 A05 并画一格
+  // 选中 MA8（柔和橙）并画一格
   const sw = [...document.querySelectorAll('#swatches-container .swatch')]
-    .find((s) => s.title.startsWith('A05'));
+    .find((s) => s.title.startsWith('MA8'));
   sw.click();
   const c = document.getElementById('wb-canvas');
   const rect = c.getBoundingClientRect();
@@ -104,7 +104,7 @@ const undoRedo = await page.evaluate(async () => {
   await wait();
   const empty = codes();
   // 画两格不同颜色 → 清空 → 撤销（应恢复两格）→ 重做（应回到空）
-  const swA07 = [...document.querySelectorAll('#swatches-container .swatch')].find((s) => s.title.startsWith('A07'));
+  const swA07 = [...document.querySelectorAll('#swatches-container .swatch')].find((s) => s.title.startsWith('MF4'));
   swA07.click();
   ev('pointerdown', 40, 40, c); ev('pointerup', 40, 40, window);
   ev('pointerdown', 90, 40, c); ev('pointerup', 90, 40, window);
@@ -130,7 +130,7 @@ const undoRedo = await page.evaluate(async () => {
 /* ---------- 5. 色板搜索 ---------- */
 const search = await page.evaluate(() => {
   const el = document.getElementById('palette-search');
-  el.value = 'A07';
+  el.value = 'MF4';
   el.dispatchEvent(new Event('input', { bubbles: true }));
   const matched = document.querySelectorAll('#swatches-container .swatch').length;
   const meta = document.getElementById('palette-meta').textContent;
@@ -153,7 +153,7 @@ const paletteSwitch = await page.evaluate(async () => {
   // 先确保画布上有内容（上一段 undo/redo 实验结束时可能是空的）
   document.getElementById('btn-clear').click();
   await wait();
-  const swA07 = [...document.querySelectorAll('#swatches-container .swatch')].find((s) => s.title.startsWith('A07'));
+  const swA07 = [...document.querySelectorAll('#swatches-container .swatch')].find((s) => s.title.startsWith('MF4'));
   swA07.click();
   ev('pointerdown', 40, 40, c); ev('pointerup', 40, 40, window);
   await wait();

@@ -1,6 +1,6 @@
 {
-  "total": 129,
-  "passed": 129,
+  "total": 131,
+  "passed": 131,
   "failed": 0,
   "groups": {
     "G1-color": {
@@ -9,8 +9,8 @@
       "fail": 0
     },
     "G2-palette": {
-      "total": 6,
-      "pass": 6,
+      "total": 8,
+      "pass": 8,
       "fail": 0
     },
     "G3-decode": {
