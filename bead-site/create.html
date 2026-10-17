@@ -236,7 +236,7 @@
     }
     .studio-side-col .stats-block-header h3 { font-size: 15px; }
 
-    @media (min-width: 1240px) {
+    @media (min-width: 1160px) {
       .studio-body {
         grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
       }
@@ -249,12 +249,21 @@
         scrollbar-width: thin;
       }
     }
+
+    /* 空状态引导存在时（尚未生成图纸），右侧材料栏无需提前占位，展示台居中舒展 */
+    #stage-empty:not(.is-hidden) + .studio-body {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    #stage-empty:not(.is-hidden) + .studio-body .studio-side-col {
+      display: none !important;
+    }
+
     /* 收起材料栏：图纸展示台独占整行，方便放大逐格核对 */
     .studio-body.is-rail-hidden {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) !important;
     }
     .studio-body.is-rail-hidden .studio-side-col {
-      display: none;
+      display: none !important;
     }
 
     @media (max-width: 900px) {
@@ -265,6 +274,35 @@
       .studio-shell .sb-root {
         position: static;
         max-height: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .create-container { padding: 0 8px; }
+      .studio-shell { gap: 10px; margin: 10px auto; }
+      .panel { padding: 12px; }
+      .stage-toolbar {
+        padding: 8px 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .stage-toolbar::-webkit-scrollbar { display: none; }
+      .toolbar-group { flex: none; }
+      .zoom-controls { flex: none; }
+      .bead-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .bead-stat { padding: 8px 10px; }
+      .export-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .export-row .btn {
+        width: 100%;
       }
     }
   </style>
@@ -436,8 +474,8 @@
             </div>
           </div>
         </div>
-      </details>
       </div>
+    </details>
 
       <p id="convert-status" class="convert-status">请先上传图片或载入精选图纸。</p>
 

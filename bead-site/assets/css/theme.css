@@ -2172,6 +2172,59 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border-radius: 9px;
 }
 
+/* ============ 移动端 (<= 900px) 侧边栏适配 ============
+   在手机端不占用首屏空间：收起时呈水平单行轻量条，展开时展示完整搜索与教程列表。 */
+@media (max-width: 900px) {
+  .sb-root {
+    position: static;
+    max-height: none;
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    gap: 12px;
+    border-radius: var(--radius);
+  }
+  .sb-root.is-collapsed {
+    padding: 10px 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .sb-root.is-collapsed .sb-head {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+  .sb-root.is-collapsed .sb-brand-text {
+    display: block !important;
+  }
+  .sb-root.is-collapsed .sb-brand-sub {
+    display: inline-block;
+    margin-left: 6px;
+  }
+  .sb-root.is-collapsed .sb-foot {
+    width: auto;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .sb-root.is-collapsed .sb-collapse-btn {
+    width: auto;
+    height: auto;
+    min-height: 28px;
+    padding: 4px 10px;
+    background: var(--muted);
+    border-radius: var(--radius-pill);
+    gap: 4px;
+  }
+  .sb-root.is-collapsed .sb-collapse-label {
+    display: inline-block !important;
+    font-size: 11.5px;
+  }
+}
+
 /* ------------------------------------------------------------------ *
  * 参数面板（分组收纳 + 宽度调节 + 整体收起）
  * 用于白板画板的左侧参数栏与创作工坊的设置区。

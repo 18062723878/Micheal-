@@ -101,7 +101,13 @@ export function initSidebar(opts) {
   /* ---------- 收起 / 展开：状态存各自的 key，互不影响 ---------- */
   let collapsed = false;
   try {
-    collapsed = localStorage.getItem(storageKey) === '1';
+    const saved = localStorage.getItem(storageKey);
+    if (saved !== null) {
+      collapsed = saved === '1';
+    } else {
+      // 移动端/小屏幕 (<= 900px) 默认收起，把宝贵首屏空间完整留给画布与主工坊
+      collapsed = typeof window !== 'undefined' && window.innerWidth <= 900;
+    }
   } catch (e) { /* 隐私模式忽略 */ }
 
   function applyCollapsed() {
@@ -113,11 +119,24 @@ export function initSidebar(opts) {
     label.textContent = collapsed ? '展开' : '收起';
   }
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
     collapsed = !collapsed;
     try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (e) { /* noop */ }
     applyCollapsed();
   });
+
+  const head = root.querySelector('.sb-head');
+  if (head) {
+    head.addEventListener('click', () => {
+      // 移动端点击标题头部可便捷切换展开/收起
+      if (typeof window !== 'undefined' && window.innerWidth <= 900) {
+        collapsed = !collapsed;
+        try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (e) { /* noop */ }
+        applyCollapsed();
+      }
+    });
+  }
 
   /* ---------- 搜索：结果只来自本模块 ---------- */
   function renderResults() {

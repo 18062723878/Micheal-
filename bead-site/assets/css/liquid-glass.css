@@ -82,9 +82,10 @@
   /* L4 镜面 */
   --lg-sheen: rgba(255, 255, 255, 0.5);
   --lg-sheen-mid: rgba(255, 255, 255, 0.16);
-  --lg-sheen-size: 120% 92%;
+  --lg-sheen-size: 96% 76%;
+  --lg-sheen-rest: 0.45;
 
-  /* 光源默认位置：正上方偏左（没有指针时也像有光打在上面） */
+  /* 光源默认位置：正上方偏左 */
   --lg-mx: 50%;
   --lg-my: -8%;
 
@@ -92,18 +93,46 @@
   --lg-scrim: transparent;
 }
 
-[data-theme='dark'] {
-  --lg-tint: 38%;
-  --lg-tint-ctl: 56%;
-  --lg-tint-clear: 12%;
+/* 深色模式的材质必须比浅色**收得更紧**。
+   深色背景下纯白高光容易过曝成为刺眼塑料斑，
+   所以：
+   1. 常态下取消常驻径向亮斑（--lg-sheen-rest: 0），消灭每个卡片与控件顶部的白斑；
+   2. 镜面反光改为极低强度的柔和微光（rgba 0.10），仅在鼠标真正划过时微弱浮现；
+   3. 边框与微光收敛，避免深色背景下爆白。 */
+[data-theme='dark'],
+:root[data-theme='dark'] {
+  --lg-tint: 28%;
+  --lg-tint-ctl: 42%;
+  --lg-tint-clear: 8%;
 
-  --lg-edge-top: rgba(255, 255, 255, 0.5);
-  --lg-edge-side: rgba(255, 255, 255, 0.22);
-  --lg-edge-bottom: rgba(255, 255, 255, 0.1);
-  --lg-ring: rgba(255, 255, 255, 0.32);
+  --lg-edge-top: rgba(255, 255, 255, 0.16);
+  --lg-edge-side: rgba(255, 255, 255, 0.06);
+  --lg-edge-bottom: rgba(255, 255, 255, 0.02);
+  --lg-ring: rgba(255, 255, 255, 0.09);
 
-  --lg-sheen: rgba(255, 255, 255, 0.34);
-  --lg-sheen-mid: rgba(255, 255, 255, 0.1);
+  --lg-sheen: rgba(255, 255, 255, 0.12);
+  --lg-sheen-mid: rgba(255, 255, 255, 0.02);
+  --lg-sheen-size: 50% 38%;
+  /* 关键：深色模式下常态完全不留死亮斑，只有指针划过时才伴随柔光 */
+  --lg-sheen-rest: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --lg-tint: 28%;
+    --lg-tint-ctl: 42%;
+    --lg-tint-clear: 8%;
+
+    --lg-edge-top: rgba(255, 255, 255, 0.16);
+    --lg-edge-side: rgba(255, 255, 255, 0.06);
+    --lg-edge-bottom: rgba(255, 255, 255, 0.02);
+    --lg-ring: rgba(255, 255, 255, 0.09);
+
+    --lg-sheen: rgba(255, 255, 255, 0.12);
+    --lg-sheen-mid: rgba(255, 255, 255, 0.02);
+    --lg-sheen-size: 50% 38%;
+    --lg-sheen-rest: 0;
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -154,12 +183,19 @@
   background: radial-gradient(
     var(--lg-sheen-size) at var(--lg-mx) var(--lg-my),
     var(--lg-sheen) 0%,
-    var(--lg-sheen-mid) 24%,
-    transparent 62%
+    var(--lg-sheen-mid) 22%,
+    transparent 56%
   );
   mix-blend-mode: screen;
+  /* 没有指针时只留一点点，指针压上来才整块亮起 */
+  opacity: var(--lg-sheen-rest, 0.5);
   transition: --lg-mx 0.26s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
-    --lg-my 0.26s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    --lg-my 0.26s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity 0.3s ease;
+}
+
+.lg.lg:hover::before,
+.lg.lg:focus-within::before {
+  opacity: 1;
 }
 
 /* --- L3 高光 ---
@@ -179,12 +215,30 @@
     inset -1.5px 0 0 0 var(--lg-edge-side), inset 0 -1.5px 0 0 var(--lg-edge-bottom);
 }
 
-/* 悬停时把边缘提亮一档，配合 L4 给出「被光照到」的反馈 */
+/* 悬停时把边缘提亮一档，配合 L4 给出「被光照到」的反馈。
+   注意：在深色背景上避免混入过高的纯白（否则会变成刺眼白边）。 */
 .lg.lg:hover::after {
-  border-color: color-mix(in srgb, var(--lg-ring) 78%, white);
-  box-shadow: inset 0 1.5px 0 0 var(--lg-edge-top), inset 1.5px 0 0 0 var(--lg-edge-side),
-    inset -1.5px 0 0 0 var(--lg-edge-side), inset 0 -1.5px 0 0 var(--lg-edge-bottom),
-    0 0 18px -6px color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--lg-ring) 55%, rgba(255, 255, 255, 0.85));
+  box-shadow: inset 0 1.5px 0 0 color-mix(in srgb, var(--lg-edge-top) 65%, rgba(255, 255, 255, 0.8)),
+    inset 1.5px 0 0 0 var(--lg-edge-side), inset -1.5px 0 0 0 var(--lg-edge-side),
+    inset 0 -1.5px 0 0 var(--lg-edge-bottom);
+}
+
+[data-theme='dark'] .lg.lg:hover::after,
+:root[data-theme='dark'] .lg.lg:hover::after {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+    inset 1.5px 0 0 0 var(--lg-edge-side), inset -1.5px 0 0 0 var(--lg-edge-side),
+    inset 0 -1.5px 0 0 var(--lg-edge-bottom);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .lg.lg:hover::after {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+      inset 1.5px 0 0 0 var(--lg-edge-side), inset -1.5px 0 0 0 var(--lg-edge-side),
+      inset 0 -1.5px 0 0 var(--lg-edge-bottom);
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -224,14 +278,42 @@
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
+  /* 130%×150% 的渐变会把整颗按钮铺满一层灰白 —— 小控件上这就是「塑料壳」的观感。
+     收成 90%×110% 并提前收尾，高光才是一块「反光」而不是「底色」。 */
   background: radial-gradient(
-    130% 150% at var(--lg-mx) var(--lg-my),
+    90% 110% at var(--lg-mx) var(--lg-my),
     var(--lg-sheen) 0%,
-    transparent 68%
+    var(--lg-sheen-mid) 30%,
+    transparent 62%
   );
   mix-blend-mode: screen;
+  opacity: var(--lg-sheen-rest, 0.5);
   transition: --lg-mx 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)),
-    --lg-my 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    --lg-my 0.22s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)), opacity 0.24s ease;
+}
+
+.lg-ctl.lg-ctl:hover::before,
+.lg-ctl.lg-ctl:focus-visible::before {
+  opacity: 1;
+}
+
+/* 深色模式下控制件无需径向渐变（彻底根除数十个小按钮顶部不协调的白斑） */
+[data-theme='dark'] .lg-ctl.lg-ctl::before,
+:root[data-theme='dark'] .lg-ctl.lg-ctl::before {
+  display: none !important;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .lg-ctl.lg-ctl::before {
+    display: none !important;
+  }
+}
+
+/* 触摸设备无指针跟随，禁用所有常驻/假光斑，保持纯净高级质感 */
+@media (hover: none), (pointer: coarse) {
+  .lg.lg::before,
+  .lg-ctl.lg-ctl::before {
+    display: none !important;
+  }
 }
 
 /* 控制件的边缘更薄：顶 1px 亮线 + 四边各 1px，底边最弱 */

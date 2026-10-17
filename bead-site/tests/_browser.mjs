@@ -16,6 +16,10 @@
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
+import WebSocket from 'ws';
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
+}
 
 const EDGE_CANDIDATES = [
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
