@@ -175,7 +175,6 @@ function buildDisplacementMap(w, h, radius, bevel) {
   const ctx = cv.getContext('2d');
   const img = ctx.createImageData(w, h);
   const d = img.data;
-
   const cx = w / 2;
   const cy = h / 2;
   const hw = w / 2;
@@ -191,6 +190,7 @@ function buildDisplacementMap(w, h, radius, bevel) {
     const ay = py < 0 ? -py : py;
     const qy = ay - ih;
     const sy = py < 0 ? -1 : 1;
+
     for (let x = 0; x < w; x++) {
       const px = x + 0.5 - cx;
       const ax = px < 0 ? -px : px;
@@ -558,11 +558,15 @@ export function initLiquidGlass(opts = {}) {
   }
 
   /* ---------- L4 镜面：指针驱动 --lg-mx / --lg-my ---------- */
+  const isTouchDevice = typeof matchMedia === 'function' && matchMedia('(hover: none), (pointer: coarse)').matches;
+
   function setSheen(el, clientX, clientY) {
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    el.style.setProperty('--lg-mx', (((clientX - r.left) / r.width) * 100).toFixed(2) + '%');
-    el.style.setProperty('--lg-my', (((clientY - r.top) / r.height) * 100).toFixed(2) + '%');
+    const mx = Math.round(((clientX - r.left) / r.width) * 10000) / 100;
+    const my = Math.round(((clientY - r.top) / r.height) * 10000) / 100;
+    el.style.setProperty('--lg-mx', mx + '%');
+    el.style.setProperty('--lg-my', my + '%');
   }
   function resetSheen(el) {
     el.style.removeProperty('--lg-mx');
@@ -572,13 +576,18 @@ export function initLiquidGlass(opts = {}) {
     state.raf = 0;
     const e = state.pendingEvt;
     state.pendingEvt = null;
-    if (!e) return;
+    if (!e || isTouchDevice) return;
     const touched = [];
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     let el = e.target instanceof Element ? e.target : null;
-    while (el && el !== document.documentElement) {
-      if (el.classList && (el.classList.contains('lg') || el.classList.contains('lg-ctl'))) {
-        setSheen(el, e.clientX, e.clientY);
-        touched.push(el);
+    while (el && el !== document.documentElement && touched.length < 3) {
+      if (el.classList) {
+        // 深色模式下控制件无需径向镜面高光，跳过测量以避免强制重排
+        const isCtl = el.classList.contains('lg-ctl');
+        if (el.classList.contains('lg') || (!isDark && isCtl)) {
+          setSheen(el, e.clientX, e.clientY);
+          touched.push(el);
+        }
       }
       el = el.parentElement;
     }
@@ -587,6 +596,7 @@ export function initLiquidGlass(opts = {}) {
     state.lastTouched = touched;
   }
   function queue(e) {
+    if (isTouchDevice) return;
     state.pendingEvt = e;
     if (!state.raf) state.raf = requestAnimationFrame(flush);
   }
@@ -595,7 +605,9 @@ export function initLiquidGlass(opts = {}) {
     state.lastTouched = [];
   }
 
-  window.addEventListener('pointermove', queue, { passive: true });
+  if (!isTouchDevice) {
+    window.addEventListener('pointermove', queue, { passive: true });
+  }
   window.addEventListener('pointerdown', queue, { passive: true });
   document.addEventListener('pointerleave', clearAllSheen);
   window.addEventListener('blur', clearAllSheen);

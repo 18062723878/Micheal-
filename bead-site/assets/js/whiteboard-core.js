@@ -34,10 +34,13 @@ export function buildPaletteIndex(palette) {
   });
 }
 
+const _wbMatchCache = new WeakMap();
+
 /**
  * 在给定 Lab 索引中找出最接近的色号。
  * 复用 lab.js 的 srgbToLab/labDistance，与「上传转图纸」走同一套色彩科学，
  * 避免白板画出来的色号和转图导出的色号不一致。
+ * 针对画笔连续拖动绘制优化：使用 WeakMap 绑定快速整型键缓存。
  *
  * @param {number} r @param {number} g @param {number} b
  * @param {Array<{bead:Object, lab:number[]}>} index
@@ -45,6 +48,17 @@ export function buildPaletteIndex(palette) {
  */
 export function matchNearest(r, g, b, index) {
   if (!index || !index.length) return null;
+  const key = ((r | 0) << 16) | ((g | 0) << 8) | (b | 0);
+
+  let cache = _wbMatchCache.get(index);
+  if (!cache) {
+    cache = new Map();
+    _wbMatchCache.set(index, cache);
+  } else {
+    const hit = cache.get(key);
+    if (hit !== undefined) return hit;
+  }
+
   const lab = srgbToLab([r, g, b]);
   let best = null;
   let bestD = Infinity;
@@ -55,6 +69,9 @@ export function matchNearest(r, g, b, index) {
       best = entry.bead;
     }
   }
+
+  if (cache.size >= 4096) cache.clear();
+  cache.set(key, best);
   return best;
 }
 
