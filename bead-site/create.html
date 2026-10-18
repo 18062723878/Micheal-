@@ -379,46 +379,54 @@
             </div>
           </details>
 
-          <div class="slider-row">
-            <div class="slider-row-header">
-              <span>像素尺寸（板宽）</span>
-              <span id="board-width-val" class="slider-val-badge">32px</span>
+          <div class="dial-deck">
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">📐 像素尺寸（板宽）</span>
+                <span id="board-width-val" class="slider-val-badge">32px</span>
+              </div>
+              <input id="board-width" type="range" min="10" max="80" step="1" value="32" />
             </div>
-            <input id="board-width" type="range" min="10" max="80" step="1" value="32" />
-          </div>
 
-          <div class="form-item">
-            <span>标准色板选择</span>
-            <select id="palette-select" class="form-select">
-              <option value="standard72">72 色常用标准版</option>
-              <option value="classic88">88 色经典版</option>
-              <option value="advance144">144 色进阶专业版</option>
-              <option value="full221">221 色全套色谱 (MA–MM)</option>
-            </select>
-          </div>
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">🎨 标准色板库</span>
+              </div>
+              <select id="palette-select" class="form-select">
+                <option value="standard72">72 色常用标准版</option>
+                <option value="classic88">88 色经典版</option>
+                <option value="advance144">144 色进阶专业版</option>
+                <option value="full221">221 色全套色谱 (MA–MM)</option>
+              </select>
+            </div>
 
-          <div class="form-item">
-            <span>色数上限限制</span>
-            <select id="max-color-select" class="form-select">
-              <option value="0">不限制</option>
-              <option value="8">最多 8 色</option>
-              <option value="12">最多 12 色</option>
-              <option value="16">最多 16 色</option>
-              <option value="24">最多 24 色</option>
-              <option value="36">最多 36 色</option>
-              <option value="48">最多 48 色</option>
-            </select>
-          </div>
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">🎯 色数上限限制</span>
+              </div>
+              <select id="max-color-select" class="form-select">
+                <option value="0">不限制</option>
+                <option value="8">最多 8 色</option>
+                <option value="12">最多 12 色</option>
+                <option value="16">最多 16 色</option>
+                <option value="24">最多 24 色</option>
+                <option value="36">最多 36 色</option>
+                <option value="48">最多 48 色</option>
+              </select>
+            </div>
 
-          <div class="form-item">
-            <span>拼豆板拼接线</span>
-            <select id="pegboard-select" class="form-select">
-              <option value="0">不显示分割线</option>
-              <option value="28">28 × 28 标准大方板</option>
-              <option value="29">29 × 29 常用拼接板</option>
-              <option value="50">50 × 50 超大连板</option>
-              <option value="14">14 × 14 小型板</option>
-            </select>
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">🧩 拼豆板拼接线</span>
+              </div>
+              <select id="pegboard-select" class="form-select">
+                <option value="0">不显示分割线</option>
+                <option value="28">28 × 28 标准大方板</option>
+                <option value="29">29 × 29 常用拼接板</option>
+                <option value="50">50 × 50 超大连板</option>
+                <option value="14">14 × 14 小型板</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -438,38 +446,56 @@
             </div>
           </details>
 
-          <div class="form-item">
-            <label class="toggle-chip is-active" id="bg-toggle-chip" style="cursor:pointer;">
-              <input id="bg-toggle" type="checkbox" checked />
-              <span>智能抠除背景色</span>
-            </label>
+          <div class="dial-deck">
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">✂️ 智能抠除背景色</span>
+                <label class="toggle-chip is-active" id="bg-toggle-chip" style="cursor:pointer;margin:0;">
+                  <input id="bg-toggle" type="checkbox" checked />
+                  <span>启用抠图</span>
+                </label>
+              </div>
+              <div class="dial-cell-header" style="margin-top:6px;">
+                <span class="muted" style="font-size:12px;">背景容差</span>
+                <span id="bg-tolerance-val" class="slider-val-badge">38</span>
+              </div>
+              <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" />
+            </div>
+
+            <div class="dial-cell">
+              <div class="dial-cell-header">
+                <span class="dial-cell-label">🧹 孤立杂色平滑合并</span>
+                <span id="noise-val" class="slider-val-badge">0颗</span>
+              </div>
+              <p class="muted" style="font-size:11.5px;margin:2px 0 6px;">合并杂散边缘零碎像素，减少用色繁杂度</p>
+              <input id="noise-threshold" type="range" min="0" max="5" step="1" value="0" />
+            </div>
           </div>
 
-          <div class="slider-row">
-            <div class="slider-row-header">
-              <span>背景容差</span>
-              <span id="bg-tolerance-val" class="slider-val-badge">38</span>
+          <div class="dial-cell" style="margin-top:10px;">
+            <div class="dial-cell-header">
+              <span class="dial-cell-label">🎛️ 画面三要素调盘</span>
+              <span class="muted" style="font-size:11.5px;">亮度 <strong id="brightness-val">0</strong> · 对比度 <strong id="contrast-val">0</strong> · 饱和度 <strong id="saturate-val">0</strong></span>
             </div>
-            <input id="bg-tolerance" type="range" min="10" max="100" step="2" value="38" />
-          </div>
-
-          <div class="slider-row">
-            <div class="slider-row-header">
-              <span>孤立杂色平滑合并</span>
-              <span id="noise-val" class="slider-val-badge">0颗</span>
-            </div>
-            <input id="noise-threshold" type="range" min="0" max="5" step="1" value="0" />
-          </div>
-
-          <div class="slider-row">
-            <div class="slider-row-header">
-              <span>画面微调</span>
-              <span class="muted" style="font-size:12px;">亮度 <strong id="brightness-val">0</strong> · 对比度 <strong id="contrast-val">0</strong> · 饱和度 <strong id="saturate-val">0</strong></span>
-            </div>
-            <div class="triple-sliders">
-              <input id="brightness-range" type="range" min="-100" max="100" step="1" value="0" title="亮度" aria-label="亮度" />
-              <input id="contrast-range" type="range" min="-100" max="100" step="1" value="0" title="对比度" aria-label="对比度" />
-              <input id="saturate-range" type="range" min="-100" max="100" step="1" value="0" title="饱和度" aria-label="饱和度" />
+            <div class="dial-triple-grid">
+              <div class="dial-sub-cell">
+                <div class="dial-sub-header">
+                  <span>☀️ 亮度</span>
+                </div>
+                <input id="brightness-range" type="range" min="-100" max="100" step="1" value="0" title="亮度" aria-label="亮度" />
+              </div>
+              <div class="dial-sub-cell">
+                <div class="dial-sub-header">
+                  <span>🌓 对比度</span>
+                </div>
+                <input id="contrast-range" type="range" min="-100" max="100" step="1" value="0" title="对比度" aria-label="对比度" />
+              </div>
+              <div class="dial-sub-cell">
+                <div class="dial-sub-header">
+                  <span>🌈 饱和度</span>
+                </div>
+                <input id="saturate-range" type="range" min="-100" max="100" step="1" value="0" title="饱和度" aria-label="饱和度" />
+              </div>
             </div>
           </div>
         </div>
