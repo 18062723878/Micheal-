@@ -104,11 +104,9 @@ export function initSidebar(opts) {
     const saved = localStorage.getItem(storageKey);
     if (saved !== null) {
       collapsed = saved === '1';
-    } else if (opts.defaultCollapsed) {
-      collapsed = true;
     } else {
-      // 移动端/小屏幕 (<= 900px) 默认收起，把宝贵首屏空间完整留给画布与主工坊
-      collapsed = typeof window !== 'undefined' && window.innerWidth <= 900;
+      // 默认收起为左侧紧凑图标条，把宝贵桌面空间完整留给画布与主工坊
+      collapsed = true;
     }
   } catch (e) { /* 隐私模式忽略 */ }
 
@@ -119,6 +117,11 @@ export function initSidebar(opts) {
     btn.title = collapsed ? '展开侧边栏' : '收起侧边栏';
     chevron.textContent = collapsed ? '›' : '‹';
     label.textContent = collapsed ? '展开' : '收起';
+    if (collapsed) {
+      root.title = `点击展开${escapeHtml(moduleName)}教程与搜索`;
+    } else {
+      root.removeAttribute('title');
+    }
   }
 
   btn.addEventListener('click', (e) => {
@@ -126,6 +129,16 @@ export function initSidebar(opts) {
     collapsed = !collapsed;
     try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (e) { /* noop */ }
     applyCollapsed();
+  });
+
+  // 收起态下：点击侧栏任意区域（包括顶部图标）直接平滑展开
+  root.addEventListener('click', (e) => {
+    if (collapsed && !e.target.closest('.sb-collapse-btn')) {
+      collapsed = false;
+      try { localStorage.setItem(storageKey, '0'); } catch (err) { /* noop */ }
+      applyCollapsed();
+      setTimeout(() => input?.focus(), 160);
+    }
   });
 
   const head = root.querySelector('.sb-head');

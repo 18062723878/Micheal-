@@ -197,7 +197,7 @@
       grid-template-columns: 248px minmax(0, 1fr);
       align-items: start;
       gap: 20px;
-      transition: grid-template-columns 0.24s var(--ease-out, ease-out);
+      transition: grid-template-columns 0.26s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .studio-shell:has(.sb-root.is-collapsed) {
       grid-template-columns: 60px minmax(0, 1fr);
@@ -786,7 +786,7 @@
       root: $('studio-sidebar'),
       moduleId: 'studio',
       // 独立存储键：创作工坊收起不影响白板画板
-      storageKey: 'studio.sidebar.collapsed',
+      storageKey: 'studio.sidebar.collapsed.v2',
       otherHref: 'whiteboard.html',
       defaultCollapsed: true,
     });

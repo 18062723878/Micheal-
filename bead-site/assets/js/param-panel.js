@@ -173,7 +173,7 @@ export function initParamPanel(opts) {
     if (!gi) return;
     gi.sec.classList.toggle('is-open', open);
     gi.head.setAttribute('aria-expanded', String(open));
-    gi.caret.textContent = open ? '▾' : '▸';
+    gi.caret.textContent = '▸';
     const key = groups[i].key || groups[i].title;
     groupState[key] = open;
     writeLS(cfg.groupsKey, JSON.stringify(groupState));

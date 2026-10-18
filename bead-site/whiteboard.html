@@ -26,6 +26,7 @@
       max-width: 1680px;
       margin: 20px auto;
       padding: 0 16px;
+      transition: grid-template-columns 0.26s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .wb-shell:has(.sb-root.is-collapsed) {
       grid-template-columns: 60px minmax(0, 1fr);
@@ -156,6 +157,7 @@
       grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
       gap: 18px;
       align-items: start;
+      transition: grid-template-columns 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       /* 首屏预留高度的默认值。脚本会在布局后把实测值写到这里（行容器）——
          必须写在行容器上而不是 .board-workbench 自己身上：
          元素自身声明的自定义属性会遮蔽从父级继承来的值，写在子元素上会让脚本失效。 */
@@ -167,6 +169,13 @@
     }
     .workbench-row.is-schematic-hidden .wb-side-col {
       display: none;
+    }
+    .workbench-row:not(.is-schematic-hidden) .wb-side-col {
+      animation: wbSideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes wbSideIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: none; }
     }
 
     /* 右侧栏：色号对照图 + 材料用量清单
@@ -532,6 +541,13 @@
       border-radius: 8px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
+    }
+    .ref-image-row:not([hidden]) {
+      animation: refRowIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes refRowIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: none; }
     }
     .mini-check {
       display: flex;
@@ -2228,7 +2244,7 @@
     const wbSidebar = initSidebar({
       root: document.getElementById('wb-sidebar'),
       moduleId: 'whiteboard',
-      storageKey: 'whiteboard.sidebar.collapsed',
+      storageKey: 'whiteboard.sidebar.collapsed.v2',
       otherHref: 'create.html',
       defaultCollapsed: true,
     });

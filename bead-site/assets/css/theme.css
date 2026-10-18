@@ -1899,6 +1899,11 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border-radius: var(--radius-lg);
   background: var(--card);
   overflow: hidden;
+  transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+  will-change: width;
 }
 
 /* 固定尺寸图标轨道：水平垂直居中，两种状态共用 */
@@ -2137,6 +2142,21 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
      flex-start 使子元素一律从内容区起点开始，与展开态像素级一致。 */
   align-items: flex-start;
   gap: 10px;
+  cursor: pointer;
+  transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+}
+.sb-root.is-collapsed:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.sb-root.is-collapsed .sb-track--brand {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sb-root.is-collapsed:hover .sb-track--brand {
+  transform: scale(1.15);
 }
 .sb-root.is-collapsed .sb-brand-text,
 .sb-root.is-collapsed .sb-search-wrap,
@@ -2167,6 +2187,25 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   height: var(--sb-track);
   padding: 0;
   border-radius: 9px;
+}
+
+@keyframes sbContentIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sb-root:not(.is-collapsed) .sb-brand-text,
+.sb-root:not(.is-collapsed) .sb-search-wrap,
+.sb-root:not(.is-collapsed) .sb-results,
+.sb-root:not(.is-collapsed) .sb-link,
+.sb-root:not(.is-collapsed) .sb-collapse-label {
+  animation: sbContentIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ============ 移动端 (<= 900px) 侧边栏适配 ============
@@ -2220,6 +2259,20 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
     display: inline-block !important;
     font-size: 11.5px;
   }
+  .sb-root:not(.is-collapsed) {
+    animation: sbMobileExpand 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes sbMobileExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ------------------------------------------------------------------ *
@@ -2234,6 +2287,7 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   width: var(--pp-width);
   min-width: 0;
   box-sizing: border-box;
+  transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), flex-basis 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 面板头部 */
@@ -2376,10 +2430,13 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   font-size: 11px;
   color: var(--muted-foreground);
   line-height: 1;
-  transition: transform 0.15s ease;
+  display: inline-block;
+  transform-origin: center center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
 }
 .pp-group.is-open .pp-caret {
   color: var(--accent);
+  transform: rotate(90deg);
 }
 .pp-group-label {
   flex: 1;
@@ -2404,12 +2461,12 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   background: var(--card);
 }
 .pp-group.is-open > .pp-group-body { display: flex; }
-/* 展开时用高度过渡，让收纳过程不突兀（不改变布局结果） */
+/* 展开时用平滑过渡，让收纳过程不突兀（不改变布局结果） */
 .pp-group.is-open > .pp-group-body {
-  animation: ppGroupIn 0.16s var(--ease-out, ease-out);
+  animation: ppGroupIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes ppGroupIn {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: none; }
 }
 
@@ -2560,6 +2617,7 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border-radius: var(--radius-lg, 12px);
   background: var(--muted, var(--card));
   overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .pp-inline-summary {
   display: flex;
@@ -2572,15 +2630,47 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   font-weight: 700;
   color: var(--foreground);
   user-select: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 .pp-inline-summary::-webkit-details-marker { display: none; }
 .pp-inline-summary:hover { color: var(--accent); }
-.pp-inline-fold[open] > .pp-inline-summary .pp-caret { transform: rotate(90deg); }
 .pp-inline-summary .pp-caret {
   display: inline-block;
   font-size: 10px;
   color: var(--muted-foreground);
-  transition: transform 0.15s var(--ease-out, ease-out);
+  transform-origin: center center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+.pp-inline-fold[open] > .pp-inline-summary .pp-caret {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+
+details.pp-inline-fold::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.26s allow-discrete;
+}
+
+details.pp-inline-fold[open]::details-content {
+  block-size: auto;
+}
+
+@keyframes ppFoldExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+details.pp-inline-fold[open] > :not(summary) {
+  animation: ppFoldExpand 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 /* 展开时把内边距还给内容区，避免贴边 */
 .pp-inline-fold[open] > .filter-controls-panel { margin: 0 14px 14px; }
