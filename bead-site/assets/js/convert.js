@@ -84,10 +84,12 @@ export function renderGrid(canvas, grid, cell, opts = {}) {
   const { labels = false, stroke = '#cfd8e3', pad = 1 } = opts;
   const h = grid.length;
   const w = grid[0] ? grid[0].length : 0;
-  canvas.width = w * cell;
-  canvas.height = h * cell;
+  const targetW = w * cell;
+  const targetH = h * cell;
+  if (canvas.width !== targetW) canvas.width = targetW;
+  if (canvas.height !== targetH) canvas.height = targetH;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, targetW, targetH);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 

@@ -308,18 +308,17 @@ pre {
   pointer-events: none;
 }
 
-/* 径向辉光装饰 */
+/* 径向辉光装饰（纯渐变无模糊滤镜，低配设备零光栅化开销） */
 .glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(150px);
   pointer-events: none;
   z-index: 0;
 }
 
 .glow--accent {
-  background: var(--accent);
-  opacity: 0.16;
+  background: radial-gradient(circle at center, var(--accent) 0%, transparent 70%);
+  opacity: 0.18;
 }
 
 /* ------------------------------------------------------------------ *
@@ -824,9 +823,7 @@ input[type='range']:focus-visible {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: color-mix(in srgb, var(--background) 86%, transparent);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  background: var(--background);
   border-bottom: 1px solid var(--border);
 }
 

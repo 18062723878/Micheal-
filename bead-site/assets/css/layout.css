@@ -137,6 +137,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  contain: content;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -573,6 +574,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  contain: content;
   padding: 0;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);

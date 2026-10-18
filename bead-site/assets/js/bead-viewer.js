@@ -116,11 +116,11 @@ export function renderPattern(ctx, matrix, options = {}) {
   const gapRatio = GAP_RATIO[gap] ?? GAP_RATIO.small;
   const margin = showRuler ? Math.round(cellSize * RULER_FACTOR) : Math.round(cellSize * 0.25);
 
-  const width = cols * cellSize + margin * 2;
-  const height = rows * cellSize + margin * 2;
+  const width = Math.max(1, cols * cellSize + margin * 2);
+  const height = Math.max(1, rows * cellSize + margin * 2);
 
-  ctx.canvas.width = Math.max(1, width);
-  ctx.canvas.height = Math.max(1, height);
+  if (ctx.canvas.width !== width) ctx.canvas.width = width;
+  if (ctx.canvas.height !== height) ctx.canvas.height = height;
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = theme.canvasBg;
   ctx.fillRect(0, 0, width, height);
@@ -170,6 +170,13 @@ export function renderPattern(ctx, matrix, options = {}) {
   const inset = (cellSize - beadSize) / 2;
   const outlined = [];
 
+  const defaultLineWidth = Math.max(1, cellSize * 0.045);
+  const defaultStrokeStyle = 'rgba(15,23,42,0.18)';
+  if (beadStyle !== 'hollow') {
+    ctx.lineWidth = defaultLineWidth;
+    ctx.strokeStyle = defaultStrokeStyle;
+  }
+
   for (let y = 0; y < rows; y++) {
     const row = matrix[y];
     for (let x = 0; x < cols; x++) {
@@ -180,21 +187,18 @@ export function renderPattern(ctx, matrix, options = {}) {
       const by = originY + y * cellSize + inset;
       const isMatch = !highlightCode || bead.code === highlightCode;
 
-      ctx.save();
-      if (!isMatch && dimOthers) ctx.globalAlpha = 0.14;
-      if (excluded.has(bead.code)) ctx.globalAlpha = 0.2;
+      let alpha = 1;
+      if (!isMatch && dimOthers) alpha = 0.14;
+      else if (excluded.has(bead.code)) alpha = 0.2;
+      if (alpha !== 1) ctx.globalAlpha = alpha;
 
       tracePath(ctx, beadStyle, bx, by, beadSize);
       ctx.fillStyle = beadColor(bead);
       ctx.fill();
 
       if (beadStyle !== 'hollow') {
-        ctx.lineWidth = Math.max(1, cellSize * 0.045);
-        ctx.strokeStyle = 'rgba(15,23,42,0.18)';
         ctx.stroke();
-      }
-
-      if (beadStyle === 'hollow') {
+      } else {
         // 中空圆珠：外圈描边 + 中心孔洞
         ctx.lineWidth = Math.max(1, beadSize * 0.16);
         ctx.strokeStyle = beadColor(bead);
@@ -214,7 +218,7 @@ export function renderPattern(ctx, matrix, options = {}) {
         ctx.stroke();
       }
 
-      ctx.restore();
+      if (alpha !== 1) ctx.globalAlpha = 1;
 
       if (isMatch && highlightCode) outlined.push([bx, by]);
     }
@@ -476,9 +480,10 @@ export function buildLegend(container, statsList, { activeCode = null, onClick }
  */
 export function fitCellToBox(box, cols, rows, padding = 16, maxCell = 28) {
   if (!box) return 8;
-  const rect = box.getBoundingClientRect();
-  const availW = Math.max(24, rect.width - padding);
-  const availH = Math.max(24, rect.height - padding);
+  const w = box.clientWidth || (box.getBoundingClientRect ? box.getBoundingClientRect().width : 0) || 0;
+  const h = box.clientHeight || (box.getBoundingClientRect ? box.getBoundingClientRect().height : 0) || 0;
+  const availW = Math.max(24, w - padding);
+  const availH = Math.max(24, h - padding);
   const cell = Math.floor(
     Math.min(availW / Math.max(1, cols), availH / Math.max(1, rows))
   );

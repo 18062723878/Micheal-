@@ -1,8 +1,6 @@
 // chrome.js — 全站统一主题控制、页头导航、页脚与赞助弹窗
 // 视觉样式统一由 assets/css/theme.css 提供，此处只负责结构与行为。
 
-import { initLiquidGlass } from './liquid-glass.js';
-
 /* ------------------------------------------------------------------ *
  * 主题
  * ------------------------------------------------------------------ */
@@ -284,12 +282,4 @@ export function injectChrome(activePage = '') {
   window.addEventListener('site:themechange', () => {
     setTimeout(initReveal, 40);
   });
-
-  // Liquid Glass 材质：页头/页脚注入完成后再初始化，保证导航栏本身也在玻璃名单里。
-  // 模块自身幂等，页面异步渲染出卡片后可以再调 scan() 补挂。
-  try {
-    initLiquidGlass();
-  } catch (e) {
-    console.warn('[liquid-glass] 初始化失败，已降级为普通样式', e);
-  }
 }

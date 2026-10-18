@@ -7,7 +7,6 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230052ff'/%3E%3Ccircle cx='11' cy='12' r='4' fill='%23fff'/%3E%3Ccircle cx='21' cy='12' r='4' fill='%23FFD400'/%3E%3Ccircle cx='11' cy='21' r='4' fill='%23E60012'/%3E%3Ccircle cx='21' cy='21' r='4' fill='%2322c55e'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="assets/css/theme.css" data-page-node-id="LQMYIFXbaTuScz8A4mJtiE" />
   <link rel="stylesheet" href="assets/css/layout.css" data-page-node-id="G6VWeQ28yBThYvxkNxu77B" />
-  <link rel="stylesheet" href="assets/css/liquid-glass.css" />
   <style>
     .wb-container {
       max-width: none;
@@ -1491,11 +1490,20 @@
      * Lab 最近色匹配（与上传转图纸同一套色彩科学），
      * 结果确定、跨浏览器一致，并且能被 Node 回归测试覆盖。
      */
-    function applyFiltersAndRender() {
+    function applyFiltersAndRender(skipStats = false) {
       const adj = currentAdjust();
       grid = remapGrid(baseGrid, adj, paletteIndex);
       renderBoard();
-      updateStats();
+      if (!skipStats) updateStats();
+    }
+
+    let drawRaf = 0;
+    function scheduleDrawRender() {
+      if (drawRaf) return;
+      drawRaf = requestAnimationFrame(() => {
+        drawRaf = 0;
+        applyFiltersAndRender(true);
+      });
     }
 
     const CELL_SIZE = 26;
@@ -1506,17 +1514,17 @@
       const canvasBg = isDark ? '#0f172a' : '#ffffff';
       const gridLine = isDark ? '#1e293b' : '#f1f5f9';
 
-      // 1. 左侧自由实体画板（实体纯色，无白点）
-      canvas.width = boardSize * CELL_SIZE;
-      canvas.height = boardSize * CELL_SIZE;
+      // 1. 左侧自由实体画板（实体纯色，按需重设尺寸避免反复重新分配 GPU 贴图）
+      const boardPx = boardSize * CELL_SIZE;
+      if (canvas.width !== boardPx) canvas.width = boardPx;
+      if (canvas.height !== boardPx) canvas.height = boardPx;
       ctx.fillStyle = canvasBg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, boardPx, boardPx);
 
       // 临摹底图：先铺在豆子下面，用透明度控制「看得见轮廓但不影响取色」
       if (refImage && document.getElementById('ref-image-toggle').checked) {
         ctx.save();
         ctx.globalAlpha = refAlpha;
-        // 等比铺满画板并居中裁切，避免拉伸变形影响临摹判断
         const scale = Math.max(canvas.width / refImage.width, canvas.height / refImage.height);
         const dw = refImage.width * scale;
         const dh = refImage.height * scale;
@@ -1524,25 +1532,31 @@
         ctx.restore();
       }
 
+      // 批量绘制网格线（单次路径代替数千次单独 strokeRect，大幅降低低端设备 CPU/GPU 负担）
+      if (showGrid) {
+        ctx.strokeStyle = gridLine;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i <= boardSize; i++) {
+          const p = i * CELL_SIZE + 0.5;
+          ctx.moveTo(p, 0);
+          ctx.lineTo(p, boardPx);
+          ctx.moveTo(0, p);
+          ctx.lineTo(boardPx, p);
+        }
+        ctx.stroke();
+      }
+
+      const beadRadius = CELL_SIZE * 0.44;
       for (let y = 0; y < boardSize; y++) {
         for (let x = 0; x < boardSize; x++) {
-          const cx = x * CELL_SIZE;
-          const cy = y * CELL_SIZE;
-
-          if (showGrid) {
-            ctx.strokeStyle = gridLine;
-            ctx.lineWidth = 1;
-            ctx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
-          }
-
           const bead = grid[y][x];
           if (bead) {
-            const centerX = cx + CELL_SIZE / 2;
-            const centerY = cy + CELL_SIZE / 2;
-            const radius = CELL_SIZE * 0.44;
+            const centerX = x * CELL_SIZE + CELL_SIZE / 2;
+            const centerY = y * CELL_SIZE + CELL_SIZE / 2;
 
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, beadRadius, 0, Math.PI * 2);
             ctx.fillStyle = bead.hex;
             ctx.fill();
             ctx.lineWidth = 1;
@@ -1554,10 +1568,12 @@
 
       // 2. 右侧色号对照图（标尺坐标与编号）
       const ruler = showRuler ? 28 : 0;
-      schematicCanvas.width = boardSize * CELL_SIZE + ruler;
-      schematicCanvas.height = boardSize * CELL_SIZE + ruler;
+      const sWidth = boardPx + ruler;
+      const sHeight = boardPx + ruler;
+      if (schematicCanvas.width !== sWidth) schematicCanvas.width = sWidth;
+      if (schematicCanvas.height !== sHeight) schematicCanvas.height = sHeight;
       sCtx.fillStyle = canvasBg;
-      sCtx.fillRect(0, 0, schematicCanvas.width, schematicCanvas.height);
+      sCtx.fillRect(0, 0, sWidth, sHeight);
 
       if (showRuler) {
         sCtx.fillStyle = isDark ? '#94a3b8' : '#64748b';
@@ -1571,25 +1587,29 @@
         }
       }
 
+      if (showGrid) {
+        sCtx.strokeStyle = gridLine;
+        sCtx.lineWidth = 1;
+        sCtx.beginPath();
+        for (let i = 0; i <= boardSize; i++) {
+          const p = ruler + i * CELL_SIZE + 0.5;
+          sCtx.moveTo(p, ruler);
+          sCtx.lineTo(p, sHeight);
+          sCtx.moveTo(ruler, p);
+          sCtx.lineTo(sWidth, p);
+        }
+        sCtx.stroke();
+      }
+
       for (let y = 0; y < boardSize; y++) {
         for (let x = 0; x < boardSize; x++) {
-          const cx = ruler + x * CELL_SIZE;
-          const cy = ruler + y * CELL_SIZE;
-
-          if (showGrid) {
-            sCtx.strokeStyle = gridLine;
-            sCtx.lineWidth = 1;
-            sCtx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
-          }
-
           const bead = grid[y][x];
           if (bead) {
-            const centerX = cx + CELL_SIZE / 2;
-            const centerY = cy + CELL_SIZE / 2;
-            const radius = CELL_SIZE * 0.44;
+            const centerX = ruler + x * CELL_SIZE + CELL_SIZE / 2;
+            const centerY = ruler + y * CELL_SIZE + CELL_SIZE / 2;
 
             sCtx.beginPath();
-            sCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            sCtx.arc(centerX, centerY, beadRadius, 0, Math.PI * 2);
             sCtx.fillStyle = bead.hex;
             sCtx.fill();
             sCtx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
@@ -1795,7 +1815,7 @@
           }
         }
       }
-      if (dirty) applyFiltersAndRender();
+      if (dirty) scheduleDrawRender();
     }
 
     /** 形状类工具的落子区域：矩形 = 包围盒，直线 = Bresenham */
@@ -2053,6 +2073,7 @@
         if (wasShape) commitShape();
         isDrawing = false;
         panStartPos = null;
+        updateStats();
       }
     }
     window.addEventListener('pointerup', handlePointerEnd);
