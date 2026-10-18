@@ -147,38 +147,46 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 22px 18px;
-      margin-bottom: 14px;
-      border: 1px dashed var(--border);
+      padding: 32px 20px;
+      margin-bottom: 18px;
+      border: 2px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
       border-radius: var(--radius-lg);
-      background: var(--muted);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, var(--card)), var(--card));
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .stage-empty:hover {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--card)), var(--card));
     }
     .stage-empty.is-hidden { display: none; }
     .stage-empty-inner {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       text-align: center;
+      max-width: 540px;
     }
-    .stage-empty-icon { font-size: 26px; line-height: 1; }
+    .stage-empty-icon { font-size: 38px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
     .stage-empty-title {
       margin: 0;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--foreground);
     }
     .stage-empty-sub {
       margin: 0;
-      font-size: 12.5px;
+      font-size: 13px;
+      line-height: 1.6;
       color: var(--muted-foreground);
     }
     .stage-empty-actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 4px;
+      margin-top: 8px;
     }
 
     /* ===== 创作工坊：侧栏布局 =====
@@ -326,6 +334,7 @@
         </div>
         <div class="studio-header-actions">
           <span class="section-label">Design Studio</span>
+          <button id="btn-toggle-tutorial" class="btn btn-outline btn-sm" type="button" title="展开/收起教程指南">📖 教程指南</button>
           <button id="btn-reset-filters" class="btn btn-outline btn-sm" type="button">重置所有参数</button>
         </div>
       </div>
@@ -336,8 +345,8 @@
       <details class="pp-inline-fold" id="studio-prep-fold">
         <summary class="pp-inline-summary">
           <span class="pp-caret" aria-hidden="true">▾</span>
-          <span>① 导入图片与参数设置</span>
-          <span class="pp-folder-hint" id="studio-prep-hint">上传图片后可校准板宽、色板与画面参数</span>
+          <span>🎛️ ① 图纸参数调字盘（板宽 / 色板 / 抠图 / 调光）</span>
+          <span class="pp-folder-hint" id="studio-prep-hint">上传图片后可随时展开校准参数</span>
         </summary>
 
       <!-- 图像导入栏 -->
@@ -509,14 +518,14 @@
       <div class="stage-empty" id="stage-empty">
         <div class="stage-empty-inner">
           <span class="stage-empty-icon" aria-hidden="true">🖼️</span>
-          <p class="stage-empty-title">先上传一张图片，开始生成拼豆图纸</p>
-          <p class="stage-empty-sub">支持 JPG / PNG / GIF · 也可在下方展开参数区微调板宽与色板</p>
+          <p class="stage-empty-title">上传任意图片，秒级转为真实拼豆图纸</p>
+          <p class="stage-empty-sub">支持 JPG / PNG / GIF / WEBP · 自动校准板宽 · 匹配官方 221 色卡并统计耗材清单</p>
           <div class="stage-empty-actions">
-            <label class="btn btn-primary" style="cursor:pointer;">
-              选择图片开始
+            <label class="btn btn-primary" style="cursor:pointer; padding: 10px 22px; font-size: 14px; font-weight: 600;">
+              📂 选择图片开始制作
               <input id="upload-input-empty" type="file" accept="image/*,.gif" hidden />
             </label>
-            <button id="btn-open-params" class="btn btn-outline" type="button">先调参数</button>
+            <button id="btn-open-params" class="btn btn-outline" type="button" style="padding: 10px 18px;">⚙️ 先调参数</button>
           </div>
         </div>
       </div>
@@ -773,13 +782,21 @@
      * 创作工坊的教程侧边栏（独立实例）
      * 只服务 studio 教程；收起状态用独立 key，与白板画板互不影响。
      * ----------------------------------------------------------------- */
-    initSidebar({
+    const studioSidebar = initSidebar({
       root: $('studio-sidebar'),
       moduleId: 'studio',
       // 独立存储键：创作工坊收起不影响白板画板
       storageKey: 'studio.sidebar.collapsed',
       otherHref: 'whiteboard.html',
+      defaultCollapsed: true,
     });
+
+    const btnToggleTutorial = $('btn-toggle-tutorial');
+    if (btnToggleTutorial && studioSidebar) {
+      btnToggleTutorial.addEventListener('click', () => {
+        studioSidebar.toggleCollapse();
+      });
+    }
 
     /* ----------------------------------------------------------------
      * 参数面板分组收纳

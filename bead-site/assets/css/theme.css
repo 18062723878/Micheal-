@@ -2330,54 +2330,78 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   background-clip: content-box;
 }
 .pp-body::-webkit-scrollbar-thumb:hover { background-color: var(--muted-foreground); background-clip: content-box; }
-}
 
-/* 分组 */
+/* 分组 — Studio Inspector 风格 */
 .pp-group {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--muted);
+  border-radius: var(--radius, 8px);
+  background: var(--card);
   overflow: hidden;
-  /* 关键：分组不允许被 flex 压缩。
-     之前缺少 flex:none 时，空间不足会把每个分组压到 10px，
-     而标题仍有 32px，于是多个折叠标题互相重叠。 */
+  /* 关键：分组不允许被 flex 压缩 */
   flex: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.pp-group:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+.pp-group.is-open {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .pp-group-head {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border: none;
-  background: transparent;
+  background: var(--muted);
   color: var(--foreground);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
-.pp-group-head:hover { color: var(--accent); }
+.pp-group.is-open > .pp-group-head {
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  border-bottom: 1px solid var(--border);
+}
+.pp-group-head:hover {
+  color: var(--accent);
+}
 .pp-caret {
   flex: none;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted-foreground);
   line-height: 1;
+  transition: transform 0.15s ease;
 }
-.pp-group-label { flex: 1; min-width: 0; }
+.pp-group.is-open .pp-caret {
+  color: var(--accent);
+}
+.pp-group-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+}
 .pp-group-hint {
   flex: none;
-  font-size: 10.5px;
-  font-weight: 400;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--muted-foreground);
-  font-family: var(--font-mono);
+  background: var(--card);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
 }
 .pp-group-body {
   display: none;
-  padding: 2px 10px 10px;
+  padding: 8px 10px 10px;
   flex-direction: column;
   gap: 8px;
+  background: var(--card);
 }
 .pp-group.is-open > .pp-group-body { display: flex; }
 /* 展开时用高度过渡，让收纳过程不突兀（不改变布局结果） */

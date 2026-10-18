@@ -804,7 +804,10 @@
     <section class="wb-card" data-page-node-id="Gur5N7QJwDtZGvcQca4eJR">
       <div class="wb-header" data-page-node-id="QVjGPghEdekB9tuF283WCi">
         <h1 style="margin: 0; font-size: 20px; color: var(--text-main);" data-page-node-id="0Xxm410N81AyL48arY375B">🎨 白板像素画板与图纸系统</h1>
-        <a href="create.html" class="btn" style="text-decoration: none;" data-page-node-id="osbUYPhNGc6wDNDug4O6Ws">← 返回设计工坊</a>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button id="btn-toggle-tutorial-wb" class="btn btn-sm" type="button" style="text-decoration: none;" title="展开/收起教程指南">📖 教程指南</button>
+          <a href="create.html" class="btn btn-sm" style="text-decoration: none;" data-page-node-id="osbUYPhNGc6wDNDug4O6Ws">← 返回设计工坊</a>
+        </div>
       </div>
 
       <!-- 画板全局微调栏 (支持真实色号重映射) -->
@@ -814,7 +817,8 @@
       <details class="pp-inline-fold" id="wb-top-params-fold">
         <summary class="pp-inline-summary">
           <span class="pp-caret" aria-hidden="true">▸</span>
-          <span>画面参数（板型 / 亮度 / 对比度 / 饱和度）</span>
+          <span>🎛️ 画面快捷参数（板型尺寸 / 亮度 / 对比度 / 饱和度）</span>
+          <span class="pp-folder-hint">顶栏快捷调光，画布全屏时亦可使用</span>
         </summary>
       <div class="filter-controls-panel dial-quick-bar" data-page-node-id="iva6L9ls1uOz33cBrScpcb">
         <div class="slider-item dial-quick-item" data-page-node-id="uW0ppqMD5HJ6GdrBPUD5zq">
@@ -2221,12 +2225,20 @@
      *   - 只服务 whiteboard 教程（搜不到创意工坊的内容）
      *   - 收起状态存在独立 key，收起/展开互不影响
      * ----------------------------------------------------------------- */
-    initSidebar({
+    const wbSidebar = initSidebar({
       root: document.getElementById('wb-sidebar'),
       moduleId: 'whiteboard',
       storageKey: 'whiteboard.sidebar.collapsed',
       otherHref: 'create.html',
+      defaultCollapsed: true,
     });
+
+    const btnToggleTutorialWb = document.getElementById('btn-toggle-tutorial-wb');
+    if (btnToggleTutorialWb && wbSidebar) {
+      btnToggleTutorialWb.addEventListener('click', () => {
+        wbSidebar.toggleCollapse();
+      });
+    }
 
     /* ----------------------------------------------------------------
      * 左侧参数面板：分组收纳 + 宽度调节 + 整体收起
@@ -2247,13 +2259,13 @@
       // 注意：撤销/重做/清空/镜像/旋转等「命令」已移到工作台顶栏工具条，
       // 这里只留需要设值的参数。
       const groups = [
-        { key: 'tools', title: '绘画工具', hint: '画笔/橡皮/填充', open: true, nodes: [pick('tools')] },
-        { key: 'palette', title: '色板与当前色', hint: '', open: true, nodes: [pick('current'), pick('palette')] },
-        { key: 'board', title: '板型（格数）', hint: '', open: true, nodes: [pick('board')] },
-        { key: 'filters', title: '画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
-        { key: 'symmetry', title: '对称绘制', hint: '左右/上下/四向', open: false, nodes: [pick('symmetry')] },
-        { key: 'import', title: '图片导入', hint: '转色号/临摹底图', open: false, nodes: [pick('import')] },
-        { key: 'view', title: '显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
+        { key: 'tools', title: '🎨 绘画工具', hint: '画笔/橡皮/填充', open: true, nodes: [pick('tools')] },
+        { key: 'palette', title: '🌈 色板与当前色', hint: '', open: true, nodes: [pick('current'), pick('palette')] },
+        { key: 'board', title: '📐 板型（格数）', hint: '', open: true, nodes: [pick('board')] },
+        { key: 'filters', title: '🎛️ 画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
+        { key: 'symmetry', title: '🪞 对称绘制', hint: '左右/上下/四向', open: false, nodes: [pick('symmetry')] },
+        { key: 'import', title: '🖼️ 图片导入', hint: '转色号/临摹底图', open: false, nodes: [pick('import')] },
+        { key: 'view', title: '👁️ 显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
       ].filter((g) => g.nodes.every(Boolean));
 
       // 任何未被分组的块（例如未来新增的分区）保持原样留在面板里

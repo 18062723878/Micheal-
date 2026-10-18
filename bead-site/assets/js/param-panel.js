@@ -156,10 +156,14 @@ export function initParamPanel(opts) {
 
     groupEls.push({ sec, head: h, body: bodyEl, caret, label });
 
-    // 展开态：已保存 > 配置默认
-    const saved = savedGroupsObj && typeof savedGroupsObj[g.key || g.title] === 'boolean'
+    // 展开态：已保存 > 配置默认。若全部为关闭，对核心操作组（tools/palette/canvas）兜底展开
+    const allSavedFalse = savedGroupsObj && Object.keys(savedGroupsObj).length > 0 && Object.values(savedGroupsObj).every(v => v === false);
+    let saved = savedGroupsObj && typeof savedGroupsObj[g.key || g.title] === 'boolean'
       ? savedGroupsObj[g.key || g.title]
       : !!g.open;
+    if (allSavedFalse && (g.key === 'tools' || g.key === 'palette' || g.key === 'canvas')) {
+      saved = true;
+    }
     groupState[g.key || g.title] = saved;
     setGroupOpen(gi, saved);
   });
@@ -173,6 +177,15 @@ export function initParamPanel(opts) {
     const key = groups[i].key || groups[i].title;
     groupState[key] = open;
     writeLS(cfg.groupsKey, JSON.stringify(groupState));
+    if (typeof updateAllOpenBtn === 'function') updateAllOpenBtn();
+  }
+
+  let allOpen = false;
+  function updateAllOpenBtn() {
+    const anyClosed = groupEls.some(g => !g.sec.classList.contains('is-open'));
+    allOpen = !anyClosed;
+    btnAll.textContent = allOpen ? '全部收起' : '全部展开';
+    btnAll.title = allOpen ? '收起全部分组' : '展开全部分组';
   }
 
   /* ---------- 组装 ---------- */
@@ -262,7 +275,6 @@ export function initParamPanel(opts) {
   }
 
   /* ---------- 全部展开 / 全部收起 ---------- */
-  let allOpen = false;
   btnAll.addEventListener('click', () => {
     allOpen = !allOpen;
     groups.forEach((_, i) => setGroupOpen(i, allOpen));

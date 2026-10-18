@@ -104,6 +104,8 @@ export function initSidebar(opts) {
     const saved = localStorage.getItem(storageKey);
     if (saved !== null) {
       collapsed = saved === '1';
+    } else if (opts.defaultCollapsed) {
+      collapsed = true;
     } else {
       // 移动端/小屏幕 (<= 900px) 默认收起，把宝贵首屏空间完整留给画布与主工坊
       collapsed = typeof window !== 'undefined' && window.innerWidth <= 900;
@@ -143,9 +145,25 @@ export function initSidebar(opts) {
     const q = input.value.trim();
 
     if (!q) {
+      const suggestions = moduleId === 'whiteboard'
+        ? ['画笔', '橡皮', '色号', '对称', '标尺', '板型']
+        : ['导入', '板宽', '色板', '抠图', '降噪', '打卡'];
       results.innerHTML = `
         <p class="sb-count">${escapeHtml(moduleName)} · ${countOf(moduleId)} 条教程</p>
-        <p class="sb-hint">在上方输入框检索本模块教程。${escapeHtml(moduleName)}与另一个模块的教程数据彼此独立，搜索结果不会混在一起。</p>`;
+        <p class="sb-hint">在上方输入框检索本模块教程。${escapeHtml(moduleName)}与另一个模块的教程数据彼此独立，搜索结果不会混在一起。</p>
+        <div class="sb-quick-tags" style="margin-top:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--muted-foreground);margin-bottom:6px;">热门检索词：</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            ${suggestions.map(s => `<button type="button" class="sb-tag-chip" data-query="${s}" style="padding:2px 8px;font-size:11px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--foreground);cursor:pointer;">${s}</button>`).join('')}
+          </div>
+        </div>`;
+      results.querySelectorAll('.sb-tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          input.value = chip.dataset.query;
+          renderResults();
+          input.focus();
+        });
+      });
       return;
     }
 
@@ -183,6 +201,20 @@ export function initSidebar(opts) {
     destroy() { clearTimeout(timer); root.innerHTML = ''; root.classList.remove('sb-root'); },
     refresh: renderResults,
     isCollapsed: () => collapsed,
+    toggleCollapse() {
+      collapsed = !collapsed;
+      try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (e) { /* noop */ }
+      applyCollapsed();
+      if (!collapsed) {
+        setTimeout(() => input?.focus(), 150);
+      }
+      return collapsed;
+    },
+    setCollapsed(val) {
+      collapsed = !!val;
+      try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch (e) { /* noop */ }
+      applyCollapsed();
+    },
     moduleId,
   };
 }
