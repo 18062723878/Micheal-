@@ -141,6 +141,15 @@ export function initSidebar(opts) {
     }
   });
 
+  // 展开态下：点击页面其他区域自动收起抽屉
+  document.addEventListener('click', (e) => {
+    if (!collapsed && !root.contains(e.target) && !e.target.closest('#btn-toggle-tutorial, #btn-toggle-tutorial-wb')) {
+      collapsed = true;
+      try { localStorage.setItem(storageKey, '1'); } catch (err) { /* noop */ }
+      applyCollapsed();
+    }
+  });
+
   const head = root.querySelector('.sb-head');
   if (head) {
     head.addEventListener('click', () => {

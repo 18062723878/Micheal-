@@ -1887,9 +1887,13 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
 .sb-root {
   --sb-track: 30px;
   --sb-gap: 10px;
-  position: sticky;
+  position: fixed;
   top: 74px;
-  max-height: calc(100vh - 96px);
+  bottom: 24px;
+  right: 24px;
+  width: 320px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 98px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1898,12 +1902,15 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--card);
+  box-shadow: var(--shadow-xl);
   overflow: hidden;
+  z-index: 1050;
   transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1),
               padding 0.26s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.2s ease,
-              border-color 0.2s ease;
-  will-change: width;
+              border-color 0.2s ease,
+              transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width, transform;
 }
 
 /* 固定尺寸图标轨道：水平垂直居中，两种状态共用 */
@@ -2137,19 +2144,30 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
    在两种状态下算出的是同一个值，因此水平位置零偏移、切换不跳动。
    收起态宽度 = 1(边框) + 14(左内边距) + 30(轨道) + 14(右内边距) + 1(边框) = 60px。 */
 .sb-root.is-collapsed {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  top: auto;
+  width: 60px;
+  max-height: 120px;
   padding: 12px 14px;
   /* 不用 align-items: center —— 居中会让 30px 轨道在 32px 内容区里产生 1px 偏移。
      flex-start 使子元素一律从内容区起点开始，与展开态像素级一致。 */
   align-items: flex-start;
   gap: 10px;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-lg);
+  z-index: 990;
   transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.2s ease,
-              border-color 0.2s ease;
+              border-color 0.2s ease,
+              transform 0.2s ease;
 }
 .sb-root.is-collapsed:hover {
   border-color: var(--accent);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
 }
 .sb-root.is-collapsed .sb-track--brand {
   cursor: pointer;

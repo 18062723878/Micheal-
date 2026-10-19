@@ -194,15 +194,18 @@
        与白板画板页共用同一份，这里只负责本页的栅格与响应式。 */
     .studio-shell {
       display: grid;
-      grid-template-columns: 248px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       align-items: start;
-      gap: 20px;
-      transition: grid-template-columns 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+      gap: 0;
     }
     .studio-shell:has(.sb-root.is-collapsed) {
       grid-template-columns: 60px minmax(0, 1fr);
     }
-    .studio-main { min-width: 0; }
+    .studio-main {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-width: 0;
+    }
     .studio-pane { display: block; }
     .studio-pane[hidden] { display: none; }
 

@@ -20,18 +20,21 @@
        但这里是**独立实例**：只服务白板画板教程，收起状态用独立 key。 */
     .wb-shell {
       display: grid;
-      grid-template-columns: 248px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       align-items: start;
-      gap: 20px;
+      gap: 0;
       max-width: 1680px;
       margin: 20px auto;
       padding: 0 16px;
-      transition: grid-template-columns 0.26s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .wb-shell:has(.sb-root.is-collapsed) {
       grid-template-columns: 60px minmax(0, 1fr);
     }
-    .wb-main { min-width: 0; }
+    .wb-main {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-width: 0;
+    }
 
     @media (max-width: 900px) {
       .wb-shell,
