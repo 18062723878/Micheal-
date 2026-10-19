@@ -1120,6 +1120,14 @@ input[type='range']:focus-visible {
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
+  transform: scale(0.96) translateY(8px);
+  opacity: 0;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.modal-backdrop.open .modal-dialog {
+  transform: scale(1) translateY(0);
+  opacity: 1;
 }
 
 .modal-close-btn {
@@ -1356,6 +1364,34 @@ input[type='range']:focus-visible {
   border-radius: var(--radius);
   background: var(--muted);
   padding: 0 16px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+details.help-panel::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.25s allow-discrete;
+}
+
+details.help-panel[open]::details-content {
+  block-size: auto;
+}
+
+details.help-panel[open] > .help-panel-body {
+  animation: helpBodyExpand 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes helpBodyExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .help-panel > summary {
@@ -1747,16 +1783,16 @@ input[type='range']:focus-visible {
   interpolate-size: allow-keywords;
 }
 
-/* --- 帮助面板（<details class="help-panel">）：高度平滑展开 --- */
-details.help-panel::details-content {
+/* --- 全站 details 元素（帮助面板 / 行内折叠面板）：高度平滑展开 --- */
+details::details-content {
   block-size: 0;
   overflow: clip;
   transition:
-    block-size 0.3s var(--ease-out, ease-out),
-    content-visibility 0.3s allow-discrete;
+    block-size 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.26s allow-discrete;
 }
 
-details.help-panel[open]::details-content {
+details[open]::details-content {
   block-size: auto;
 }
 
@@ -2412,12 +2448,17 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   /* 关键：分组不允许被 flex 压缩 */
   flex: none;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  display: grid;
+  grid-template-rows: auto 0fr;
+  transition: grid-template-rows 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.15s ease,
+              box-shadow 0.15s ease;
 }
 .pp-group:hover {
   border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
 }
 .pp-group.is-open {
+  grid-template-rows: auto 1fr;
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
@@ -2450,7 +2491,7 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   line-height: 1;
   display: inline-block;
   transform-origin: center center;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
 }
 .pp-group.is-open .pp-caret {
   color: var(--accent);
@@ -2472,20 +2513,23 @@ details.help-panel[open] .help-panel-body li:nth-child(12) { animation-delay: 0.
   border: 1px solid var(--border);
 }
 .pp-group-body {
-  display: none;
-  padding: 8px 10px 10px;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 10px;
   flex-direction: column;
   gap: 8px;
   background: var(--card);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: padding 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease,
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pp-group.is-open > .pp-group-body { display: flex; }
-/* 展开时用平滑过渡，让收纳过程不突兀（不改变布局结果） */
 .pp-group.is-open > .pp-group-body {
-  animation: ppGroupIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes ppGroupIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: none; }
+  padding: 8px 10px 10px;
+  opacity: 1;
+  transform: none;
 }
 
 /* 收起态：面板本体让位，只留外部把手 */
