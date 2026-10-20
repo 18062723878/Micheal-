@@ -105,6 +105,26 @@ export function initParamPanel(opts) {
   const groupEls = [];
   const groupState = {};
 
+  let allOpen = false;
+  function updateAllOpenBtn() {
+    const anyClosed = groupEls.some(g => !g.sec.classList.contains('is-open'));
+    allOpen = !anyClosed;
+    btnAll.textContent = allOpen ? '全部收起' : '全部展开';
+    btnAll.title = allOpen ? '收起全部分组' : '展开全部分组';
+  }
+
+  function setGroupOpen(i, open) {
+    const gi = groupEls[i];
+    if (!gi) return;
+    gi.sec.classList.toggle('is-open', open);
+    gi.head.setAttribute('aria-expanded', String(open));
+    gi.caret.textContent = '▸';
+    const key = groups[i].key || groups[i].title;
+    groupState[key] = open;
+    writeLS(cfg.groupsKey, JSON.stringify(groupState));
+    updateAllOpenBtn();
+  }
+
   // 读取上次的展开态
   const savedGroups = readLS(cfg.groupsKey, null);
   const savedGroupsObj = savedGroups ? safeParse(savedGroups) : null;
@@ -167,26 +187,6 @@ export function initParamPanel(opts) {
     groupState[g.key || g.title] = saved;
     setGroupOpen(gi, saved);
   });
-
-  function setGroupOpen(i, open) {
-    const gi = groupEls[i];
-    if (!gi) return;
-    gi.sec.classList.toggle('is-open', open);
-    gi.head.setAttribute('aria-expanded', String(open));
-    gi.caret.textContent = '▸';
-    const key = groups[i].key || groups[i].title;
-    groupState[key] = open;
-    writeLS(cfg.groupsKey, JSON.stringify(groupState));
-    if (typeof updateAllOpenBtn === 'function') updateAllOpenBtn();
-  }
-
-  let allOpen = false;
-  function updateAllOpenBtn() {
-    const anyClosed = groupEls.some(g => !g.sec.classList.contains('is-open'));
-    allOpen = !anyClosed;
-    btnAll.textContent = allOpen ? '全部收起' : '全部展开';
-    btnAll.title = allOpen ? '收起全部分组' : '展开全部分组';
-  }
 
   /* ---------- 组装 ---------- */
   panel.insertBefore(head, panel.firstChild);
@@ -276,8 +276,9 @@ export function initParamPanel(opts) {
 
   /* ---------- 全部展开 / 全部收起 ---------- */
   btnAll.addEventListener('click', () => {
-    allOpen = !allOpen;
-    groups.forEach((_, i) => setGroupOpen(i, allOpen));
+    const target = !allOpen;
+    groups.forEach((_, i) => setGroupOpen(i, target));
+    allOpen = target;
     btnAll.textContent = allOpen ? '全部收起' : '全部展开';
     btnAll.title = allOpen ? '收起全部分组' : '展开全部分组';
   });

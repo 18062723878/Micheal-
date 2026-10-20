@@ -2127,7 +2127,11 @@
         if (wasShape) commitShape();
         isDrawing = false;
         panStartPos = null;
-        updateStats();
+        if (drawRaf) {
+          cancelAnimationFrame(drawRaf);
+          drawRaf = 0;
+        }
+        applyFiltersAndRender(false);
       }
     }
     window.addEventListener('pointerup', handlePointerEnd);
@@ -2300,11 +2304,11 @@
       const groups = [
         { key: 'tools', title: '🎨 绘画工具', hint: '画笔/橡皮/填充', open: true, nodes: [pick('tools')] },
         { key: 'palette', title: '🌈 色板与当前色', hint: '', open: true, nodes: [pick('current'), pick('palette')] },
-        { key: 'board', title: '📐 板型（格数）', hint: '', open: true, nodes: [pick('board')] },
-        { key: 'filters', title: '🎛️ 画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
+        { key: 'view', title: '👁️ 显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
+        { key: 'board', title: '📐 板型（格数）', hint: '', open: false, nodes: [pick('board')] },
         { key: 'symmetry', title: '🪞 对称绘制', hint: '左右/上下/四向', open: false, nodes: [pick('symmetry')] },
         { key: 'import', title: '🖼️ 图片导入', hint: '转色号/临摹底图', open: false, nodes: [pick('import')] },
-        { key: 'view', title: '👁️ 显示设置', hint: '网格/标尺/色号', open: false, nodes: [pick('view')] },
+        { key: 'filters', title: '🎛️ 画面滤镜', hint: '亮度/对比度/饱和度', open: false, nodes: [pick('filters')] },
       ].filter((g) => g.nodes.every(Boolean));
 
       // 任何未被分组的块（例如未来新增的分区）保持原样留在面板里

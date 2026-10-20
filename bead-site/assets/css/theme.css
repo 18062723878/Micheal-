@@ -87,6 +87,7 @@
 /* 深色模式（跟随系统，可被 data-theme 覆盖） */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
+    color-scheme: dark;
     --background: #080c16;
     --foreground: #f1f5f9;
     --card: #0f1729;
@@ -119,6 +120,7 @@
 }
 
 [data-theme='dark'] {
+  color-scheme: dark;
   --background: #080c16;
   --foreground: #f1f5f9;
   --card: #0f1729;
@@ -150,6 +152,7 @@
 }
 
 [data-theme='light'] {
+  color-scheme: light;
   --background: #fafafa;
   --foreground: #0f172a;
   --card: #ffffff;
@@ -597,6 +600,32 @@ input[type='checkbox'] {
   flex: none;
 }
 
+/* 全局滚动条样式：彻底杜绝深色模式下浏览器自带的亮白色原生滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* 滑块 */
 input[type='range'] {
   -webkit-appearance: none;
@@ -612,23 +641,39 @@ input[type='range'] {
   border-radius: var(--radius-pill);
   outline: none;
   cursor: pointer;
+  color-scheme: inherit;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--radius-pill);
+  border: none;
 }
 
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--accent);
   border: 2px solid var(--card);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
-  transition: transform var(--dur) ease;
+  transition: transform var(--dur) ease, background-color var(--dur) ease;
+  margin-top: -5px;
 }
 
 input[type='range']::-webkit-slider-thumb:hover {
-  transform: scale(1.12);
+  transform: scale(1.15);
+}
+
+input[type='range']::-moz-range-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--radius-pill);
+  border: none;
 }
 
 input[type='range']::-moz-range-thumb {
